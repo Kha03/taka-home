@@ -39,8 +39,8 @@ npx shadcn@latest add table
 ### 2. Import và sử dụng
 
 ```tsx
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 
 export function MyComponent() {
   return (

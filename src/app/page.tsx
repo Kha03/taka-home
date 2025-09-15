@@ -1,5 +1,3 @@
-import Image from "next/image";
-import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,14 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThemeToggle, SimpleThemeToggle } from "@/components/theme-toggle";
+import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="font-sans min-h-screen px-8 pb-20 gap-16 sm:px-20">
-      <Header />
-
-      <main className="w-full max-w-[1518px] mx-auto space-y-8 pt-8">
+    <div className="font-sans px-8 pb-20 gap-16 sm:px-20">
+      <div className="w-full max-w-[1518px] mx-auto space-y-8 pt-8">
         <div className="text-center space-y-4">
           <Image
             className="dark:invert mx-auto"
@@ -185,54 +181,7 @@ export default function Home() {
             </a>
           </Button>
         </div>
-      </main>
-      <footer className="w-full max-w-[1595px] mx-auto row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }

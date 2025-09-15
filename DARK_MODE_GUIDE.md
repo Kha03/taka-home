@@ -208,7 +208,7 @@ return <div>{theme === "dark" ? "Dark" : "Light"}</div>;
 ### 3. Use the theme toggle components:
 
 ```tsx
-import { ThemeToggle, SimpleThemeToggle } from "@/components/theme-toggle"
+import { ThemeToggle, SimpleThemeToggle } from "@/components/providers"
 
 // Dropdown with Light/Dark/System options
 <ThemeToggle />
@@ -226,8 +226,8 @@ import { ThemeToggle, SimpleThemeToggle } from "@/components/theme-toggle"
 
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import { Button } from "@/components/ui";
 
 export function ThemeDemo() {
   const { theme, setTheme } = useTheme();

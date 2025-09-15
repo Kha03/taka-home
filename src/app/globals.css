@@ -46,26 +46,26 @@
 :root {
   --radius: 0.625rem;
   /* Main brand color */
-  --color-primary: #11928f;
+  --color-primary: #071658;
   /* Button colors */
-  --color-btn-orange: #ffa432;
+  --color-btn-orange: #fba31d;
   --color-btn-blue: #59a9fe;
   --color-btn-red: #fe5959;
   /* Title colors */
   --color-title-main: #000000;
   --color-title-sub: #1c2b38;
   /* Description */
-  --color-desc-main: #909090;
+  --color-desc-main: #4f4f4f;
   /* Content colors */
-  --color-content-main: #495560;
-  --color-content-sub1: #7c7c7c;
-  --color-content-sub2: #778088;
+  --color-content-main: #4f4f4f;
+  --color-content-sub1: #4f4f4f;
+  --color-content-sub2: #4f4f4f;
   /* Backgrounds */
   --color-bg-main: #ffffff;
   --color-bg-component: #16527d;
-  --color-bg-input: #f4f4f5;
-  --color-bg-tag: #efefef;
-  --color-bg-stat: #f8f8f8;
+  --color-bg-input: #e5e5e5;
+  --color-bg-tag: #e5e5e5;
+  --color-bg-stat: #e5e5e5;
   /* Mapping to shadcn/ui system tokens for light mode */
   --background: var(--color-bg-main);
   --foreground: var(--color-title-main);
@@ -75,7 +75,7 @@
   --popover-foreground: var(--color-title-main);
   --primary: var(--color-primary);
   --primary-foreground: #fff;
-  --secondary: var(--color-btn-blue);
+  --secondary: var(--color-btn-orange);
   --secondary-foreground: #fff;
   --muted: var(--color-bg-stat);
   --muted-foreground: var(--color-desc-main);
@@ -104,21 +104,21 @@
 
 .dark {
   /* Dark mode custom colors */
-  --color-primary: #2edddc; /* Sáng hơn #11928F, giữ tone xanh ngọc */
-  --color-btn-orange: #ffb86b; /* Sáng hơn #FFA432 */
+  --color-primary: #071658; /* Giữ nguyên màu primary trong dark mode */
+  --color-btn-orange: #fba31d; /* Giữ nguyên màu cam */
   --color-btn-blue: #7ec3ff; /* Sáng hơn #59A9FE */
   --color-btn-red: #ff7a7a; /* Sáng hơn #FE5959 */
   --color-title-main: #ffffff; /* Trắng cho title chính */
   --color-title-sub: #b8c7d1; /* Nhạt hơn #1C2B38 */
-  --color-desc-main: #b0b0b0; /* Nhạt hơn #909090 */
-  --color-content-main: #c7d0d8; /* Nhạt hơn #495560 */
-  --color-content-sub1: #a0a0a0; /* Nhạt hơn #7C7C7C */
-  --color-content-sub2: #aeb6c2; /* Nhạt hơn #778088 */
-  --color-bg-main: #181c1f; /* Gần đen, cho background chính */
-  --color-bg-component: #223b4c; /* Đậm hơn, xanh navy cho component */
-  --color-bg-input: #23272f; /* Đậm hơn #F4F4F5 */
-  --color-bg-tag: #23272f; /* Đậm hơn #EFEFEF */
-  --color-bg-stat: #23272f; /* Đậm hơn #F8F8F8 */
+  --color-desc-main: #e5e5e5; /* Sử dụng màu gray nhạt */
+  --color-content-main: #e5e5e5; /* Sử dụng màu gray nhạt */
+  --color-content-sub1: #e5e5e5; /* Sử dụng màu gray nhạt */
+  --color-content-sub2: #e5e5e5; /* Sử dụng màu gray nhạt */
+  --color-bg-main: #000000; /* Đen cho background chính */
+  --color-bg-component: #4f4f4f; /* Gray đậm cho component */
+  --color-bg-input: #4f4f4f; /* Gray đậm cho input */
+  --color-bg-tag: #4f4f4f; /* Gray đậm cho tag */
+  --color-bg-stat: #4f4f4f; /* Gray đậm cho stat */
   /* Mapping to shadcn/ui system tokens for dark mode */
   --background: var(--color-bg-main);
   --foreground: var(--color-title-main);
@@ -127,13 +127,13 @@
   --popover: var(--color-bg-component);
   --popover-foreground: var(--color-title-main);
   --primary: var(--color-primary);
-  --primary-foreground: #181c1f;
-  --secondary: var(--color-btn-blue);
-  --secondary-foreground: #181c1f;
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-btn-orange);
+  --secondary-foreground: #000000;
   --muted: var(--color-bg-stat);
   --muted-foreground: var(--color-desc-main);
   --accent: var(--color-btn-orange);
-  --accent-foreground: #181c1f;
+  --accent-foreground: #000000;
   /* ...existing system tokens... */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -151,6 +151,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+
+  /* Container system variables */
+  --container-sm: 768px;
+  --container-md: 1024px;
+  --container-lg: 1152px;
+  --container-xl: 1470px;
 }
 
 @layer base {
@@ -159,5 +165,24 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Layout Styles */
+@layer components {
+  .layout-container {
+    @apply min-h-screen flex flex-col;
+  }
+
+  .layout-header {
+    @apply w-full border-b;
+  }
+
+  .layout-main {
+    @apply flex-1;
+  }
+
+  .layout-footer {
+    @apply w-full border-t mt-auto;
   }
 }
