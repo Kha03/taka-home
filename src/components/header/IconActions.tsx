@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import { HeartOutlined, SendOutlined, BellOutlined } from "@ant-design/icons";
 import { Button } from "@/components/ui/button";
+import { BellOutlined, HeartOutlined, SendOutlined } from "@ant-design/icons";
 
 export function IconActions() {
   return (
