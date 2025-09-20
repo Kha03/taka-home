@@ -1,118 +1,161 @@
+/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
+import { Dancing_Script } from "next/font/google";
+import { Phone, Mail, Printer } from "lucide-react";
+
+const dancing = Dancing_Script({ subsets: ["latin"] });
 export default function Footer() {
   return (
     <footer className="w-full bg-[#FFEED3] border-t">
-      <div className="py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Logo và mô tả */}
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="text-xl font-bold mb-4">Taka Home</h3>
-            <p className="text-muted-foreground mb-4">
-              Nền tảng chia sẻ và khám phá những không gian sống tuyệt vời.
-            </p>
-            <div className="flex space-x-4">
+      <div className="py-12 px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Logo và Social Media */}
+          <div className="lg:col-span-4 flex flex-col gap-3 items-center">
+            <img src="/assets/logos/logoFooter.svg" alt="TakaHome Logo" />
+            <div className="flex gap-10 items-center">
               <a
                 href="#"
-                className="text-muted-foreground hover:text-foreground"
+                className="w-7.5 h-7.5 flex items-center justify-center"
               >
-                Facebook
+                <img src="/assets/icons/facebook.svg" alt="Facebook" />
               </a>
               <a
                 href="#"
-                className="text-muted-foreground hover:text-foreground"
+                className="w-7.5 h-7.5 flex items-center justify-center"
               >
-                Instagram
+                <img src="/assets/icons/instargram.svg" alt="Instagram" />
               </a>
               <a
                 href="#"
-                className="text-muted-foreground hover:text-foreground"
+                className="w-7.5 h-7.5 flex items-center justify-center"
               >
-                Twitter
+                <img src="/assets/icons/Youtube.svg" alt="YouTube" />
               </a>
+              <a
+                href="#"
+                className="w-7.5 h-7.5 flex items-center justify-center"
+              >
+                <img src="/assets/icons/twitter.svg" alt="Twitter" />
+              </a>
+            </div>
+
+            <div className="text-primary text-center">
+              <p className=" font-bold">Contact With Us</p>
+              <p className={`${dancing.className} text-xl`}>
+                Thank you for believing
+              </p>
             </div>
           </div>
 
-          {/* Liên kết nhanh */}
-          <div>
-            <h4 className="font-semibold mb-4">Liên kết nhanh</h4>
-            <ul className="space-y-2">
+          {/* Liên kết */}
+          <div className="lg:col-span-3">
+            <h4 className="font-bold text-lg text-primary mb-4 border-l-4 border-accent pl-3">
+              Liên kết
+            </h4>
+            <ul className="space-y-3">
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-gray-600 hover:text-accent transition-colors flex items-center"
                 >
-                  Trang chủ
+                  • Danh sách bất động sản
                 </a>
               </li>
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-gray-600 hover:text-accent transition-colors flex items-center"
                 >
-                  Về chúng tôi
+                  • Hỗ trợ đăng ký đại lý
                 </a>
               </li>
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-gray-600 hover:text-accent transition-colors flex items-center"
                 >
-                  Dịch vụ
+                  • Thông tin cá nhân
                 </a>
               </li>
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-gray-600 hover:text-accent transition-colors flex items-center"
                 >
-                  Liên hệ
+                  • Về chúng tôi
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-accent transition-colors flex items-center"
+                >
+                  • Chính sách
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Hỗ trợ */}
-          <div>
-            <h4 className="font-semibold mb-4">Hỗ trợ</h4>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Trung tâm hỗ trợ
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Câu hỏi thường gặp
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Chính sách bảo mật
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Điều khoản sử dụng
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
+          {/* Liên hệ */}
+          <div className="lg:col-span-3">
+            <h4 className="font-bold text-lg text-primary mb-4 border-l-4 border-orange-400 pl-3">
+              Liên hệ
+            </h4>
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <div className="w-7 h-7 bg-orange-400 rounded-full flex items-center justify-center mr-2">
+                  <Phone className="w-4 h-4 text-white" />
+                </div>
+                <div className="text-[#4f4f4f] text-sm flex gap-1">
+                  <p className="font-bold">Hotline:</p>
+                  <p>0987654321</p>
+                </div>
+              </div>
 
-        {/* Copyright */}
-        <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-          <p>&copy; 2024 Taka Home. All rights reserved.</p>
+              <div className="flex items-center">
+                <div className="w-7 h-7 bg-orange-400 rounded-full flex items-center justify-center mr-2">
+                  <Mail className="w-4 h-4 text-white" />
+                </div>
+                <div className="text-[#4f4f4f] text-sm flex gap-1">
+                  <p className=" font-bold">Email:</p>
+                  <p>example@gmail.com</p>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <div className="w-7 h-7 bg-orange-400 rounded-full flex items-center justify-center mr-2">
+                  <Printer className="w-4 h-4 text-white" />
+                </div>
+                <div className="text-[#4f4f4f] text-sm flex gap-1">
+                  <p className="font-bold">Fax:</p>
+                  <p>09876543 - 12345678</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Download App */}
+          <div className="lg:col-span-2">
+            <div className="space-y-3">
+              <a href="#" className="block hover:opacity-80 transition-opacity">
+                <Image
+                  src="/assets/icons/appstore.svg"
+                  alt="Download on App Store"
+                  width={227}
+                  height={67}
+                />
+              </a>
+
+              <a href="#" className="block hover:opacity-80 transition-opacity">
+                <Image
+                  src="/assets/icons/googleplay.svg"
+                  alt="Get it on Google Play"
+                  width={227}
+                  height={67}
+                />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
