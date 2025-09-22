@@ -12,7 +12,7 @@ export function PropertyDetails({
   area,
 }: PropertyDetailsProps) {
   return (
-    <div className="flex items-center justify-center gap-3 text-sm text-primary border-b border-[#e5e5e5] pb-2.5">
+    <div className="flex items-center justify-center gap-3 text-sm text-primary ">
       <div className="flex items-center gap-1">
         <img src="/assets/icons/bed-icon.svg" alt="bed" />
         <span>Bed {bedrooms}</span>

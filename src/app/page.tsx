@@ -13,7 +13,7 @@ export default function Home() {
       <div className="bg-[#FFF7E9]">
         {/* Featured Properties Section */}
         <FeaturedProperties />
-        <div className="mx-auto  h-px w-full max-w-7xl bg-gray-200" />
+        <div className="mx-auto h-px w-full max-w-7xl bg-gray-200" />
         {/* Newest Properties Section */}
         <NewestProperties />
       </div>

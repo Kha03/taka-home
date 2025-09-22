@@ -41,7 +41,7 @@ export function PropertyCard({
           bathrooms={bathrooms}
           area={area}
         />
-        <div className="space-y-1 mt-1.5">
+        <div className="space-y-1 mt-2.5 border-t border-[#e5e5e5] pt-1.5">
           <h3 className="font-bold text-primary line-clamp-1 text-lg">
             {title}
           </h3>
