@@ -22,6 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PropertySidebar } from "../property-detail/PropertySidebar";
 import { PropertyMainContent } from "../property-detail/PropertyMainContent";
 import { PropertyDescription } from "../property-detail/PropertyDescription";
+import MapLocation from "../property-detail/MapLocation";
 
 interface PropertyAgent {
   name: string;
@@ -226,6 +227,8 @@ export function PropertyDetailView({ property }: PropertyDetailViewProps) {
           <PropertyMainContent />
           {/* Property Description */}
           <PropertyDescription />
+          {/* Map Location */}
+          <MapLocation />
         </div>
 
         {/* Right Column - Agent and Actions */}

@@ -29,14 +29,14 @@ export function PropertyDescription({
   summary = "Căn hộ sẵn sàng để ở, thích hợp cho sinh viên, nhân viên văn phòng hoặc gia đình trẻ. Giá thuê bao gồm phí quản lý và một số tiện ích cơ bản.",
 }: PropertyDescriptionProps) {
   return (
-    <Card className="shadow-none bg-background border-0 p-4">
+    <Card className="shadow-none bg-background border-0 p-4 rounded-[12px] mb-3">
       <CardContent className="p-0">
-        <p className="font-bold text-primary mb-4 flex items-center gap-2">
+        <div className="font-bold text-primary mb-4 flex items-center gap-2">
           <div className="w-6 h-6 flex items-center justify-center bg-[#D9D9D9] rounded-full">
             <Podcast className="h-3 w-3 text-primary" />
           </div>
           Mô tả chi tiết
-        </p>
+        </div>
         <div className="space-y-4 text-sm text-foreground leading-relaxed">
           <p>{description}</p>
 
