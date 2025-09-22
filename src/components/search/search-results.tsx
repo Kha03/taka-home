@@ -164,7 +164,7 @@ export function SearchResults() {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center pt-8">
+      <div className="flex justify-center">
         <Pagination>
           <PaginationContent>
             <PaginationItem>

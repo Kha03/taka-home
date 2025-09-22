@@ -94,7 +94,7 @@ export function RentalSearchForm() {
             <SelectTrigger className="w-full bg-[#F4F4F4] rounded-[30px] text-xs data-[placeholder]:text-[#A1A1A1]">
               <SelectValue placeholder="Số phòng ngủ" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-primary-foreground">
               <SelectItem value="1">1 phòng ngủ</SelectItem>
               <SelectItem value="2">2 phòng ngủ</SelectItem>
               <SelectItem value="3">3 phòng ngủ</SelectItem>
@@ -111,7 +111,7 @@ export function RentalSearchForm() {
             <SelectTrigger className="w-full bg-[#F4F4F4] rounded-[30px] text-xs data-[placeholder]:text-[#A1A1A1]">
               <SelectValue placeholder="Số nhà vệ sinh" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-primary-foreground">
               <SelectItem value="1">1 nhà vệ sinh</SelectItem>
               <SelectItem value="2">2 nhà vệ sinh</SelectItem>
               <SelectItem value="3">3 nhà vệ sinh</SelectItem>
@@ -155,7 +155,7 @@ export function RentalSearchForm() {
             <SelectTrigger className="w-full bg-[#F4F4F4] rounded-[30px] text-xs data-[placeholder]:text-[#A1A1A1]">
               <SelectValue placeholder="Tình trạng nội thất" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-primary-foreground">
               <SelectItem value="fully-furnished">Đầy đủ nội thất</SelectItem>
               <SelectItem value="partially-furnished">
                 Nội thất cơ bản
