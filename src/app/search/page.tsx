@@ -5,8 +5,9 @@ import { HeroSearch } from "@/components/hero/hero-search";
 import { RentalSearchForm } from "@/components/search/rental-search-form";
 import { SearchResults } from "@/components/search/search-results";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const location = searchParams.get("loc") || "Tp Hồ Chí Minh";
   const category = searchParams.get("cat") || "Nhà ở";
@@ -47,5 +48,19 @@ export default function SearchPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#FFF7E9] flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <SearchContent />
+    </Suspense>
   );
 }
