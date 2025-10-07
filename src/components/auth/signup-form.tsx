@@ -52,17 +52,19 @@ export function SignUpForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-3">
       {error && (
-        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+        <div className="p-2.5 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
           {error}
         </div>
       )}
 
       {/* Basic info */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="fullName">Họ và tên</Label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5 sm:col-span-2">
+          <Label htmlFor="fullName" className="text-sm">
+            Họ và tên
+          </Label>
           <Input
             id="fullName"
             name="fullName"
@@ -72,10 +74,13 @@ export function SignUpForm() {
             required
             autoComplete="name"
             disabled={isLoading}
+            className="h-9"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-sm">
+            Email
+          </Label>
           <Input
             id="email"
             name="email"
@@ -86,10 +91,13 @@ export function SignUpForm() {
             required
             autoComplete="email"
             disabled={isLoading}
+            className="h-9"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">Số điện thoại</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="phone" className="text-sm">
+            Số điện thoại
+          </Label>
           <Input
             id="phone"
             name="phone"
@@ -99,21 +107,29 @@ export function SignUpForm() {
             onChange={handleChange}
             required
             autoComplete="tel"
+            className="h-9"
           />
         </div>
       </div>
 
       {/* Passwords */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <PasswordInput
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="text-sm">
+            Mật khẩu
+          </Label>
+          <PasswordInput
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="confirmPassword" className="text-sm">
+            Xác nhận mật khẩu
+          </Label>
           <Input
             id="confirmPassword"
             name="confirmPassword"
@@ -123,26 +139,32 @@ export function SignUpForm() {
             onChange={handleChange}
             required
             autoComplete="new-password"
+            className="h-9"
           />
           {formData.confirmPassword &&
           formData.confirmPassword !== formData.password ? (
-            <p className="text-xs text-destructive">
+            <p className="text-xs text-destructive mt-1">
               Mật khẩu nhập lại không khớp.
             </p>
           ) : null}
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button type="submit" className="w-full h-9" disabled={isLoading}>
         {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
       </Button>
 
-      <Separator className="my-6" />
+      <Separator className="my-3" />
 
       {/* Socials & switch */}
-      <div className="grid grid-cols-2 gap-3">
-        <Button variant="outline" type="button" className="w-full text-primary">
-          <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" aria-hidden>
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          variant="outline"
+          type="button"
+          className="w-full text-primary text-xs h-8"
+          size="sm"
+        >
+          <svg className="mr-1.5 h-4 w-4" viewBox="0 0 24 24" aria-hidden>
             <path
               fill="currentColor"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -162,9 +184,14 @@ export function SignUpForm() {
           </svg>
           Google
         </Button>
-        <Button variant="outline" type="button" className="w-full text-primary">
+        <Button
+          variant="outline"
+          type="button"
+          className="w-full text-primary text-xs h-8"
+          size="sm"
+        >
           <svg
-            className="mr-2 h-5 w-5"
+            className="mr-1.5 h-4 w-4"
             viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden
@@ -175,7 +202,7 @@ export function SignUpForm() {
         </Button>
       </div>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-3 text-center text-sm text-muted-foreground">
         Đã có tài khoản?{" "}
         <Link
           href="/signin"

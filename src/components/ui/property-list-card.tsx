@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { PropertyDetails } from "@/components/ui/property-details";
+import { PropertyDetails } from "@/components/property-detail/PropertyDetails";
 import { MapPin, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

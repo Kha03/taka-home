@@ -183,7 +183,7 @@ export default function ContractCard({ contract }: ContractCardProps) {
                 </div>
               </div>
             </div>
-            <div className="text-right flex bg-[#f5f5f5] rounded-2xl  py-2 justify-center">
+            <div className="flex bg-[#f5f5f5] rounded-2xl py-2 justify-center">
               <div className="text-sm text-muted-foreground">Giá thuê:</div>
               <div className="text-sm font-bold text-secondary ml-1">
                 {contract.price.toLocaleString("vi-VN")} VND

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import ContractFilter from "@/components/contracts/contract-filter";
-import ContractTab from "@/components/contracts/contract-tab";
+import StatusTab from "@/components/ui/status-tab";
 import ContractCard from "@/components/contracts/contract-card";
 import {
   Pagination,
@@ -195,6 +195,12 @@ export default function ContractsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const contractTabs = [
+    { id: "all", label: "Tất cả", count: 12 },
+    { id: "active", label: "Còn hiệu lực", count: 2 },
+    { id: "expired", label: "Hết hiệu lực", count: 10 },
+  ];
+
   const PAGE_SIZE = 4;
 
   // (Optional future) filter contracts by tab / search; currently just returns all
@@ -239,7 +245,11 @@ export default function ContractsPage() {
     <div className="min-h-screen bg-orange-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header Tabs */}
-        <ContractTab activeTab={activeTab} setActiveTab={setActiveTab} />
+        <StatusTab
+          tabs={contractTabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
 
         {/* Search and Navigation Bar */}
         <ContractFilter

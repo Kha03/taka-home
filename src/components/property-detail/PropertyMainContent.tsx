@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Building, Clock, MapPin } from "lucide-react";
-import { PropertyDetails } from "../ui/property-details";
+import { PropertyDetails } from "./PropertyDetails";
 
 export function PropertyMainContent() {
   return (

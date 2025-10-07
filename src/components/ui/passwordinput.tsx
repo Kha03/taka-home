@@ -1,13 +1,11 @@
 import * as React from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 
 export function PasswordInput({
   id,
   name,
-  label = "Mật khẩu",
   value,
   onChange,
   placeholder = "Nhập mật khẩu",
@@ -34,9 +32,8 @@ export function PasswordInput({
   }, [value]);
 
   return (
-    <div className="space-y-2">
+    <div>
       <div className="flex items-center justify-between">
-        <Label htmlFor={id}>{label}</Label>
         {value ? (
           <span className="text-xs text-muted-foreground">
             Độ mạnh: {score}/4

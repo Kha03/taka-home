@@ -32,15 +32,15 @@ export function SignInForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+        <div className="p-2.5 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
           {error}
         </div>
       )}
 
-      <div className="grid gap-4">
-        <div className="space-y-2">
+      <div className="grid gap-3">
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -58,7 +58,7 @@ export function SignInForm() {
           </p>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="password">Mật khẩu</Label>
           <Input
             id="password"
@@ -73,7 +73,7 @@ export function SignInForm() {
           />
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <Checkbox
               id="remember"
@@ -98,15 +98,16 @@ export function SignInForm() {
       </div>
 
       <div>
-        <Separator className="my-6" />
-        <div className="grid grid-cols-2 gap-3">
+        <Separator className="my-4" />
+        <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
             variant="outline"
-            className="w-full text-primary"
+            className="w-full text-primary text-xs"
+            size="sm"
           >
             {/* Inline Google icon */}
-            <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" aria-hidden>
+            <svg className="mr-1.5 h-4 w-4" viewBox="0 0 24 24" aria-hidden>
               <path
                 fill="currentColor"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -129,10 +130,11 @@ export function SignInForm() {
           <Button
             type="button"
             variant="outline"
-            className="w-full text-primary"
+            className="w-full text-primary text-xs"
+            size="sm"
           >
             <svg
-              className="mr-2 h-5 w-5"
+              className="mr-1.5 h-4 w-4"
               viewBox="0 0 24 24"
               fill="currentColor"
               aria-hidden
@@ -142,7 +144,7 @@ export function SignInForm() {
             Facebook
           </Button>
         </div>
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           Chưa có tài khoản?{" "}
           <Link
             href="/signup"

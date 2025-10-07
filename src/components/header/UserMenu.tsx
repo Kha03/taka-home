@@ -20,7 +20,7 @@ export function UserMenu() {
   if (!isAuthenticated || !user) {
     return (
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" asChild>
+        <Button size="sm" asChild className="bg-accent hover:bg-accent/90">
           <Link href="/signin">Đăng nhập</Link>
         </Button>
         <Button size="sm" asChild>
@@ -47,7 +47,11 @@ export function UserMenu() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent
+        className="w-56 bg-primary-foreground"
+        align="end"
+        forceMount
+      >
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.name}</p>

@@ -18,7 +18,7 @@ export function MainMenu() {
     },
     {
       label: "Bất động sản của tôi",
-      href: "/properties",
+      href: "/my-properties",
     },
   ];
 
