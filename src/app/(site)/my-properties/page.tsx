@@ -152,7 +152,11 @@ export default function MyPropertiesPage() {
           {activeView === "room"
             ? // Room View
               (paginatedData as typeof mockPropertyRooms).map((property) => (
-                <PropertyRoom key={property.id} {...property} />
+                <PropertyRoom
+                  key={property.id}
+                  {...property}
+                  showRentalStatus={false}
+                />
               ))
             : // Unit View
               (paginatedData as typeof mockPropertyUnits).map(

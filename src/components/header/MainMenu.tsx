@@ -20,6 +20,10 @@ export function MainMenu() {
       label: "Bất động sản của tôi",
       href: "/my-properties",
     },
+    {
+      label: "Yêu cầu thuê",
+      href: "/rental-requests",
+    },
   ];
 
   return (

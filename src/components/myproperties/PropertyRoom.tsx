@@ -1,10 +1,11 @@
-import { Card } from "@/components/ui/card";
-import { PropertyStatusBadge } from "@/components/myproperties/property-status-badge";
 import { PropertyRoomBadge } from "@/components/myproperties/property-room-badge";
-import { Bed, Bath, Maximize2, MapPin } from "lucide-react";
+import { PropertyStatusBadge } from "@/components/myproperties/property-status-badge";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { MapPin } from "lucide-react";
 import Image from "next/image";
 import { PropertyDetails } from "../property-detail/PropertyDetails";
-import { cn } from "@/lib/utils";
+import { RentalRequestStatus } from "../rental-requests";
 
 export interface PropertyRoomProps {
   id: string;
@@ -21,6 +22,16 @@ export interface PropertyRoomProps {
   category: string;
   price: number;
   currency?: string;
+  showRentalStatus?: boolean;
+  rentalRequests?: Array<{
+    user: {
+      name: string;
+      avatar: string;
+    };
+    status: "pending" | "approved" | "rejected";
+    reason?: string;
+    timestamp: string;
+  }>;
 }
 
 export function PropertyRoom({
@@ -37,6 +48,8 @@ export function PropertyRoom({
   category,
   price,
   currency = "VND",
+  showRentalStatus = false,
+  rentalRequests = [],
 }: PropertyRoomProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price);
@@ -46,7 +59,7 @@ export function PropertyRoom({
     <Card className="overflow-hidden hover:shadow-lg transition-shadow p-3 bg-primary-foreground">
       <div className="flex flex-col md:flex-row gap-3">
         {/* Image Section */}
-        <div className="relative w-full md:w-54 h-48 md:h-auto flex-shrink-0 rounded-[8px] overflow-hidden">
+        <div className="relative w-full md:w-54 md:h-33 flex-shrink-0 rounded-[8px] overflow-hidden">
           <Image
             src={image || "/placeholder.svg"}
             alt={title}
@@ -55,68 +68,89 @@ export function PropertyRoom({
           />
           {status && <PropertyStatusBadge status={status} />}
         </div>
-
         {/* Content Section */}
-        <div className="flex-1 p-0 flex justify-between items-center">
-          {/* Room Code Badge */}
-          <div>
-            {roomCode && (
-              <div className="mb-1.5">
-                <PropertyRoomBadge roomCode={roomCode} isRented={isRented} />
+        <div className="flex-1">
+          <div className="flex justify-between items-center">
+            {/* Room Code Badge */}
+            <div>
+              {roomCode && (
+                <div className="mb-1.5">
+                  <PropertyRoomBadge roomCode={roomCode} isRented={isRented} />
+                </div>
+              )}
+
+              {/* Title */}
+              <h3 className="text-lg font-bold mb-2 text-primary">{title}</h3>
+
+              {/* Property Details */}
+              <div className="flex mb-3">
+                <PropertyDetails
+                  bedrooms={bedrooms}
+                  bathrooms={bathrooms}
+                  area={area}
+                />
               </div>
-            )}
 
-            {/* Title */}
-            <h3 className="text-lg font-bold mb-2 text-primary">{title}</h3>
-
-            {/* Property Details */}
-            <div className="flex mb-3">
-              <PropertyDetails
-                bedrooms={bedrooms}
-                bathrooms={bathrooms}
-                area={area}
-              />
+              {/* Address */}
+              <div className="flex items-center gap-1 text-sm text-[#4f4f4f]">
+                <div className="w-6 h-6 rounded-full bg-[#e5e5e5] flex items-center justify-center">
+                  <MapPin className="w-4 h-4 text-primary" />
+                </div>
+                <span>{address}</span>
+              </div>
             </div>
-
-            {/* Address */}
-            <div className="flex items-center gap-1 text-sm text-[#4f4f4f]">
-              <div className="w-6 h-6 rounded-full bg-[#e5e5e5] flex items-center justify-center">
-                <MapPin className="w-4 h-4 text-primary" />
+            {/* right Section */}
+            <div className="flex flex-col">
+              {/* Furniture Status and Category - Horizontal Layout */}
+              <div className="flex items-center gap-3 mb-2">
+                <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
+                  <div className="text-xs text-[#8d8d8d]">
+                    Tình trạng nội thất
+                  </div>
+                  <div className="font-medium text-primary">
+                    {furnitureStatus}
+                  </div>
+                </div>
+                <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
+                  <div className="text-xs text-[#8d8d8d]">Danh mục</div>
+                  <div className="font-medium text-primary">{category}</div>
+                </div>
               </div>
-              <span>{address}</span>
+
+              {/* Price */}
+              <div className=" flex bg-[#f5f5f5] rounded-2xl py-2 justify-center">
+                <div className="text-sm text-muted-foreground">Giá thuê:</div>
+                <div
+                  className={cn("text-sm font-bold ml-1 text-secondary", {
+                    "text-[#00AE26]": isRented,
+                  })}
+                >
+                  {price.toLocaleString("vi-VN")} VND
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* right Section */}
-          <div className="flex flex-col">
-            {/* Furniture Status and Category - Horizontal Layout */}
-            <div className="flex items-center gap-3 mb-2">
-              <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
-                <div className="text-xs text-[#8d8d8d]">
-                  Tình trạng nội thất
-                </div>
-                <div className="font-medium text-primary">
-                  {furnitureStatus}
-                </div>
-              </div>
-              <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
-                <div className="text-xs text-[#8d8d8d]">Danh mục</div>
-                <div className="font-medium text-primary">{category}</div>
-              </div>
+          {showRentalStatus && rentalRequests.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {rentalRequests.map((request, index) => (
+                <RentalRequestStatus
+                  key={index}
+                  user={request.user}
+                  status={request.status}
+                  reason={request.reason}
+                  timestamp={request.timestamp}
+                  onApprove={() => {
+                    // Handle approve logic here
+                    console.log("Approved request from:", request.user.name);
+                  }}
+                  onReject={() => {
+                    // Handle reject logic here
+                    console.log("Rejected request from:", request.user.name);
+                  }}
+                />
+              ))}
             </div>
-
-            {/* Price */}
-            <div className=" flex bg-[#f5f5f5] rounded-2xl py-2 justify-center">
-              <div className="text-sm text-muted-foreground">Giá thuê:</div>
-              <div
-                className={cn("text-sm font-bold ml-1 text-secondary", {
-                  "text-[#00AE26]": isRented,
-                })}
-              >
-                {price.toLocaleString("vi-VN")} VND
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </Card>

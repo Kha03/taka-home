@@ -19,6 +19,24 @@ export const mockPropertyRooms: PropertyRoomProps[] = [
     category: "Chung cư",
     price: 15000000,
     currency: "VND",
+    rentalRequests: [
+      {
+        user: {
+          name: "Nguyễn Văn A",
+          avatar: "/assets/imgs/avatar.png",
+        },
+        status: "pending" as const,
+        timestamp: "2 giờ trước",
+      },
+      {
+        user: {
+          name: "Trần Thị B",
+          avatar: "/assets/imgs/avatar.png",
+        },
+        status: "approved" as const,
+        timestamp: "1 ngày trước",
+      },
+    ],
   },
   {
     id: "PR002",
@@ -36,6 +54,17 @@ export const mockPropertyRooms: PropertyRoomProps[] = [
     category: "Biệt thự",
     price: 25000000,
     currency: "VND",
+    rentalRequests: [
+      {
+        user: {
+          name: "Lê Văn C",
+          avatar: "/assets/imgs/avatar.png",
+        },
+        status: "rejected" as const,
+        reason: "Không đáp ứng yêu cầu về thu nhập",
+        timestamp: "3 ngày trước",
+      },
+    ],
   },
   {
     id: "PR003",
