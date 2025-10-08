@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Bell, Heart, Send } from "lucide-react";
+import { Bell, Heart, Send, MessageCircle } from "lucide-react";
 
 export function IconActions() {
   return (
@@ -13,9 +13,11 @@ export function IconActions() {
         <Heart className="text-xl" />
       </Button>
       <div className="relative">
-        <Button variant="golden" size="icon-sm" className="rounded-full">
-          <Send className="text-xl" />
-        </Button>
+        <Link href="/chat">
+          <Button variant="golden" size="icon-sm" className="rounded-full">
+            <MessageCircle className="text-xl" />
+          </Button>
+        </Link>
         {/* Badge for unread messages */}
         <span className="absolute top-[-4px] right-[-4px] w-5 h-5 px-1 flex items-center justify-center text-[12px] font-semibold text-white bg-[#FF0004] rounded-full">
           3
