@@ -10,7 +10,7 @@ export function AboutUs() {
       {/* Background Image - Full Width */}
       <div className="absolute inset-0">
         <Image
-          src="/assets/imgs/abou-us.png"
+          src="/assets/imgs/about-us.png"
           alt="About TakaHome - Modern bathroom interior"
           fill
           className="object-cover"
