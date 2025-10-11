@@ -35,6 +35,7 @@ export function MainMenu() {
           <Link
             key={item.href}
             href={item.href}
+            prefetch={true}
             className={cn(
               "p-2 relative group cursor-pointer flex items-center font-medium hover:text-primary/80",
               // Only transition specific properties to avoid performance issues
