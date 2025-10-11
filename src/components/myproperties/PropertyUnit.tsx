@@ -63,6 +63,7 @@ export function PropertyUnit({
                 fill
                 className="object-cover"
                 style={{ objectFit: "cover" }}
+                sizes="(max-width: 640px) 100vw, 216px"
               />
             </div>
 
@@ -205,6 +206,7 @@ export function PropertyUnit({
                               alt={`${roomType.name} ${i + 1}`}
                               fill
                               className="object-cover"
+                              sizes="(max-width: 640px) 100vw, 216px"
                             />
                           </div>
                         ))}

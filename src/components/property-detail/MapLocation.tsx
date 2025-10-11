@@ -18,6 +18,8 @@ export default function MapLocation() {
             alt="Map location"
             fill
             className="object-cover"
+            sizes="100vw"
+            
           />
         </div>
       </CardContent>

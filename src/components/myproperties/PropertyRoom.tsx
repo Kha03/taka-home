@@ -65,6 +65,7 @@ export function PropertyRoom({
             alt={title}
             fill
             className="object-cover"
+            sizes="(max-width: 768px) 100vw, 216px"
           />
           {status && <PropertyStatusBadge status={status} />}
         </div>

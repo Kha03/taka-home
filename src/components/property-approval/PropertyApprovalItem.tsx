@@ -134,7 +134,7 @@ export default function PropertyListItem(props: PropertyListItemProps) {
 
       {/* Main image */}
       <div className="relative h-30 w-40 overflow-hidden rounded-[8px] md:h-33 md:w-54 shrink-0">
-        <Image src={mainImage} alt={title} fill className="object-cover" />
+        <Image src={mainImage} alt={title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 216px" />
       </div>
 
       {/* Content section - grows to fill available space */}

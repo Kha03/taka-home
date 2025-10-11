@@ -14,6 +14,7 @@ export function AboutUs() {
           alt="About TakaHome - Modern bathroom interior"
           fill
           className="object-cover"
+          sizes="100vw"
           priority
         />
       </div>

@@ -58,6 +58,7 @@ function MapCard() {
           alt="Map"
           fill
           className="object-cover"
+          sizes="100vw"
         />
         <div className="h-full w-full absolute inset-0 bg-black/10 flex items-center justify-center">
           <Button
@@ -99,6 +100,7 @@ function LocationCard({ location }: { location: LocationData }) {
             alt={`Bất động sản tại ${location.name}`}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-110"
+            sizes="100vw"
           />
 
           {/* Gradient overlay */}
