@@ -24,6 +24,12 @@ export const VALIDATION_MESSAGES = {
   description: {
     max: "Mô tả không được vượt quá 1500 ký tự",
   },
+  electricityPrice: {
+    min: "Giá điện phải lớn hơn hoặc bằng 0",
+  },
+  waterPrice: {
+    min: "Giá nước phải lớn hơn hoặc bằng 0",
+  },
 };
 
 export const ListingKind = z.enum(["apartment", "boarding"], {
@@ -68,6 +74,8 @@ export const FormSchema = z.object({
       })
     )
     .default([]),
+  electricityPrice: z.coerce.number().min(0).optional(),
+  waterPrice: z.coerce.number().min(0).optional(),
 
   description: z
     .string()

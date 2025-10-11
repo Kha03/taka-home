@@ -31,6 +31,8 @@ export default function NewPropertyPage() {
       kind: "apartment",
       gallery: [],
       floors: [],
+      electricityPrice: 0,
+      waterPrice: 0,
       roomTypes: [
         {
           name: "Loại 1",
@@ -173,9 +175,26 @@ export default function NewPropertyPage() {
                         </div>
                       </>
                     ) : (
-                      <BoardingStructure />
+                      <>
+                        <BoardingStructure />
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <Field
+                            label="Giá điện"
+                            name="electricityPrice"
+                            type="number"
+                            placeholder="VND/kWh"
+                            required
+                          />
+                          <Field
+                            label="Giá nước"
+                            name="waterPrice"
+                            type="number"
+                            placeholder="VND/m³"
+                            required
+                          />
+                        </div>
+                      </>
                     )}
-
                     <div>
                       <Label className="text-[#4F4F4F] font-semibold text-sm mb-3">
                         Mô tả chi tiết
