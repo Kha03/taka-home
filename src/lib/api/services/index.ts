@@ -7,3 +7,4 @@ export {
   vietnamAddressService,
   VietnamAddressService,
 } from "./vietnam-address";
+export { propertyService, PropertyService } from "./property";

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CircleAlert, ImageIcon, Info, Play, X } from "lucide-react";
+
+// Import Property Service
+import { propertyService } from "@/lib/api";
+import type { PropertyCreateRequest, PropertyRoom } from "@/lib/api/types";
 
 import { DottedBox } from "@/components/property-form/DottedBox";
 import { ImageDrop } from "@/components/property-form/ImageDrop";
@@ -25,6 +30,7 @@ import { SelectField } from "@/components/property-form/form/SelectField";
 import { FormSchema, NewPropertyForm } from "@/schema/schema";
 
 export default function NewPropertyPage() {
+  const router = useRouter();
   const methods = useForm<NewPropertyForm>({
     resolver: zodResolver(FormSchema) as any,
     defaultValues: {
@@ -55,32 +61,167 @@ export default function NewPropertyPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Helper function to safely convert to number
+  const toSafeNumber = (value: any): number => {
+    if (value === null || value === undefined || value === "") {
+      return 0;
+    }
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  };
+
+  // Convert form data to API format
+  const convertFormToApiData = (
+    formData: NewPropertyForm
+  ): PropertyCreateRequest => {
+    // Base data common for both types (including legalDoc from common section)
+    const baseData: PropertyCreateRequest = {
+      title: formData.title.trim(),
+      description: formData.description?.trim() || undefined,
+      type: formData.kind === "apartment" ? "APARTMENT" : "BOARDING",
+      province: formData.province,
+      ward: formData.ward,
+      address: formData.street.trim(),
+      legalDoc: formData.legalDoc || undefined,
+      isVisible: true,
+    };
+
+    // For apartment - add apartment-specific fields
+    if (formData.kind === "apartment") {
+      return {
+        ...baseData,
+        unit: formData.unit?.trim() || undefined,
+        bedrooms: toSafeNumber(formData.bedrooms),
+        bathrooms: toSafeNumber(formData.bathrooms),
+        area: toSafeNumber(formData.area),
+        price: toSafeNumber(formData.price),
+        deposit: toSafeNumber(formData.deposit),
+        furnishing: formData.furnishing || "Cơ bản",
+      } as PropertyCreateRequest;
+    }
+
+    // For boarding house - add boarding-specific fields
+    if (formData.kind === "boarding") {
+      // Convert floors structure to rooms array
+      const allRooms =
+        formData.floors?.flatMap((floor, floorIndex) =>
+          floor.rooms.map((roomName) => ({
+            name: roomName.trim(),
+            floor: floorIndex + 1, // Use array index as floor number
+          }))
+        ) || [];
+
+      // Convert roomTypes to API format with rooms nested inside
+      const roomTypes =
+        formData.roomTypes
+          ?.filter((roomType) => roomType.name.trim()) // Only include non-empty room types
+          .map((roomType, index) => {
+            // Distribute rooms among room types based on their locations
+            const roomsForThisType =
+              roomType.locations
+                ?.map((locationName) =>
+                  allRooms.find((room) => room.name === locationName)
+                )
+                .filter((room): room is PropertyRoom => Boolean(room)) || [];
+
+            // If no specific locations, assign some rooms to this room type
+            const assignedRooms =
+              roomsForThisType.length > 0
+                ? roomsForThisType
+                : allRooms.slice(
+                    index *
+                      Math.ceil(allRooms.length / formData.roomTypes!.length),
+                    (index + 1) *
+                      Math.ceil(allRooms.length / formData.roomTypes!.length)
+                  );
+
+            return {
+              name: roomType.name.trim(),
+              description: `Phòng ${roomType.name} - Diện tích ${roomType.area}m² - ${roomType.bedrooms} phòng ngủ, ${roomType.bathrooms} phòng tắm`,
+              bedrooms: toSafeNumber(roomType.bedrooms),
+              bathrooms: toSafeNumber(roomType.bathrooms),
+              area: toSafeNumber(roomType.area),
+              price: toSafeNumber(roomType.price),
+              deposit: toSafeNumber(roomType.deposit),
+              furnishing: "Cơ bản", // Default furnishing
+              heroImage: roomType.images?.[0] || undefined,
+              images: roomType.images?.filter(Boolean) || [], // Remove empty strings
+              rooms: assignedRooms, // Rooms nested inside roomType
+            };
+          }) || [];
+
+      return {
+        ...baseData,
+        electricityPricePerKwh: toSafeNumber(formData.electricityPrice),
+        waterPricePerM3: toSafeNumber(formData.waterPrice),
+        unit: formData.unit?.trim() || undefined, // Add unit for boarding
+        roomTypes: roomTypes.length > 0 ? roomTypes : undefined,
+      };
+    }
+
+    return baseData;
+  };
+
   const onSubmit = async (values: NewPropertyForm) => {
     setIsSubmitting(true);
     setSubmitError(null);
+
     try {
-      const response = await fetch("/api/properties", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-      const result = await response.json();
-      if (result.success) {
-        alert(result.message || "Đăng tin thành công!");
-        // TODO: router.push("/my-properties");
+      // Convert form data to API format
+      const apiData = convertFormToApiData(values);
+
+      // Call Property Service API
+      const response = await propertyService.createProperty(apiData);
+
+      // Check if response is successful
+      if (response && (response.code === 200 || response.code === 201)) {
+        const successMessage = response.message || "Đăng tin thành công!";
+
+        // Show success confirmation
+        if (
+          window.confirm(
+            `${successMessage}\n\nBạn có muốn xem danh sách bất động sản của mình không?`
+          )
+        ) {
+          router.push("/my-properties");
+        } else {
+          // Reset form for creating another property
+          methods.reset();
+        }
       } else {
-        setSubmitError(result.message || "Có lỗi xảy ra khi đăng tin");
+        const errorMessage = response?.message || "Có lỗi xảy ra khi đăng tin";
+        setSubmitError(errorMessage);
       }
-    } catch (error) {
-      console.error("Submit error:", error);
-      setSubmitError("Có lỗi xảy ra khi đăng tin. Vui lòng thử lại.");
+    } catch (error: any) {
+      let errorMessage = "Có lỗi xảy ra khi đăng tin. Vui lòng thử lại.";
+      if (error?.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        if (status === 400) {
+          errorMessage = data?.message || "Dữ liệu gửi lên không hợp lệ";
+        } else if (status === 401) {
+          errorMessage = "Bạn cần đăng nhập để thực hiện chức năng này";
+        } else if (status === 403) {
+          errorMessage = "Bạn không có quyền thực hiện chức năng này";
+        } else if (status === 422) {
+          errorMessage = data?.message || "Dữ liệu không đúng định dạng";
+        } else if (status === 500) {
+          errorMessage = "Lỗi server. Vui lòng thử lại sau";
+        } else {
+          errorMessage = data?.message || `Lỗi HTTP ${status}`;
+        }
+      } else if (error?.request) {
+        errorMessage =
+          "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      setSubmitError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const kind = methods.watch("kind");
-
   return (
     <div className="min-h-screen bg-[#FFF7E9] p-4">
       <FormProvider {...methods}>
@@ -96,7 +237,7 @@ export default function NewPropertyPage() {
             onSubmit={methods.handleSubmit(onSubmit as any)}
             className="space-y-6"
           >
-            <div className="bg-white rounded-xl shadow-lg border border-border/50 overflow-hidden backdrop-blur-sm">
+            <div className="bg-primary-foreground rounded-xl shadow-lg border border-border/50 overflow-hidden backdrop-blur-sm">
               <div className="space-y-8 p-6">
                 {/* Thông tin chung + Hình ảnh đính kèm */}
                 <div className="grid gap-6 lg:grid-cols-3">
@@ -160,8 +301,12 @@ export default function NewPropertyPage() {
                         name="street"
                         placeholder="Ví dụ: 123 Nguyễn Huệ"
                       />
+                      <SelectField
+                        name="legalDoc"
+                        options={["Sổ hồng", "HĐMB", "Khác"]}
+                        placeholder="Giấy tờ pháp lý"
+                      />
                     </div>
-
                     {kind === "apartment" ? (
                       <>
                         <Label className="mb-2 text-[#4F4F4F] flex items-center gap-1 font-semibold">
@@ -292,13 +437,6 @@ export default function NewPropertyPage() {
                           placeholder="Chọn tình trạng nội thất"
                           required
                         />
-                        <SelectField
-                          label="Giấy tờ pháp lý"
-                          name="legalDoc"
-                          options={["Sổ hồng", "HĐMB", "Khác"]}
-                          placeholder="Chọn loại giấy tờ"
-                          required
-                        />
                       </div>
                     </div>
 
@@ -371,18 +509,22 @@ export default function NewPropertyPage() {
                     type="button"
                     variant="outline"
                     disabled={isSubmitting}
+                    onClick={() => router.back()}
                     className="rounded-[8px] bg-[#e5e5e5] border-0 hover:bg-[#b1b1b1] text-[#4f4f4f]"
                   >
                     <X className="h-4 w-4" />
                     Hủy
                   </Button>
+
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="rounded-[8px] bg-accent border-0 hover:bg-[#e59400] text-primary-foreground"
+                    className="rounded-[8px] bg-accent border-0 hover:bg-[#e59400] text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Play className="h-4 w-4" />
-                    {isSubmitting ? "Đang xử lý..." : "Tiếp theo"}
+                    {isSubmitting
+                      ? "Đang tạo bất động sản..."
+                      : "Tạo bất động sản"}
                   </Button>
                 </div>
               </div>

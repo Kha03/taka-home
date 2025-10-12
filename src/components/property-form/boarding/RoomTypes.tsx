@@ -74,13 +74,6 @@ export function RoomTypes() {
                       placeholder="Chọn tình trạng nội thất"
                       required
                     />
-                    <SelectField
-                      label="Giấy tờ pháp lý"
-                      name={`roomTypes.${idx}.legalDoc`}
-                      options={["Sổ hồng", "HĐMB", "Khác"]}
-                      placeholder="Chọn loại giấy tờ"
-                      required
-                    />
                     <Field
                       label="Diện tích"
                       name={`roomTypes.${idx}.area`}
@@ -94,12 +87,6 @@ export function RoomTypes() {
                       type="number"
                       placeholder="VND"
                       required
-                    />
-                    <Field
-                      label="Số lượng"
-                      name={`roomTypes.${idx}.count`}
-                      type="number"
-                      placeholder="1"
                     />
                   </div>
 

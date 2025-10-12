@@ -45,16 +45,23 @@ export interface AddressData {
 }
 
 // ========== Property Types ==========
+export interface PropertyRoom {
+  name: string;
+  floor: number;
+}
+
 export interface PropertyRoomType {
   name: string;
+  description?: string;
   bedrooms: number;
   bathrooms: number;
-  legalDoc?: string;
   area: number;
   price: number;
   deposit?: number;
-  description?: string;
-  gallery: string[];
+  furnishing?: string;
+  heroImage?: string;
+  images?: string[];
+  rooms?: PropertyRoom[]; // Rooms nested inside roomTypes
 }
 
 export interface PropertyFloor {
@@ -65,13 +72,13 @@ export interface PropertyFloor {
 export interface Property {
   id: string;
   title: string;
-  kind: "apartment" | "boarding";
+  type: "APARTMENT" | "BOARDING";
 
   // Location
   province: string;
-  district: string;
   ward: string;
-  street: string;
+  address: string;
+  mapLocation?: string;
 
   // Apartment specific
   block?: string;
@@ -79,7 +86,10 @@ export interface Property {
   unit?: string;
 
   // Boarding specific
-  floors: PropertyFloor[];
+  floors?: PropertyFloor[];
+  rooms?: PropertyRoom[];
+  electricityPricePerKwh?: number;
+  waterPricePerM3?: number;
 
   description?: string;
 
@@ -88,46 +98,39 @@ export interface Property {
   bathrooms?: number;
   furnishing?: string;
   legalDoc?: string;
-  area: number;
-  price: number;
+  area?: number;
+  price?: number;
   deposit?: number;
 
   // Images
   heroImage?: string;
-  gallery: string[];
+  gallery?: string[];
 
   // Room types for boarding
-  roomTypes: PropertyRoomType[];
+  roomTypes?: PropertyRoomType[];
 
   // Metadata
-  status: "draft" | "pending" | "approved" | "rejected";
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
+  isVisible?: boolean;
+  status?: "draft" | "pending" | "approved" | "rejected";
+  ownerId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PropertyCreateRequest {
   title: string;
-  kind: "apartment" | "boarding";
-  province: string;
-  district: string;
-  ward: string;
-  street: string;
-  block?: string;
-  floor?: string;
-  unit?: string;
-  floors?: PropertyFloor[];
   description?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  furnishing?: string;
+  type: "APARTMENT" | "BOARDING";
+  province: string;
+  ward: string;
+  address: string;
+  mapLocation?: string;
+  electricityPricePerKwh?: number;
+  waterPricePerM3?: number;
+  isVisible?: boolean;
   legalDoc?: string;
-  area: number;
-  price: number;
-  deposit?: number;
-  heroImage?: string;
-  gallery?: string[];
-  roomTypes?: PropertyRoomType[];
+  unit?: string;
+  roomTypes?: PropertyRoomType[]; // rooms are now nested inside roomTypes
 }
 
 export interface PropertyUpdateRequest extends Partial<PropertyCreateRequest> {
@@ -136,9 +139,8 @@ export interface PropertyUpdateRequest extends Partial<PropertyCreateRequest> {
 
 export interface PropertySearchParams {
   q?: string; // search query
-  kind?: "apartment" | "boarding";
+  type?: "APARTMENT" | "BOARDING";
   province?: string;
-  district?: string;
   ward?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -151,6 +153,7 @@ export interface PropertySearchParams {
   limit?: number;
   sortBy?: "price" | "area" | "createdAt";
   sortOrder?: "asc" | "desc";
+  [key: string]: unknown;
 }
 
 // ========== Chat Types ==========

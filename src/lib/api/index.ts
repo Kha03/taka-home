@@ -11,9 +11,12 @@ export { API_CONFIG, getApiBaseUrl } from "./config";
 export type * from "./types";
 
 // ========== Services ==========
-// export { addressService, AddressService } from "./services/address";
-
 export { authService, AuthService } from "./services/auth";
+export { propertyService, PropertyService } from "./services/property";
+export {
+  vietnamAddressService,
+  VietnamAddressService,
+} from "./services/vietnam-address";
 
 // ========== Hooks ==========
 // Property hooks

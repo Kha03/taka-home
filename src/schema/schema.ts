@@ -17,7 +17,6 @@ export const VALIDATION_MESSAGES = {
   },
   address: {
     province: "Vui lòng chọn tỉnh, thành phố",
-    district: "Vui lòng chọn quận, huyện",
     ward: "Vui lòng chọn phường, xã",
     street: "Vui lòng nhập số nhà, tên đường",
   },
@@ -56,7 +55,6 @@ export const FormSchema = z.object({
     .max(100, VALIDATION_MESSAGES.title.max),
   kind: ListingKind,
   province: z.string().min(1, VALIDATION_MESSAGES.address.province),
-  district: z.string().min(1, VALIDATION_MESSAGES.address.district),
   ward: z.string().min(1, VALIDATION_MESSAGES.address.ward),
   street: z.string().min(1, VALIDATION_MESSAGES.address.street),
 
