@@ -17,7 +17,6 @@ export function SignInForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear error when user types
     if (error) setError("");
   };
 
@@ -53,9 +52,6 @@ export function SignInForm() {
             autoComplete="email"
             disabled={isLoading}
           />
-          <p className="text-xs text-muted-foreground">
-            Demo: admin@takaHome.com / 123456
-          </p>
         </div>
 
         <div className="space-y-1.5">
@@ -145,7 +141,7 @@ export function SignInForm() {
           </Button>
         </div>
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Chưa có tài khoản?{" "}
+          Chưa có tài khoản?
           <Link
             href="/signup"
             className="font-medium text-primary hover:underline"

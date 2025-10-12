@@ -44,7 +44,8 @@ export function SignUpForm() {
     const result = await register(
       formData.fullName,
       formData.email,
-      formData.password
+      formData.password,
+      formData.phone
     );
     if (!result.success && result.error) {
       setError(result.error);
@@ -143,10 +144,12 @@ export function SignUpForm() {
           />
           {formData.confirmPassword &&
           formData.confirmPassword !== formData.password ? (
-            <p className="text-xs text-destructive mt-1">
+            <p className="text-xs text-destructive h-2">
               Mật khẩu nhập lại không khớp.
             </p>
-          ) : null}
+          ) : (
+            <p className="h-2"></p>
+          )}
         </div>
       </div>
 

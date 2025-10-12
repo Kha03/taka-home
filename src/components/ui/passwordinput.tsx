@@ -31,15 +31,16 @@ export function PasswordInput({
     return s;
   }, [value]);
 
+  const getStrengthColor = (score: number) => {
+    if (score === 0) return "bg-gray-200";
+    if (score === 1) return "bg-red-400";
+    if (score === 2) return "bg-yellow-400";
+    if (score === 3) return "bg-blue-400";
+    return "bg-green-400";
+  };
+
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        {value ? (
-          <span className="text-xs text-muted-foreground">
-            Độ mạnh: {score}/4
-          </span>
-        ) : null}
-      </div>
+    <div className="space-y-2">
       <div className="relative">
         <Input
           id={id}
@@ -66,10 +67,12 @@ export function PasswordInput({
           )}
         </Button>
       </div>
-      {/* Strength bar */}
-      <div className="h-1 w-full rounded bg-muted">
+
+      <div className="h-1 w-full rounded bg-muted overflow-hidden">
         <div
-          className={`h-1 rounded transition-all`}
+          className={`h-1 rounded transition-all duration-300 ${getStrengthColor(
+            score
+          )}`}
           style={{ width: `${(score / 4) * 100}%` }}
         />
       </div>

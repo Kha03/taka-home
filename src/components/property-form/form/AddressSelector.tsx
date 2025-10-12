@@ -4,66 +4,54 @@ import React from "react";
 import { useVietnameseAddress } from "@/hooks/use-vietnamese-address";
 import { useFormContextStrict } from "./useFormContextStrict";
 import { NewPropertyForm } from "@/schema/schema";
-import { SelectField } from "./SelectField";
+import { ComboboxField } from "./ComboboxField";
 
 export function AddressSelector() {
   const { watch, setValue } = useFormContextStrict<NewPropertyForm>();
   const {
     provinces,
-    districts,
     wards,
     loadingProvinces,
-    loadingDistricts,
     loadingWards,
-    loadDistricts,
-    loadWards,
+    loadWardsByProvince,
   } = useVietnameseAddress();
 
   const selectedProvince = watch("province");
-  const selectedDistrict = watch("district");
 
   React.useEffect(() => {
     if (selectedProvince) {
       const province = provinces.find((p) => p.name === selectedProvince);
       if (province) {
-        loadDistricts(province.code);
-        setValue("district", "");
+        loadWardsByProvince(province.code);
         setValue("ward", "");
       }
+    } else {
+      setValue("ward", "");
     }
-  }, [selectedProvince, provinces, loadDistricts, setValue]);
-
-  React.useEffect(() => {
-    if (selectedDistrict) {
-      const district = districts.find((d) => d.name === selectedDistrict);
-      if (district) {
-        loadWards(district.code);
-        setValue("ward", "");
-      }
-    }
-  }, [selectedDistrict, districts, loadWards, setValue]);
+  }, [selectedProvince, provinces, loadWardsByProvince, setValue]);
 
   return (
     <>
-      <SelectField
+      <ComboboxField
         name="province"
-        options={provinces.map((p) => p.name)}
+        options={provinces.map((p) => ({ value: p.name, label: p.name }))}
         loading={loadingProvinces}
         placeholder="Chọn tỉnh, thành phố"
+        searchPlaceholder="Tìm kiếm tỉnh/thành phố..."
+        emptyText="Không tìm thấy tỉnh/thành phố"
       />
-      <SelectField
-        name="district"
-        options={districts.map((d) => d.name)}
-        loading={loadingDistricts}
-        disabled={!selectedProvince}
-        placeholder="Chọn quận, huyện, thị xã"
-      />
-      <SelectField
+      <ComboboxField
         name="ward"
-        options={wards.map((w) => w.name)}
+        options={wards.map((w) => ({ value: w.name, label: w.name }))}
         loading={loadingWards}
-        disabled={!selectedDistrict}
+        disabled={!selectedProvince}
         placeholder="Chọn phường, xã, thị trấn"
+        searchPlaceholder="Tìm kiếm phường/xã..."
+        emptyText={
+          selectedProvince
+            ? "Không tìm thấy phường/xã"
+            : "Vui lòng chọn tỉnh/thành phố trước"
+        }
       />
     </>
   );

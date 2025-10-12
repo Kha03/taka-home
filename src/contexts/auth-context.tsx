@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/lib/api/services/auth";
 
 interface User {
   id: string;
@@ -21,7 +22,8 @@ interface AuthContextType {
   register: (
     name: string,
     email: string,
-    password: string
+    password: string,
+    phone?: string
   ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
@@ -68,70 +70,130 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      await new Promise((r) => setTimeout(r, 1000));
 
-      if (email === "admin@takaHome.com" && password === "123456") {
-        const mockUser: User = {
-          id: "1",
-          email,
-          name: "Admin User",
-          avatar: "/assets/imgs/avatar.png",
+      const response = await authService.login({ email, password });
+
+      if (response.code === 200 && response.data) {
+        const { accessToken, account } = response.data;
+
+        // Transform API user to local User format
+        const user: User = {
+          id: account.id,
+          email: account.email,
+          name: account.user.fullName,
+          avatar: account.user.avatarUrl || "/assets/imgs/avatar.png",
         };
-        localStorage.setItem("user", JSON.stringify(mockUser));
-        localStorage.setItem("token", "mock-jwt-token");
-        document.cookie = `auth-token=mock-jwt-token; path=/; max-age=${
+
+        // Store token and user data
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("token", accessToken);
+        document.cookie = `auth-token=${accessToken}; path=/; max-age=${
           7 * 24 * 60 * 60
         }`;
 
-        setUser(mockUser);
+        setUser(user);
         afterAuthRedirect();
         return { success: true };
       }
-      return { success: false, error: "Email hoặc mật khẩu không đúng" };
-    } catch {
-      return { success: false, error: "Đã có lỗi xảy ra. Vui lòng thử lại." };
+
+      return {
+        success: false,
+        error: response.message || "Email hoặc mật khẩu không đúng",
+      };
+    } catch (error) {
+      console.error("Login error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    phone?: string
+  ) => {
     try {
       setIsLoading(true);
-      await new Promise((r) => setTimeout(r, 1000));
 
-      if (email && password && name) {
-        const mockUser: User = {
-          id: Date.now().toString(),
-          email,
-          name,
-          avatar: "/assets/imgs/avatar.png",
-        };
-        localStorage.setItem("user", JSON.stringify(mockUser));
-        localStorage.setItem("token", "mock-jwt-token");
-        document.cookie = `auth-token=mock-jwt-token; path=/; max-age=${
-          7 * 24 * 60 * 60
-        }`;
+      // Call register API
+      const response = await authService.register({
+        email,
+        password,
+        fullName: name,
+        phone,
+        roles: ["TENANT"], // Default role
+      });
 
-        setUser(mockUser);
-        afterAuthRedirect();
-        return { success: true };
+      if (response.code === 200) {
+        // After successful registration, automatically login
+        const loginResponse = await authService.login({ email, password });
+
+        if (loginResponse.code === 200 && loginResponse.data) {
+          const { accessToken, account } = loginResponse.data;
+
+          // Transform API user to local User format
+          const user: User = {
+            id: account.id,
+            email: account.email,
+            name: account.user.fullName,
+            avatar: account.user.avatarUrl || "/assets/imgs/avatar.png",
+          };
+
+          // Store token and user data
+          localStorage.setItem("user", JSON.stringify(user));
+          localStorage.setItem("token", accessToken);
+          document.cookie = `auth-token=${accessToken}; path=/; max-age=${
+            7 * 24 * 60 * 60
+          }`;
+
+          setUser(user);
+          afterAuthRedirect();
+          return { success: true };
+        }
       }
-      return { success: false, error: "Vui lòng điền đầy đủ thông tin" };
-    } catch {
-      return { success: false, error: "Đã có lỗi xảy ra. Vui lòng thử lại." };
+
+      return {
+        success: false,
+        error: response.message || "Đăng ký thất bại. Vui lòng thử lại.",
+      };
+    } catch (error) {
+      console.error("Register error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    document.cookie =
-      "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
-    setUser(null);
-    router.push("/signin");
+  const logout = async () => {
+    try {
+      // Call logout API if available
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout API error:", error);
+      // Continue with local logout even if API fails
+    } finally {
+      // Clear local storage and state
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      document.cookie =
+        "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+      setUser(null);
+      router.push("/signin");
+    }
   };
 
   const value: AuthContextType = {
