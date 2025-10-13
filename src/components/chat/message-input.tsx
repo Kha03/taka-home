@@ -140,8 +140,8 @@ export function MessageInput({
   }, [isTyping, onTyping]);
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
-      <div className="flex items-end gap-3">
+    <div className="border-t border-gray-200 bg-white p-2">
+      <div className="flex  gap-3 items-center">
         {/* File upload button */}
         <div className="flex-shrink-0">
           <input

@@ -13,10 +13,10 @@ import {
   MoreVertical,
   Star,
 } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { MessageBubble } from "./message-bubble";
 import { MessageInput } from "./message-input";
+import Link from "next/link";
 
 interface ChatWindowProps {
   chat: Chat | null;
@@ -44,13 +44,26 @@ export function ChatWindow({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (smooth = true) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: smooth ? "smooth" : "auto",
+        block: "end",
+      });
+    }
   };
 
+  // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Scroll to bottom immediately when chat changes (without smooth animation)
+  useEffect(() => {
+    if (chat) {
+      setTimeout(() => scrollToBottom(false), 100);
+    }
+  }, [chat]);
 
   if (!chat) {
     return (
@@ -83,8 +96,6 @@ export function ChatWindow({
 
   return (
     <div className={cn("h-full flex flex-col bg-white", className)}>
-      <div ref={messagesEndRef} />
-
       {/* Header */}
       <div className="flex-shrink-0 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-3 p-4">
@@ -154,27 +165,19 @@ export function ChatWindow({
         {chat.propertyTitle && (
           <div className="px-4 pb-3">
             <div className="bg-[#DCBB87]/10 rounded-lg p-3 border border-[#DCBB87]/20">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 truncate">
-                    {chat.propertyTitle}
-                  </h4>
-                  <div className="flex items-center gap-1 text-sm text-gray-600">
-                    <MapPin className="w-3 h-3" />
-                    <span>châu Á</span>
-                    <div className="flex items-center gap-1 ml-2">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span>4.8</span>
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-[#DCBB87] text-[#DCBB87]"
-                >
-                  
-                </Button>
+              <div className="flex items-center  justify-between">
+                <h4 className="font-medium text-gray-900 truncate">
+                  {chat.propertyTitle}
+                </h4>
+                <Link href={`/properties/${chat.propertyId}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-[#DCBB87] text-[#DCBB87]"
+                  >
+                    Xem chi tiết
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -269,6 +272,8 @@ export function ChatWindow({
             )}
           </>
         )}
+        {/* Scroll anchor at the bottom */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Message Input */}

@@ -240,7 +240,8 @@ export function ChatProvider({
       const response = await chatService.getChatroomMessages(chatId);
       if (response.code === 200 && response.data) {
         const transformedMessages = response.data.map(transformChatMessage);
-        setMessages(transformedMessages);
+        // Reverse the messages array so newest messages appear at the bottom
+        setMessages(transformedMessages.reverse());
         setError(null);
       } else {
         throw new Error(response.message || "Không thể tải tin nhắn");
