@@ -259,31 +259,6 @@ export function ChatProvider({
     async (content: string, type: Message["type"] = "text") => {
       if (!activeChat) return;
 
-      const optimisticMessage: Message = {
-        id: `temp-${Date.now()}`,
-        chatroomId: activeChat.id,
-        sender: messages.find((m) => m.sender.id === currentUserId)?.sender || {
-          id: currentUserId,
-          fullName: "You",
-        },
-        content,
-        timestamp: new Date(),
-        type,
-        status: "sent",
-      };
-
-      // Optimistically update UI
-      setMessages((prev) => [...prev, optimisticMessage]);
-
-      // Update last message in chat
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === activeChat.id
-            ? { ...chat, lastMessage: optimisticMessage, updatedAt: new Date() }
-            : chat
-        )
-      );
-
       try {
         // 1. Send via HTTP API first (to ensure message is saved in DB)
         const response = await chatService.sendMessage(
@@ -293,24 +268,6 @@ export function ChatProvider({
         );
 
         if (response.code === 201 && response.data) {
-          const savedMessage = transformChatMessage(response.data);
-
-          // Replace optimistic message with real one from server
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === optimisticMessage.id ? savedMessage : msg
-            )
-          );
-
-          // Update last message in chat with real data
-          setChats((prev) =>
-            prev.map((chat) =>
-              chat.id === activeChat.id
-                ? { ...chat, lastMessage: savedMessage, updatedAt: new Date() }
-                : chat
-            )
-          );
-
           // 2. Also send via WebSocket for real-time delivery to other users
           // WebSocket will broadcast to other participants
           try {
@@ -327,27 +284,6 @@ export function ChatProvider({
         }
       } catch {
         setError("Không thể gửi tin nhắn");
-        // Remove optimistic message on error
-        setMessages((prev) =>
-          prev.filter((msg) => msg.id !== optimisticMessage.id)
-        );
-        // Revert last message in chat
-        setChats((prev) =>
-          prev.map((chat) => {
-            if (chat.id === activeChat.id) {
-              // Find previous message before the failed one
-              const chatMessages = messages.filter(
-                (msg) => msg.id !== optimisticMessage.id
-              );
-              const previousMessage = chatMessages[chatMessages.length - 1];
-              return {
-                ...chat,
-                lastMessage: previousMessage,
-              };
-            }
-            return chat;
-          })
-        );
       }
     },
     [activeChat, currentUserId, messages]

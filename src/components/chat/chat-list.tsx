@@ -117,7 +117,9 @@ function ChatListItem({
                 : "text-gray-600"
             )}
           >
-            {chat.lastMessage?.senderId === currentUserId && "Bạn: "}
+            {chat.lastMessage?.sender?.id === currentUserId
+              ? "Bạn: "
+              : chat.lastMessage?.sender?.fullName ?? ""}
             {chat.lastMessage
               ? truncateMessage(chat.lastMessage.content)
               : "Bắt đầu cuộc trò chuyện"}
