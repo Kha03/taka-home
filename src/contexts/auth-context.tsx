@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkAuth = () => {
       try {
         const savedUser = localStorage.getItem("user");
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
         if (savedUser && token) {
           setUser(JSON.parse(savedUser));
           // Cookie cho middleware
@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Transform API user to local User format
         const user: User = {
-          id: account.id,
+          id: account.user.id,
           email: account.email,
           name: account.user.fullName,
           avatar: account.user.avatarUrl || "/assets/imgs/avatar.png",

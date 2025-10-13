@@ -41,13 +41,17 @@ export function MessageBubble({
         isOwn ? "flex-row-reverse" : "flex-row"
       )}
     >
-      {showAvatar && !isOwn && (
+      {/* Avatar hoặc placeholder - cho cả tin nhắn người khác và của mình */}
+      {showAvatar ? (
         <Avatar className="w-8 h-8 flex-shrink-0">
           <AvatarImage src={user?.avatar} alt={user?.name} />
           <AvatarFallback className="bg-[#DCBB87] text-white text-sm">
             {user?.name?.charAt(0).toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
+      ) : (
+        // Placeholder invisible để giữ spacing
+        <div className="w-8 h-8 flex-shrink-0" />
       )}
 
       <div
@@ -137,15 +141,6 @@ export function MessageBubble({
           {isOwn && getStatusIcon()}
         </div>
       </div>
-
-      {showAvatar && isOwn && (
-        <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarImage src={user?.avatar} alt={user?.name} />
-          <AvatarFallback className="bg-[#DCBB87] text-white text-sm">
-            {user?.name?.charAt(0).toUpperCase() || "U"}
-          </AvatarFallback>
-        </Avatar>
-      )}
     </div>
   );
 }

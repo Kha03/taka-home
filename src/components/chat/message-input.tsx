@@ -4,22 +4,70 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { MessageInputProps } from "@/types/chat";
-import { Image as ImageIcon, Send, Smile } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { Image as ImageIcon, Send } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export function MessageInput({
   onSend,
+  onTyping,
   disabled = false,
   placeholder = "Nhập tin nhắn...",
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle typing indicator with debounce
+  const handleTypingChange = useCallback(
+    (typing: boolean) => {
+      if (!onTyping || isTyping === typing) return;
+
+      setIsTyping(typing);
+      onTyping(typing);
+
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      // Stop typing after 3 seconds of inactivity
+      if (typing) {
+        typingTimeoutRef.current = setTimeout(() => {
+          setIsTyping(false);
+          onTyping(false);
+        }, 3000);
+      }
+    },
+    [onTyping, isTyping]
+  );
+
+  // Handle message change
+  const handleMessageChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newMessage = e.target.value;
+      setMessage(newMessage);
+
+      // Send typing indicator when user starts typing
+      if (newMessage.trim() && !isTyping) {
+        handleTypingChange(true);
+      } else if (!newMessage.trim() && isTyping) {
+        handleTypingChange(false);
+      }
+    },
+    [isTyping, handleTypingChange]
+  );
 
   const handleSend = () => {
     const trimmedMessage = message.trim();
     if (!trimmedMessage || disabled || isUploading) return;
+
+    // Stop typing indicator before sending
+    if (isTyping) {
+      handleTypingChange(false);
+    }
 
     onSend(trimmedMessage);
     setMessage("");
@@ -75,9 +123,21 @@ export function MessageInput({
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     adjustTextareaHeight();
   }, [message]);
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      if (isTyping && onTyping) {
+        onTyping(false);
+      }
+    };
+  }, [isTyping, onTyping]);
 
   return (
     <div className="border-t border-gray-200 bg-white p-4">
@@ -116,7 +176,7 @@ export function MessageInput({
           <Textarea
             ref={textareaRef}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleMessageChange}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={disabled || isUploading}

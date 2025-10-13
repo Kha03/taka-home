@@ -8,3 +8,4 @@ export {
   VietnamAddressService,
 } from "./vietnam-address";
 export { propertyService, PropertyService } from "./property";
+export { chatService, ChatService } from "./chat";

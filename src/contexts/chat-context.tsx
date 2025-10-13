@@ -1,132 +1,108 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { Chat, Message, ChatContextType, User } from "@/types/chat";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
+import { Chat, Message, ChatContextType } from "@/types/chat";
+import {
+  chatService,
+  type Chatroom,
+  type ChatMessage,
+} from "@/lib/api/services/chat";
+import {
+  chatSocket,
+  type SocketMessage,
+  type UserTypingInfo,
+} from "@/lib/socket/chat-socket";
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// Mock data cho development
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "Nguyễn Văn An",
-    avatar: "/public/assets/imgs/avatar.png",
-    role: "landlord",
-    email: "an@example.com",
-    phone: "0123456789",
-  },
-  {
-    id: "2",
-    name: "Trần Thị Bình",
-    avatar: "/public/assets/imgs/avatar.png",
-    role: "tenant",
-    email: "binh@example.com",
-    phone: "0987654321",
-  },
-  {
-    id: "3",
-    name: "Lê Minh Cường",
-    avatar: "/public/assets/imgs/avatar.png",
-    role: "landlord",
-    email: "cuong@example.com",
-    phone: "0555666777",
-  },
-];
+/**
+ * Transform API Chatroom to local Chat type
+ */
+function transformChatroomToChat(
+  chatroom: Chatroom,
+  currentUserId: string
+): Chat {
+  const lastMessage = chatroom.messages[chatroom.messages.length - 1];
 
-const mockChats: Chat[] = [
-  {
-    id: "chat1",
-    participants: [mockUsers[0], mockUsers[1]],
-    lastMessage: {
-      id: "msg1",
-      chatId: "chat1",
-      senderId: "2",
-      content: "Chào anh, em muốn hỏi về căn hộ này ạ",
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      type: "text",
-      status: "read",
-    },
+  return {
+    id: chatroom.id,
+    participants: [
+      {
+        id: chatroom.user1.id,
+        name: chatroom.user1.fullName || "Unknown",
+        avatar: chatroom.user1.avatarUrl || undefined,
+        role: chatroom.user1.id === currentUserId ? "tenant" : "landlord",
+        email: chatroom.user1.email,
+        phone: chatroom.user1.phone,
+      },
+      {
+        id: chatroom.user2.id,
+        name: chatroom.user2.fullName || "Unknown",
+        avatar: chatroom.user2.avatarUrl || undefined,
+        role: chatroom.user2.id === currentUserId ? "tenant" : "landlord",
+        email: chatroom.user2.email,
+        phone: chatroom.user2.phone,
+      },
+    ],
+    lastMessage: lastMessage
+      ? {
+          id: lastMessage.id,
+          chatroomId:
+            typeof lastMessage.chatroom === "string"
+              ? lastMessage.chatroom
+              : lastMessage.chatroom?.id || chatroom.id,
+          sender: lastMessage.sender,
+          content: lastMessage.content,
+          timestamp: new Date(lastMessage.createdAt),
+          type: "text",
+          status: "delivered",
+        }
+      : undefined,
     unreadCount: 0,
-    propertyId: "prop1",
-    propertyTitle: "Căn hộ 2PN tại Quận 1",
-    propertyImage: "/public/assets/imgs/house-item.png",
+    propertyId: chatroom.property.id,
+    propertyTitle: chatroom.property.title,
+    propertyImage: chatroom.property.heroImage || undefined,
     isActive: true,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 30 * 60 * 1000),
-  },
-  {
-    id: "chat2",
-    participants: [mockUsers[0], mockUsers[2]],
-    lastMessage: {
-      id: "msg2",
-      chatId: "chat2",
-      senderId: "3",
-      content: "Cảm ơn anh đã quan tâm đến bất động sản của em",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      type: "text",
-      status: "delivered",
-    },
-    unreadCount: 2,
-    propertyId: "prop2",
-    propertyTitle: "Nhà phố 3 tầng tại Quận 7",
-    propertyImage: "/public/assets/imgs/house-item.png",
-    isActive: true,
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-];
+    createdAt: new Date(chatroom.createdAt),
+    updatedAt: new Date(chatroom.updatedAt),
+  };
+}
 
-const mockMessages: { [key: string]: Message[] } = {
-  chat1: [
-    {
-      id: "msg1-1",
-      chatId: "chat1",
-      senderId: "2",
-      content: "Xin chào anh, em đang quan tâm đến căn hộ này",
-      timestamp: new Date(Date.now() - 60 * 60 * 1000),
-      type: "text",
-      status: "read",
-    },
-    {
-      id: "msg1-2",
-      chatId: "chat1",
-      senderId: "1",
-      content: "Chào em, anh rất vui khi em quan tâm. Em có câu hỏi gì không?",
-      timestamp: new Date(Date.now() - 55 * 60 * 1000),
-      type: "text",
-      status: "read",
-    },
-    {
-      id: "msg1-3",
-      chatId: "chat1",
-      senderId: "2",
-      content: "Em muốn hỏi về giá thuê và các tiện ích xung quanh ạ",
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      type: "text",
-      status: "read",
-    },
-  ],
-  chat2: [
-    {
-      id: "msg2-1",
-      chatId: "chat2",
-      senderId: "3",
-      content: "Anh ơi, em có thể xem nhà vào cuối tuần được không?",
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-      type: "text",
-      status: "delivered",
-    },
-    {
-      id: "msg2-2",
-      chatId: "chat2",
-      senderId: "3",
-      content: "Cảm ơn anh đã quan tâm đến bất động sản của em",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      type: "text",
-      status: "delivered",
-    },
-  ],
-};
+/**
+ * Transform API ChatMessage to local Message type
+ */
+function transformChatMessage(chatMessage: ChatMessage): Message {
+  return {
+    id: chatMessage.id,
+    chatroomId: chatMessage.chatroom?.id || "",
+    sender: chatMessage.sender,
+    content: chatMessage.content,
+    timestamp: new Date(chatMessage.createdAt),
+    type: "text",
+    status: "delivered",
+  };
+}
+
+/**
+ * Transform Socket Message to local Message type
+ */
+function transformSocketMessage(socketMessage: SocketMessage): Message {
+  return {
+    id: socketMessage.id,
+    chatroomId: socketMessage.chatroomId,
+    sender: socketMessage.sender,
+    content: socketMessage.content,
+    timestamp: new Date(socketMessage.createdAt),
+    type: "text",
+    status: "delivered",
+  };
+}
 
 interface ChatProviderProps {
   children: React.ReactNode;
@@ -137,50 +113,159 @@ export function ChatProvider({
   children,
   currentUserId = "1",
 }: ChatProviderProps) {
-  const [chats, setChats] = useState<Chat[]>(mockChats);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [typingUsers, setTypingUsers] = useState<Map<string, UserTypingInfo>>(
+    new Map()
+  );
 
+  /**
+   * Setup message handlers (socket connection is handled by SocketProvider)
+   */
+  useEffect(() => {
+    // Setup message handler
+    const unsubscribeMessage = chatSocket.onMessage((socketMessage) => {
+      const message = transformSocketMessage(socketMessage);
+
+      // Add message to current chat if it's the active one
+      if (activeChat?.id === message.chatroomId) {
+        setMessages((prev) => [...prev, message]);
+      }
+
+      // Update last message in chat list
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === message.chatroomId
+            ? {
+                ...chat,
+                lastMessage: message,
+                updatedAt: new Date(),
+                unreadCount:
+                  activeChat?.id === message.chatroomId
+                    ? 0
+                    : chat.unreadCount + 1,
+              }
+            : chat
+        )
+      );
+    });
+
+    // Setup typing handler
+    const unsubscribeTyping = chatSocket.onTyping((typingInfo) => {
+      // Ignore empty typing info (clear signal)
+      if (!typingInfo.userId) return;
+
+      // Only process typing for active chat and not from current user
+      if (!activeChat || typingInfo.userId === currentUserId) return;
+
+      setTypingUsers((prev) => {
+        const newMap = new Map(prev);
+
+        if (typingInfo.isTyping) {
+          newMap.set(typingInfo.userId, typingInfo);
+
+          // Auto-clear typing after 5 seconds
+          setTimeout(() => {
+            setTypingUsers((current) => {
+              const updated = new Map(current);
+              const existing = updated.get(typingInfo.userId);
+              // Only remove if it's the same timestamp (not updated)
+              if (existing?.timestamp === typingInfo.timestamp) {
+                updated.delete(typingInfo.userId);
+              }
+              return updated;
+            });
+          }, 5000);
+        } else {
+          newMap.delete(typingInfo.userId);
+        }
+
+        return newMap;
+      });
+    });
+
+    // Setup error handler
+    const unsubscribeError = chatSocket.onError(() => {
+      setError("Lỗi kết nối real-time");
+    });
+
+    // Cleanup handlers only (not disconnect)
+    return () => {
+      unsubscribeMessage();
+      unsubscribeTyping();
+      unsubscribeError();
+    };
+  }, [activeChat, currentUserId]);
+
+  /**
+   * Load chats on mount
+   */
+  useEffect(() => {
+    refreshChats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Refresh chat list from API
+   */
   const refreshChats = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setChats(mockChats);
-      setError(null);
+      const response = await chatService.getMyChatrooms();
+      if (response.code === 200 && response.data) {
+        const transformedChats = response.data.map((chatroom) =>
+          transformChatroomToChat(chatroom, currentUserId)
+        );
+        setChats(transformedChats);
+        setError(null);
+      } else {
+        throw new Error(response.message || "Không thể tải danh sách chat");
+      }
     } catch {
       setError("Không thể tải danh sách chat");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [currentUserId]);
 
+  /**
+   * Load messages for a specific chat
+   */
   const loadMessages = useCallback(async (chatId: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      const chatMessages = mockMessages[chatId] || [];
-      setMessages(chatMessages);
-      setError(null);
+      const response = await chatService.getChatroomMessages(chatId);
+      if (response.code === 200 && response.data) {
+        const transformedMessages = response.data.map(transformChatMessage);
+        setMessages(transformedMessages);
+        setError(null);
+      } else {
+        throw new Error(response.message || "Không thể tải tin nhắn");
+      }
     } catch {
       setError("Không thể tải tin nhắn");
-      setMessages([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  /**
+   * Send message via API and WebSocket
+   */
   const sendMessage = useCallback(
     async (content: string, type: Message["type"] = "text") => {
       if (!activeChat) return;
 
-      const newMessage: Message = {
-        id: `msg-${Date.now()}`,
-        chatId: activeChat.id,
-        senderId: currentUserId,
+      const optimisticMessage: Message = {
+        id: `temp-${Date.now()}`,
+        chatroomId: activeChat.id,
+        sender: messages.find((m) => m.sender.id === currentUserId)?.sender || {
+          id: currentUserId,
+          fullName: "You",
+        },
         content,
         timestamp: new Date(),
         type,
@@ -188,41 +273,91 @@ export function ChatProvider({
       };
 
       // Optimistically update UI
-      setMessages((prev) => [...prev, newMessage]);
+      setMessages((prev) => [...prev, optimisticMessage]);
 
       // Update last message in chat
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === activeChat.id
-            ? { ...chat, lastMessage: newMessage, updatedAt: new Date() }
+            ? { ...chat, lastMessage: optimisticMessage, updatedAt: new Date() }
             : chat
         )
       );
 
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Update message status
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
-          )
+        // 1. Send via HTTP API first (to ensure message is saved in DB)
+        const response = await chatService.sendMessage(
+          activeChat.id,
+          currentUserId,
+          content
         );
+
+        if (response.code === 201 && response.data) {
+          const savedMessage = transformChatMessage(response.data);
+
+          // Replace optimistic message with real one from server
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === optimisticMessage.id ? savedMessage : msg
+            )
+          );
+
+          // Update last message in chat with real data
+          setChats((prev) =>
+            prev.map((chat) =>
+              chat.id === activeChat.id
+                ? { ...chat, lastMessage: savedMessage, updatedAt: new Date() }
+                : chat
+            )
+          );
+
+          // 2. Also send via WebSocket for real-time delivery to other users
+          // WebSocket will broadcast to other participants
+          try {
+            chatSocket.sendMessage({
+              chatroomId: activeChat.id,
+              content,
+            });
+          } catch {
+            // Don't fail if WebSocket fails - message is already saved via API
+            console.warn("WebSocket send failed, but message saved via API");
+          }
+        } else {
+          throw new Error(response.message || "Không thể gửi tin nhắn");
+        }
       } catch {
         setError("Không thể gửi tin nhắn");
-        // Remove message on error
-        setMessages((prev) => prev.filter((msg) => msg.id !== newMessage.id));
+        // Remove optimistic message on error
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== optimisticMessage.id)
+        );
+        // Revert last message in chat
+        setChats((prev) =>
+          prev.map((chat) => {
+            if (chat.id === activeChat.id) {
+              // Find previous message before the failed one
+              const chatMessages = messages.filter(
+                (msg) => msg.id !== optimisticMessage.id
+              );
+              const previousMessage = chatMessages[chatMessages.length - 1];
+              return {
+                ...chat,
+                lastMessage: previousMessage,
+              };
+            }
+            return chat;
+          })
+        );
       }
     },
-    [activeChat, currentUserId]
+    [activeChat, currentUserId, messages]
   );
 
+  /**
+   * Mark chat as read
+   */
   const markAsRead = useCallback(async (chatId: string) => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === chatId ? { ...chat, unreadCount: 0 } : chat
@@ -233,34 +368,83 @@ export function ChatProvider({
     }
   }, []);
 
+  /**
+   * Create new chat for a property
+   */
   const createChat = useCallback(
     async (participantId: string, propertyId?: string): Promise<Chat> => {
-      const participant = mockUsers.find((u) => u.id === participantId);
-      if (!participant) throw new Error("Không tìm thấy người dùng");
+      try {
+        if (!propertyId) {
+          throw new Error("PropertyId is required");
+        }
 
-      const newChat: Chat = {
-        id: `chat-${Date.now()}`,
-        participants: [
-          mockUsers.find((u) => u.id === currentUserId)!,
-          participant,
-        ],
-        unreadCount: 0,
-        propertyId,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+        const response = await chatService.startChatForProperty(propertyId);
+        if (
+          response.code === 200 &&
+          response.data &&
+          response.data.length > 0
+        ) {
+          const newChatroom = response.data[0];
+          const newChat = transformChatroomToChat(newChatroom, currentUserId);
 
-      setChats((prev) => [newChat, ...prev]);
-      return newChat;
+          // Add to chat list if not already exists
+          setChats((prev) => {
+            const exists = prev.some((chat) => chat.id === newChat.id);
+            return exists ? prev : [newChat, ...prev];
+          });
+
+          return newChat;
+        } else {
+          throw new Error(response.message || "Không thể tạo chat");
+        }
+      } catch (err) {
+        setError("Không thể tạo chat");
+        throw err;
+      }
     },
     [currentUserId]
   );
 
+  /**
+   * Send typing indicator
+   */
+  const sendTypingIndicator = useCallback(
+    (isTyping: boolean) => {
+      if (!activeChat || !chatSocket.isConnected()) {
+        return;
+      }
+      chatSocket.sendTyping(activeChat.id, isTyping);
+    },
+    [activeChat]
+  );
+
+  /**
+   * Get typing users for active chat
+   */
+  const getTypingUsers = useCallback(() => {
+    return Array.from(typingUsers.values()).filter((info) => info.isTyping);
+  }, [typingUsers]);
+
+  /**
+   * Handle active chat selection
+   */
   const handleSetActiveChat = useCallback(
     (chat: Chat | null) => {
+      // Leave previous room
+      if (activeChat && chatSocket.isConnected()) {
+        chatSocket.leaveRoom(activeChat.id);
+      }
+
+      // Clear typing users when switching chats
+      setTypingUsers(new Map());
+
       setActiveChat(chat);
       if (chat) {
+        // Join new room
+        if (chatSocket.isConnected()) {
+          chatSocket.joinRoom(chat.id);
+        }
+
         loadMessages(chat.id);
         if (chat.unreadCount > 0) {
           markAsRead(chat.id);
@@ -269,7 +453,7 @@ export function ChatProvider({
         setMessages([]);
       }
     },
-    [loadMessages, markAsRead]
+    [loadMessages, markAsRead, activeChat]
   );
 
   const contextValue: ChatContextType = {
@@ -278,12 +462,14 @@ export function ChatProvider({
     messages,
     isLoading,
     error,
+    typingUsers: getTypingUsers(),
     setActiveChat: handleSetActiveChat,
     sendMessage,
     markAsRead,
     loadMessages,
     createChat,
     refreshChats,
+    sendTypingIndicator,
   };
 
   return (

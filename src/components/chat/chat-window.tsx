@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Chat, Message, User } from "@/types/chat";
+import { Chat, Message, TypingUser, User } from "@/types/chat";
 import {
   ArrowLeft,
   Info,
@@ -22,7 +22,9 @@ interface ChatWindowProps {
   chat: Chat | null;
   messages: Message[];
   currentUser: User;
+  typingUsers?: TypingUser[];
   onSendMessage: (content: string, type?: Message["type"]) => void;
+  onTyping?: (isTyping: boolean) => void;
   onBack?: () => void;
   isLoading?: boolean;
   className?: string;
@@ -32,7 +34,9 @@ export function ChatWindow({
   chat,
   messages,
   currentUser,
+  typingUsers = [],
   onSendMessage,
+  onTyping,
   onBack,
   isLoading = false,
   className,
@@ -151,24 +155,13 @@ export function ChatWindow({
           <div className="px-4 pb-3">
             <div className="bg-[#DCBB87]/10 rounded-lg p-3 border border-[#DCBB87]/20">
               <div className="flex items-center gap-3">
-                {chat.propertyImage && (
-                  <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                    <Image
-                      src={chat.propertyImage}
-                      alt="Property"
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-gray-900 truncate">
                     {chat.propertyTitle}
                   </h4>
                   <div className="flex items-center gap-1 text-sm text-gray-600">
                     <MapPin className="w-3 h-3" />
-                    <span>Quận 1, TP.HCM</span>
+                    <span>châu Á</span>
                     <div className="flex items-center gap-1 ml-2">
                       <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                       <span>4.8</span>
@@ -180,7 +173,7 @@ export function ChatWindow({
                   size="sm"
                   className="border-[#DCBB87] text-[#DCBB87]"
                 >
-                  Xem chi tiết
+                  
                 </Button>
               </div>
             </div>
@@ -218,12 +211,12 @@ export function ChatWindow({
         ) : (
           <>
             {messages.map((message, index) => {
-              const isOwn = message.senderId === currentUser.id;
+              const isOwn = message.sender.id === currentUser.id;
               const user = isOwn ? currentUser : otherParticipant;
               const previousMessage = messages[index - 1];
               const showAvatar =
                 !previousMessage ||
-                previousMessage.senderId !== message.senderId ||
+                previousMessage.sender.id !== message.sender.id ||
                 message.timestamp.getTime() -
                   previousMessage.timestamp.getTime() >
                   5 * 60 * 1000; // 5 minutes
@@ -238,6 +231,42 @@ export function ChatWindow({
                 />
               );
             })}
+
+            {/* Typing Indicator */}
+            {typingUsers.length > 0 && (
+              <div className="flex items-start gap-2 mt-2 mb-2">
+                <Avatar className="w-8 h-8 flex-shrink-0">
+                  <AvatarImage
+                    src={otherParticipant?.avatar}
+                    alt={otherParticipant?.name}
+                  />
+                  <AvatarFallback className="bg-[#DCBB87] text-white text-xs">
+                    {otherParticipant?.name?.charAt(0).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[70%]">
+                  <div className="flex items-center gap-1">
+                    <div className="flex gap-1">
+                      <span
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0ms" }}
+                      ></span>
+                      <span
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "150ms" }}
+                      ></span>
+                      <span
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "300ms" }}
+                      ></span>
+                    </div>
+                    <span className="text-xs text-gray-500 ml-2">
+                      {typingUsers[0].fullName} đang nhập...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -246,6 +275,7 @@ export function ChatWindow({
       <div className="flex-shrink-0">
         <MessageInput
           onSend={onSendMessage}
+          onTyping={onTyping}
           disabled={isLoading}
           placeholder={`Nhắn tin cho ${otherParticipant?.name}...`}
         />

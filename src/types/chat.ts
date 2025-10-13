@@ -1,3 +1,5 @@
+import { ChatUser } from "@/lib/api/services/chat";
+
 export interface User {
   id: string;
   name: string;
@@ -9,8 +11,8 @@ export interface User {
 
 export interface Message {
   id: string;
-  chatId: string;
-  senderId: string;
+  chatroomId: string;
+  sender: ChatUser;
   content: string;
   timestamp: Date;
   type: "text" | "image" | "file";
@@ -39,12 +41,20 @@ export interface Chat {
   updatedAt: Date;
 }
 
+export interface TypingUser {
+  userId: string;
+  fullName: string;
+  isTyping: boolean;
+  timestamp: number;
+}
+
 export interface ChatContextType {
   chats: Chat[];
   activeChat: Chat | null;
   messages: Message[];
   isLoading: boolean;
   error: string | null;
+  typingUsers: TypingUser[];
 
   // Actions
   setActiveChat: (chat: Chat | null) => void;
@@ -53,6 +63,7 @@ export interface ChatContextType {
   loadMessages: (chatId: string) => Promise<void>;
   createChat: (participantId: string, propertyId?: string) => Promise<Chat>;
   refreshChats: () => Promise<void>;
+  sendTypingIndicator: (isTyping: boolean) => void;
 }
 
 export interface ChatListItemProps {
@@ -71,6 +82,7 @@ export interface MessageBubbleProps {
 
 export interface MessageInputProps {
   onSend: (content: string, type?: Message["type"]) => void;
+  onTyping?: (isTyping: boolean) => void;
   disabled?: boolean;
   placeholder?: string;
 }

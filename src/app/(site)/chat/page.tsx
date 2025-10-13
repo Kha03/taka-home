@@ -2,27 +2,50 @@
 
 import React, { useState } from "react";
 import { ChatProvider, useChat } from "@/contexts/chat-context";
+import { useAuth } from "@/contexts/auth-context";
 import { ChatList, ChatWindow } from "@/components/chat";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-// Mock current user - trong thực tế sẽ lấy từ auth context
-const mockCurrentUser = {
-  id: "1",
-  name: "Nguyễn Văn An",
-  avatar: "/assets/imgs/avatar.png",
-  role: "landlord" as const,
-  email: "an@example.com",
-  phone: "0123456789",
-};
-
 function ChatPageContent() {
-  const { chats, activeChat, messages, isLoading, setActiveChat, sendMessage } =
-    useChat();
+  const {
+    chats,
+    activeChat,
+    messages,
+    isLoading,
+    typingUsers,
+    setActiveChat,
+    sendMessage,
+    sendTypingIndicator,
+  } = useChat();
+  const { user } = useAuth();
 
   const [showChatWindow, setShowChatWindow] = useState(false);
+
+  if (!user) {
+    return (
+      <div className="h-screen bg-[#FFF7E9] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg mb-4">Vui lòng đăng nhập để sử dụng chat</p>
+          <Link href="/signin">
+            <Button>Đăng nhập</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Convert auth user to chat user format
+  const currentUser = {
+    id: user.id,
+    name: user.name,
+    avatar: user.avatar || "/assets/imgs/avatar.png",
+    role: "tenant" as const, // You can determine this from user data if available
+    email: user.email,
+    phone: "",
+  };
 
   const handleChatSelect = (chat: typeof activeChat) => {
     setActiveChat(chat);
@@ -63,7 +86,7 @@ function ChatPageContent() {
               chats={chats}
               activeChat={activeChat}
               onChatSelect={handleChatSelect}
-              currentUserId={mockCurrentUser.id}
+              currentUserId={user.id}
               isLoading={isLoading}
             />
           </div>
@@ -73,8 +96,10 @@ function ChatPageContent() {
             <ChatWindow
               chat={activeChat}
               messages={messages}
-              currentUser={mockCurrentUser}
+              currentUser={currentUser}
+              typingUsers={typingUsers}
               onSendMessage={handleSendMessage}
+              onTyping={sendTypingIndicator}
               onBack={handleBack}
               isLoading={isLoading}
             />
@@ -86,8 +111,23 @@ function ChatPageContent() {
 }
 
 export default function ChatPage() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="h-screen bg-[#FFF7E9] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg mb-4">Vui lòng đăng nhập để sử dụng chat</p>
+          <Link href="/signin">
+            <Button>Đăng nhập</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <ChatProvider currentUserId={mockCurrentUser.id}>
+    <ChatProvider currentUserId={user.id}>
       <ChatPageContent />
     </ChatProvider>
   );
