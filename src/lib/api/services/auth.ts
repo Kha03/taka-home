@@ -26,7 +26,7 @@ export class AuthService {
       apiClient.setAuthToken(response.data.accessToken);
       // Lưu token và account info vào localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem("auth_token", response.data.accessToken);
+        localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem(
           "account_info",
           JSON.stringify(response.data.account)
@@ -60,7 +60,7 @@ export class AuthService {
       // Xóa token khỏi client và localStorage
       apiClient.removeAuthToken();
       if (typeof window !== "undefined") {
-        localStorage.removeItem("auth_token");
+        localStorage.removeItem("accessToken");
         localStorage.removeItem("account_info");
       }
 
@@ -69,7 +69,7 @@ export class AuthService {
       // Vẫn xóa token local dù API call fail
       apiClient.removeAuthToken();
       if (typeof window !== "undefined") {
-        localStorage.removeItem("auth_token");
+        localStorage.removeItem("accessToken");
         localStorage.removeItem("account_info");
       }
       throw error;
@@ -143,7 +143,7 @@ export class AuthService {
     if (response.code === 200 && response.data?.accessToken) {
       apiClient.setAuthToken(response.data.accessToken);
       if (typeof window !== "undefined") {
-        localStorage.setItem("auth_token", response.data.accessToken);
+        localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem(
           "account_info",
           JSON.stringify(response.data.account)
@@ -173,7 +173,7 @@ export class AuthService {
    */
   initializeAuth(): void {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("accessToken");
       if (token) {
         apiClient.setAuthToken(token);
       }
@@ -185,7 +185,7 @@ export class AuthService {
    */
   isAuthenticated(): boolean {
     if (typeof window !== "undefined") {
-      return !!localStorage.getItem("auth_token");
+      return !!localStorage.getItem("accessToken");
     }
     return false;
   }

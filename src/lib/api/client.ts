@@ -41,10 +41,10 @@ class ApiClient {
     // Request interceptor
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        // Add auth token nếu có
+        // Add accessToken  nếu có
         const token =
           typeof window !== "undefined"
-            ? localStorage.getItem("auth_token")
+            ? localStorage.getItem("accessToken")
             : null;
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -81,7 +81,7 @@ class ApiClient {
         // Handle 401 Unauthorized
         if (error.response?.status === 401) {
           if (typeof window !== "undefined") {
-            localStorage.removeItem("auth_token");
+            localStorage.removeItem("accessToken");
             localStorage.removeItem("user");
             window.location.href = "/signin";
           }
