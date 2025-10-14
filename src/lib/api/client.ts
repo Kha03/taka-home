@@ -50,10 +50,16 @@ class ApiClient {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
+        // If sending FormData, remove Content-Type header
+        // Let browser set it automatically with boundary
+        if (config.data instanceof FormData) {
+          delete config.headers["Content-Type"];
+        }
+
         console.log(
           `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`,
           {
-            data: config.data,
+            data: config.data instanceof FormData ? "FormData" : config.data,
             params: config.params,
           }
         );

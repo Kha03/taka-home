@@ -86,39 +86,29 @@ export class PropertyService {
     );
   }
 
-  /**
-   * Lấy properties theo location
-   */
-  async getPropertiesByLocation(
-    province: string,
-    ward?: string,
-    params?: Omit<FilterPropertyQuery, "province" | "ward">
-  ): Promise<ApiResponse<Property[]>> {
-    const searchParams = {
-      ...params,
-      province,
-      ...(ward && { ward }),
-    };
-    return await apiClient.get<Property[]>(
-      this.basePath,
-      searchParams as Record<string, unknown>
-    );
-  }
+  async uploadPropertyImages(
+    propertyId: string,
+    entityType: "APARTMENT" | "BOARDING",
+    heroImage?: File,
+    images?: File[]
+  ): Promise<ApiResponse<Property>> {
+    const formData = new FormData();
 
-  /**
-   * Search properties with text query
-   */
-  async searchProperties(
-    query: string,
-    params?: Omit<FilterPropertyQuery, "q">
-  ): Promise<ApiResponse<Property[]>> {
-    const searchParams = {
-      ...params,
-      q: query,
-    };
-    return await apiClient.get<Property[]>(
-      this.basePath,
-      searchParams as Record<string, unknown>
+    formData.append("entityType", entityType);
+
+    if (heroImage) {
+      formData.append("heroImage", heroImage);
+    }
+
+    if (images && images.length > 0) {
+      images.forEach((image) => {
+        formData.append("images", image);
+      });
+    }
+
+    return await apiClient.post<Property>(
+      `${this.basePath}/${propertyId}/images`,
+      formData
     );
   }
 }

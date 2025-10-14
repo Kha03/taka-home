@@ -5,7 +5,8 @@ import { useFieldArray } from "react-hook-form";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Info, Trash2, ImageIcon, Plus } from "lucide-react";
+import { Info, Trash2, ImageIcon, Plus, X } from "lucide-react";
+import Image from "next/image";
 import { Field } from "../form/Field";
 import { SelectField } from "../form/SelectField";
 import { DepositField } from "../form/DepositField";
@@ -16,11 +17,14 @@ import { NewPropertyForm } from "@/schema/schema";
 import { useFormContextStrict } from "../form/useFormContextStrict";
 
 export function RoomTypes() {
-  const { control } = useFormContextStrict<NewPropertyForm>();
+  const { control, setValue, watch, getValues } =
+    useFormContextStrict<NewPropertyForm>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "roomTypes",
   });
+
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
 
   return (
     <div className="space-y-3 mt-5">
@@ -108,22 +112,130 @@ export function RoomTypes() {
                     <div className="h-6 w-6 bg-primary rounded-full flex items-center justify-center">
                       <Info className="w-3 h-3 text-white" />
                     </div>
-                    <p className="font-bold text-primary">Hình ảnh đính kèm</p>
+                    <p className="font-bold text-primary">
+                      Hình ảnh đính kèm (Tối đa 6 ảnh)
+                    </p>
                   </div>
-                  <ImageDrop
-                    label="Tải lên ảnh phòng (850 × 450)"
-                    onPick={(src) => console.log("Picked", src)}
-                  />
+
+                  {/* Hero Image Upload */}
+                  {!watch(`roomTypes.${idx}.images`)?.[0] && (
+                    <ImageDrop
+                      label="Tải lên ảnh phòng (850 × 450)"
+                      onPick={(src) => {
+                        const currentImages =
+                          getValues(`roomTypes.${idx}.images`) || [];
+                        setValue(`roomTypes.${idx}.images`, [
+                          src,
+                          ...currentImages,
+                        ]);
+                      }}
+                      onError={setUploadError}
+                    />
+                  )}
+
+                  {/* Gallery Display */}
                   <div className="grid grid-cols-3 gap-3">
-                    {Array.from({ length: 6 }).map((_, i) => (
+                    {/* Display selected images */}
+                    {watch(`roomTypes.${idx}.images`)?.map((imgSrc, i) => (
+                      <div key={i} className="relative aspect-video group">
+                        <Image
+                          src={imgSrc}
+                          alt={`Ảnh ${i + 1}`}
+                          fill
+                          className="object-cover rounded-lg border-2 border-accent"
+                          unoptimized
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentImages =
+                              getValues(`roomTypes.${idx}.images`) || [];
+                            setValue(
+                              `roomTypes.${idx}.images`,
+                              currentImages.filter((_, index) => index !== i)
+                            );
+                          }}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                        {i === 0 && (
+                          <div className="absolute bottom-1 left-1 bg-primary text-white text-xs px-2 py-0.5 rounded">
+                            Ảnh chính
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Empty slots for additional images */}
+                    {Array.from({
+                      length: Math.max(
+                        0,
+                        6 - (watch(`roomTypes.${idx}.images`)?.length || 0)
+                      ),
+                    }).map((_, i) => (
                       <DottedBox
-                        key={i}
-                        className="aspect-video flex items-center justify-center bg-muted/30 border-accent"
+                        key={`empty-${i}`}
+                        className="aspect-video flex items-center justify-center bg-muted/30 border-accent cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept =
+                            "image/jpeg,image/jpg,image/png,image/webp";
+                          input.onchange = async (e) => {
+                            const file = (e.target as HTMLInputElement)
+                              .files?.[0];
+                            if (!file) return;
+
+                            // Validate
+                            if (
+                              ![
+                                "image/jpeg",
+                                "image/jpg",
+                                "image/png",
+                                "image/webp",
+                              ].includes(file.type)
+                            ) {
+                              setUploadError(
+                                "Chỉ chấp nhận file ảnh định dạng JPEG, PNG, WEBP"
+                              );
+                              return;
+                            }
+                            if (file.size > 5 * 1024 * 1024) {
+                              setUploadError(
+                                "Kích thước ảnh không được vượt quá 5MB"
+                              );
+                              return;
+                            }
+
+                            // Convert to base64
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const currentImages =
+                                getValues(`roomTypes.${idx}.images`) || [];
+                              setValue(`roomTypes.${idx}.images`, [
+                                ...currentImages,
+                                reader.result as string,
+                              ]);
+                            };
+                            reader.readAsDataURL(file);
+                          };
+                          input.click();
+                        }}
                       >
-                        <ImageIcon className="h-5 w-5 text-accent" />
+                        <div className="flex flex-col items-center gap-1">
+                          <ImageIcon className="h-5 w-5 text-accent" />
+                          <span className="text-xs text-muted-foreground">
+                            Thêm ảnh
+                          </span>
+                        </div>
                       </DottedBox>
                     ))}
                   </div>
+
+                  {uploadError && (
+                    <p className="text-xs text-red-500 mt-2">{uploadError}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>

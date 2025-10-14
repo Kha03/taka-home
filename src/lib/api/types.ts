@@ -51,11 +51,15 @@ export enum PropertyTypeEnum {
   BOARDING = "BOARDING",
 }
 export interface PropertyRoom {
+  id?: string;
   name: string;
   floor: number;
+  roomType?: PropertyRoomType; // Nested roomType info from backend
+  isVisible?: boolean;
 }
 
 export interface PropertyRoomType {
+  id?: string; // Added for response from backend after creation
   name: string;
   description?: string;
   bedrooms: number;

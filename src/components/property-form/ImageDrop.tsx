@@ -22,23 +22,38 @@ export function ImageDrop({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validate file type
+    const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      onError?.("Chỉ chấp nhận file ảnh định dạng JPEG, PNG, WEBP");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      onError?.("Kích thước ảnh không được vượt quá 5MB");
+      return;
+    }
+
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await response.json();
-
-      if (result.success) onPick(result.data.url);
-      else onError?.(result.message || "Có lỗi xảy ra khi upload ảnh");
+      // Convert file to base64 for temporary storage
+      // Images will be uploaded later after property creation
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        onPick(base64String);
+        setIsUploading(false);
+      };
+      reader.onerror = () => {
+        onError?.("Có lỗi xảy ra khi đọc file ảnh");
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
     } catch (error) {
-      console.error("Upload error:", error);
-      onError?.("Có lỗi xảy ra khi upload ảnh");
-    } finally {
+      console.error("File reading error:", error);
+      onError?.("Có lỗi xảy ra khi xử lý ảnh");
       setIsUploading(false);
     }
   };

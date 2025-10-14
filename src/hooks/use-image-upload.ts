@@ -23,26 +23,49 @@ export function useImageUpload() {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result: UploadResponse = await response.json();
-
-      if (!result.success) {
-        setError(result.message);
+      // Validate file type
+      const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      if (!validTypes.includes(file.type)) {
+        const errorMsg = "Chỉ chấp nhận file ảnh định dạng JPEG, PNG, WEBP";
+        setError(errorMsg);
         return null;
       }
 
-      return result;
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        const errorMsg = "Kích thước ảnh không được vượt quá 5MB";
+        setError(errorMsg);
+        return null;
+      }
+
+      // Convert file to base64 for temporary storage
+      // Images will be uploaded later after property creation
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          resolve({
+            success: true,
+            message: "File processed successfully",
+            data: {
+              url: base64String,
+              fileName: file.name,
+              originalName: file.name,
+              size: file.size,
+              type: file.type,
+            },
+          });
+        };
+        reader.onerror = () => {
+          reject(new Error("Có lỗi xảy ra khi đọc file ảnh"));
+        };
+        reader.readAsDataURL(file);
+      });
     } catch (err) {
-      const errorMessage = "Có lỗi xảy ra khi upload ảnh";
+      const errorMessage = "Có lỗi xảy ra khi xử lý ảnh";
       setError(errorMessage);
-      console.error("Upload error:", err);
+      console.error("File processing error:", err);
       return null;
     } finally {
       setIsUploading(false);
