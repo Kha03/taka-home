@@ -18,27 +18,6 @@ export {
   VietnamAddressService,
 } from "./services/vietnam-address";
 
-// ========== Hooks ==========
-// Property hooks
-// export {
-//   useProperties,
-//   useProperty,
-//   useMyProperties,
-//   useCreateProperty,
-//   useUpdateProperty,
-//   useDeleteProperty,
-//   useSimilarProperties,
-// } from "./hooks/use-property";
-
-// Address hooks
-// export {
-//   useProvinces,
-//   useDistricts,
-//   useWards,
-//   useVietnameseAddress,
-// } from "./hooks/use-address";
-
-// ========== Utils & Helpers ==========
 
 /**
  * Helper function để handle API errors một cách consistent

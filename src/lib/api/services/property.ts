@@ -6,9 +6,9 @@
 import { apiClient } from "../client";
 import type {
   ApiResponse,
+  FilterPropertyQuery,
   Property,
   PropertyCreateRequest,
-  PropertySearchParams,
 } from "../types";
 
 export class PropertyService {
@@ -27,10 +27,10 @@ export class PropertyService {
    * Lấy danh sách properties với phân trang và filter
    */
   async getProperties(
-    params?: PropertySearchParams
+    params?: FilterPropertyQuery
   ): Promise<ApiResponse<Property[]>> {
     return await apiClient.get<Property[]>(
-      this.basePath,
+      `${this.basePath}/filter`,
       params as Record<string, unknown>
     );
   }
@@ -63,7 +63,7 @@ export class PropertyService {
    * Lấy properties của user hiện tại
    */
   async getMyProperties(
-    params?: Omit<PropertySearchParams, "ownerId">
+    params?: Omit<FilterPropertyQuery, "ownerId">
   ): Promise<ApiResponse<Property[]>> {
     return await apiClient.get<Property[]>(
       `${this.basePath}/my-properties`,
@@ -92,7 +92,7 @@ export class PropertyService {
   async getPropertiesByLocation(
     province: string,
     ward?: string,
-    params?: Omit<PropertySearchParams, "province" | "ward">
+    params?: Omit<FilterPropertyQuery, "province" | "ward">
   ): Promise<ApiResponse<Property[]>> {
     const searchParams = {
       ...params,
@@ -110,7 +110,7 @@ export class PropertyService {
    */
   async searchProperties(
     query: string,
-    params?: Omit<PropertySearchParams, "q">
+    params?: Omit<FilterPropertyQuery, "q">
   ): Promise<ApiResponse<Property[]>> {
     const searchParams = {
       ...params,

@@ -16,6 +16,7 @@ interface PropertyListCardProps {
   timePosted?: string;
   isNew?: boolean;
   isFeatured?: boolean;
+  roomType?: string; // Tên loại phòng cho BOARDING
 }
 
 export function PropertyListCard({
@@ -27,15 +28,16 @@ export function PropertyListCard({
   bathrooms,
   area,
   imageUrl,
-  timePosted = "Cập nhật 12 giờ trước",
+  timePosted,
+  roomType,
 }: PropertyListCardProps) {
   return (
     <Link href={`/properties/${id}`}>
       <Card className="p-3 group border-none overflow-hidden bg-transparent shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer rounded-[12px] hover:bg-secondary/10">
         <CardContent className="p-0">
-          <div className="flex gap-4">
+          <div className="flex gap-4 min-h-[160px] items-center">
             {/* Image */}
-            <div className="relative w-[216px] flex-shrink-0 overflow-hidden rounded-[8px]">
+            <div className="relative w-[216px] h-[160px] flex-shrink-0 overflow-hidden rounded-[8px]">
               <Image
                 src={imageUrl}
                 alt={title}
@@ -46,35 +48,51 @@ export function PropertyListCard({
             </div>
 
             {/* Content */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-w-0">
               <h3 className="font-bold text-primary text-lg line-clamp-1">
                 {title}
               </h3>
+              {roomType && (
+                <p className="text-xs font-semibold text-accent mt-1 truncate">
+                  {roomType}
+                </p>
+              )}
 
-              <div className="flex items-center justify-between mt-4">
-                <PropertyDetails
-                  bedrooms={bedrooms}
-                  bathrooms={bathrooms}
-                  area={area}
-                />
-                <p className=" font-extrabold text-secondary">{price}</p>
+              <div className="flex items-center justify-between mt-2 gap-2">
+                <div className="flex-shrink-0">
+                  <PropertyDetails
+                    bedrooms={bedrooms}
+                    bathrooms={bathrooms}
+                    area={area}
+                  />
+                </div>
+                <p className="font-extrabold text-secondary whitespace-nowrap flex-shrink-0">
+                  {price}
+                </p>
               </div>
               <div className="mt-2">
-                <p className="text-sm text-[#4f4f4f] flex items-center gap-1 font-medium">
-                  <div className="w-6 h-6 flex items-center justify-center bg-[#E5E5E5] rounded-full">
+                <div className="text-sm text-[#4f4f4f] flex items-center gap-1 font-medium">
+                  <div className="w-6 h-6 flex items-center justify-center bg-[#E5E5E5] rounded-full flex-shrink-0">
                     <Clock size={12} className="flex-shrink-0" />
                   </div>
-                  {timePosted}
-                </p>
+                  <span className="truncate">
+                    {timePosted
+                      ? new Date(timePosted).toLocaleDateString("vi-VN", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })
+                      : "Cập nhật gần đây"}
+                  </span>
+                </div>
               </div>
               <div className="mt-2">
-                <p className="text-sm text-[#4f4f4f] flex items-center gap-1 line-clamp-2 font-medium">
-                  <div className="w-6 h-6 flex items-center justify-center bg-[#E5E5E5] rounded-full">
+                <div className="text-sm text-[#4f4f4f] flex items-center gap-1 font-medium">
+                  <div className="w-6 h-6 flex items-center justify-center bg-[#E5E5E5] rounded-full flex-shrink-0">
                     <MapPin size={12} className="flex-shrink-0" />
                   </div>
-
-                  {location}
-                </p>
+                  <span className="line-clamp-2 break-words">{location}</span>
+                </div>
               </div>
             </div>
           </div>

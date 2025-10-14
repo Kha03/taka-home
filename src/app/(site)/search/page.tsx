@@ -9,12 +9,36 @@ import { Suspense } from "react";
 
 function SearchContent() {
   const searchParams = useSearchParams();
-  const location = searchParams.get("loc") || "Tp Hồ Chí Minh";
-  const category = searchParams.get("cat") || "Nhà ở";
+  const query = searchParams.get("q");
+  const type = searchParams.get("type");
+  const province = searchParams.get("province");
+
+  // Generate breadcrumb label based on search params
+  const generateBreadcrumbLabel = () => {
+    const parts: string[] = ["Tìm kiếm"];
+
+    if (type === "APARTMENT") {
+      parts.push("Nhà ở/Chung cư");
+    } else if (type === "BOARDING") {
+      parts.push("Phòng trọ");
+    } else {
+      parts.push("Bất động sản");
+    }
+
+    if (province) {
+      parts.push(`tại ${province}`);
+    }
+
+    if (query) {
+      parts.push(`"${query}"`);
+    }
+
+    return parts.join(" ");
+  };
 
   const breadcrumbItems = [
     {
-      label: `Mua bán ${category} ở ${location}`,
+      label: generateBreadcrumbLabel(),
       current: true,
     },
   ];
@@ -22,7 +46,7 @@ function SearchContent() {
   return (
     <div className="min-h-screen bg-[#FFF7E9]">
       {/* Header with Search */}
-      <div className="max-w-6xl  mx-auto py-4">
+      <div className="max-w-6xl mx-auto py-4">
         <div className="w-full">
           <HeroSearch />
         </div>
@@ -32,7 +56,7 @@ function SearchContent() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto  px-4">
+      <div className="max-w-7xl mx-auto px-4 pb-10">
         <div className="grid grid-cols-12 gap-2">
           {/* Results - Left/Top on mobile */}
           <div className="col-span-12 lg:col-span-9 order-2 lg:order-1">

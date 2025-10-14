@@ -17,6 +17,7 @@ import { CircleAlert, ImageIcon, Info, Play, X } from "lucide-react";
 // Import Property Service
 import { propertyService } from "@/lib/api";
 import type { PropertyCreateRequest, PropertyRoom } from "@/lib/api/types";
+import { PropertyTypeEnum } from "@/lib/api/types";
 
 import { DottedBox } from "@/components/property-form/DottedBox";
 import { ImageDrop } from "@/components/property-form/ImageDrop";
@@ -34,7 +35,7 @@ export default function NewPropertyPage() {
   const methods = useForm<NewPropertyForm>({
     resolver: zodResolver(FormSchema) as any,
     defaultValues: {
-      kind: "apartment",
+      kind: "APARTMENT",
       gallery: [],
       floors: [],
       electricityPrice: 0,
@@ -78,7 +79,10 @@ export default function NewPropertyPage() {
     const baseData: PropertyCreateRequest = {
       title: formData.title.trim(),
       description: formData.description?.trim() || undefined,
-      type: formData.kind === "apartment" ? "APARTMENT" : "BOARDING",
+      type:
+        formData.kind === "APARTMENT"
+          ? PropertyTypeEnum.APARTMENT
+          : PropertyTypeEnum.BOARDING,
       province: formData.province,
       ward: formData.ward,
       address: formData.street.trim(),
@@ -87,7 +91,7 @@ export default function NewPropertyPage() {
     };
 
     // For apartment - add apartment-specific fields
-    if (formData.kind === "apartment") {
+    if (formData.kind === "APARTMENT") {
       return {
         ...baseData,
         unit: formData.unit?.trim() || undefined,
@@ -101,7 +105,7 @@ export default function NewPropertyPage() {
     }
 
     // For boarding house - add boarding-specific fields
-    if (formData.kind === "boarding") {
+    if (formData.kind === "BOARDING") {
       // Convert floors structure to rooms array
       const allRooms =
         formData.floors?.flatMap((floor, floorIndex) =>
@@ -163,16 +167,19 @@ export default function NewPropertyPage() {
   };
 
   const onSubmit = async (values: NewPropertyForm) => {
+    console.log("=== FORM SUBMITTED ===");
+    console.log("Form values:", values);
+    console.log("Form errors:", methods.formState.errors);
+
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
       // Convert form data to API format
       const apiData = convertFormToApiData(values);
-
+      console.log("API data to be sent:", apiData);
       // Call Property Service API
       const response = await propertyService.createProperty(apiData);
-
       // Check if response is successful
       if (response && (response.code === 200 || response.code === 201)) {
         const successMessage = response.message || "Đăng tin thành công!";
@@ -234,7 +241,11 @@ export default function NewPropertyPage() {
           <Stepper step={1} />
 
           <form
-            onSubmit={methods.handleSubmit(onSubmit as any)}
+            onSubmit={methods.handleSubmit(onSubmit as any, (errors) => {
+              console.log("=== VALIDATION ERRORS ===");
+              console.log("Validation failed with errors:", errors);
+              console.log("Form values at error:", methods.getValues());
+            })}
             className="space-y-6"
           >
             <div className="bg-primary-foreground rounded-xl shadow-lg border border-border/50 overflow-hidden backdrop-blur-sm">
@@ -271,16 +282,16 @@ export default function NewPropertyPage() {
                         className="flex gap-8"
                       >
                         <div className="flex items-center gap-2">
-                          <RadioGroupItem value="apartment" id="kind-apart" />
+                          <RadioGroupItem value="APARTMENT" id="kind-apart" />
                           <Label
                             htmlFor="kind-apart"
                             className="text-[#4F4F4F]"
                           >
-                            Căn hộ/Chung cư
+                            Nhà ở/Chung cư
                           </Label>
                         </div>
                         <div className="flex items-center gap-2">
-                          <RadioGroupItem value="boarding" id="kind-board" />
+                          <RadioGroupItem value="BOARDING" id="kind-board" />
                           <Label
                             htmlFor="kind-board"
                             className="text-[#4F4F4F]"
@@ -307,7 +318,7 @@ export default function NewPropertyPage() {
                         placeholder="Giấy tờ pháp lý"
                       />
                     </div>
-                    {kind === "apartment" ? (
+                    {kind === "APARTMENT" ? (
                       <>
                         <Label className="mb-2 text-[#4F4F4F] flex items-center gap-1 font-semibold">
                           Vị trí
@@ -404,7 +415,7 @@ export default function NewPropertyPage() {
                 <hr className="border-border" />
 
                 {/* Thông tin chi tiết + Diện tích & Giá */}
-                {kind === "apartment" ? (
+                {kind === "APARTMENT" ? (
                   <div className="grid gap-6 lg:grid-cols-3">
                     <div className="space-y-4 lg:col-span-2">
                       <div className="flex items-center gap-2.5 mb-2">

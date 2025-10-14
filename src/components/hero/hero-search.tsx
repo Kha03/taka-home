@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
@@ -7,21 +8,36 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useVietnameseAddress } from "@/hooks/use-vietnamese-address";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PropertyTypeEnum } from "@/lib/api/types";
+
+// Mapping PropertyTypeEnum sang tiếng Việt
+const propertyTypeLabels: Record<PropertyTypeEnum, string> = {
+  [PropertyTypeEnum.APARTMENT]: "Nhà ở/Chung cư",
+  [PropertyTypeEnum.BOARDING]: "Nhà trọ",
+};
 
 export function HeroSearch() {
+  const { provinces } = useVietnameseAddress();
   const router = useRouter();
+  const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<PropertyTypeEnum | "">("");
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         const form = new FormData(e.currentTarget as HTMLFormElement);
-        router.push(
-          `/search?kw=${form.get("kw")}&cat=${form.get("cat")}&loc=${form.get(
-            "loc"
-          )}`
-        );
+        const keyword = form.get("kw") || "";
+        const params = new URLSearchParams();
+        if (keyword) params.set("q", keyword.toString());
+        if (selectedType) params.set("type", selectedType);
+        if (selectedProvince) params.set("province", selectedProvince);
+        router.push(`/search?${params.toString()}`);
       }}
       className="mx-auto flex w-full items-center gap-2 rounded-[12px] bg-background p-3.5 shadow-md"
     >
@@ -34,14 +50,14 @@ export function HeroSearch() {
         className="placeholder:text-primary placeholder:font-bold text-primary font-medium"
         style={{ boxShadow: "none", border: "none" }}
       />
-      <Popover>
+      <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
         <PopoverTrigger asChild>
           <Button
             type="button"
             variant="ghost"
-            className="rounded-none  border-l border-gray-200 bg-transparent  pl-4 pr-[200px] py-2 hover:bg-primary/5 font-bold text-primary"
+            className=" w-70 rounded-none  border-l border-gray-200 bg-transparent  pl-4  py-2 hover:bg-primary/5 font-bold text-primary"
           >
-            Danh mục
+            {selectedType ? propertyTypeLabels[selectedType] : "Danh mục"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0">
@@ -49,25 +65,41 @@ export function HeroSearch() {
             <CommandList>
               <CommandItem
                 onSelect={() => {
-                  /* set value */
+                  setSelectedType("");
+                  setCategoryOpen(false);
                 }}
               >
-                Nhà ở
+                Tất cả
               </CommandItem>
-              <CommandItem>Căn hộ/Chung cư</CommandItem>
+              <CommandItem
+                onSelect={() => {
+                  setSelectedType(PropertyTypeEnum.APARTMENT);
+                  setCategoryOpen(false);
+                }}
+              >
+                {propertyTypeLabels[PropertyTypeEnum.APARTMENT]}
+              </CommandItem>
+              <CommandItem
+                onSelect={() => {
+                  setSelectedType(PropertyTypeEnum.BOARDING);
+                  setCategoryOpen(false);
+                }}
+              >
+                {propertyTypeLabels[PropertyTypeEnum.BOARDING]}
+              </CommandItem>
             </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
 
-      <Popover>
+      <Popover open={locationOpen} onOpenChange={setLocationOpen}>
         <PopoverTrigger asChild>
           <Button
             type="button"
             variant="ghost"
-            className="rounded-none  border-l border-gray-200 bg-transparent pl-4 pr-[200px] py-2 hover:bg-primary/5 font-bold text-primary"
+            className="w-70 rounded-none  border-l border-gray-200 bg-transparent pl-4  py-2 hover:bg-primary/5 font-bold text-primary"
           >
-            Toàn quốc
+            {selectedProvince || "Toàn quốc"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0">
@@ -75,13 +107,23 @@ export function HeroSearch() {
             <CommandList>
               <CommandItem
                 onSelect={() => {
-                  /* set value */
+                  setSelectedProvince("");
+                  setLocationOpen(false);
                 }}
               >
-                Hà Nội
+                Toàn quốc
               </CommandItem>
-              <CommandItem>Hồ Chí Minh</CommandItem>
-              <CommandItem>Đà Nẵng</CommandItem>
+              {provinces.map((province) => (
+                <CommandItem
+                  key={province.code}
+                  onSelect={() => {
+                    setSelectedProvince(province.name);
+                    setLocationOpen(false);
+                  }}
+                >
+                  {province.name}
+                </CommandItem>
+              ))}
             </CommandList>
           </Command>
         </PopoverContent>

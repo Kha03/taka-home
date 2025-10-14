@@ -11,7 +11,16 @@ const nextConfig: NextConfig = {
     // Enable image optimization
     formats: ["image/webp", "image/avif"],
     // Add domains if using external images
-    domains: [],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**", // Allow all HTTPS hostnames
+      },
+      {
+        protocol: "http",
+        hostname: "localhost", // Allow localhost for development
+      },
+    ],
     // Optimize image loading
     minimumCacheTTL: 60,
   },

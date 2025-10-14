@@ -31,7 +31,7 @@ export const VALIDATION_MESSAGES = {
   },
 };
 
-export const ListingKind = z.enum(["apartment", "boarding"], {
+export const ListingKind = z.enum(["APARTMENT", "BOARDING"], {
   error: BASE_REQUIRED,
 });
 
@@ -48,52 +48,71 @@ export const RoomTypeSchema = z.object({
   images: z.array(z.string()).max(8).default([]),
 });
 
-export const FormSchema = z.object({
-  title: z
-    .string()
-    .min(1, VALIDATION_MESSAGES.title.min)
-    .max(100, VALIDATION_MESSAGES.title.max),
-  kind: ListingKind,
-  province: z.string().min(1, VALIDATION_MESSAGES.address.province),
-  ward: z.string().min(1, VALIDATION_MESSAGES.address.ward),
-  street: z.string().min(1, VALIDATION_MESSAGES.address.street),
+export const FormSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, VALIDATION_MESSAGES.title.min)
+      .max(100, VALIDATION_MESSAGES.title.max),
+    kind: ListingKind,
+    province: z.string().min(1, VALIDATION_MESSAGES.address.province),
+    ward: z.string().min(1, VALIDATION_MESSAGES.address.ward),
+    street: z.string().min(1, VALIDATION_MESSAGES.address.street),
 
-  // Apartment
-  block: z.string().optional(),
-  floor: z.string().optional(),
-  unit: z.string().optional(),
+    // Apartment
+    block: z.string().optional(),
+    floor: z.string().optional(),
+    unit: z.string().optional(),
 
-  // Boarding
-  floors: z
-    .array(
-      z.object({
-        name: z.string(),
-        rooms: z.array(z.string()),
-      })
-    )
-    .default([]),
-  electricityPrice: z.coerce.number().min(0).optional(),
-  waterPrice: z.coerce.number().min(0).optional(),
+    // Boarding
+    floors: z
+      .array(
+        z.object({
+          name: z.string(),
+          rooms: z.array(z.string()),
+        })
+      )
+      .default([]),
+    electricityPrice: z.coerce.number().min(0).optional(),
+    waterPrice: z.coerce.number().min(0).optional(),
 
-  description: z
-    .string()
-    .max(1500, VALIDATION_MESSAGES.description.max)
-    .optional(),
+    description: z
+      .string()
+      .max(1500, VALIDATION_MESSAGES.description.max)
+      .optional(),
 
-  // Details
-  bedrooms: z.coerce.number().min(0).optional(),
-  bathrooms: z.coerce.number().min(0).optional(),
-  furnishing: z.string().optional(),
-  legalDoc: z.string().optional(),
-  area: z.coerce.number().min(0.1, VALIDATION_MESSAGES.area.min),
-  price: z.coerce.number().min(0, VALIDATION_MESSAGES.price.min),
-  deposit: z.coerce.number().min(0).optional(),
+    // Details
+    bedrooms: z.coerce.number().min(0).optional(),
+    bathrooms: z.coerce.number().min(0).optional(),
+    furnishing: z.string().optional(),
+    legalDoc: z.string().optional(),
+    area: z.coerce.number().optional(),
+    price: z.coerce.number().optional(),
+    deposit: z.coerce.number().min(0).optional(),
 
-  heroImage: z.string().optional(),
-  gallery: z.array(z.string()).max(8).default([]),
+    heroImage: z.string().optional(),
+    gallery: z.array(z.string()).max(8).default([]),
 
-  // Boarding groups
-  roomTypes: z.array(RoomTypeSchema).default([]),
-});
+    // Boarding groups
+    roomTypes: z.array(RoomTypeSchema).default([]),
+  })
+  .refine(
+    (data) => {
+      // If APARTMENT, area and price are required
+      if (data.kind === "APARTMENT") {
+        return (
+          data.area !== undefined &&
+          data.area > 0 &&
+          data.price !== undefined &&
+          data.price >= 0
+        );
+      }
+      return true;
+    },
+    {
+      message: "Diện tích và giá thuê là bắt buộc cho Nhà ở/Chung cư",
+      path: ["area"],
+    }
+  );
 
 export type NewPropertyForm = z.infer<typeof FormSchema>;

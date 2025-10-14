@@ -45,6 +45,11 @@ export interface AddressData {
 }
 
 // ========== Property Types ==========
+
+export enum PropertyTypeEnum {
+  APARTMENT = "APARTMENT",
+  BOARDING = "BOARDING",
+}
 export interface PropertyRoom {
   name: string;
   floor: number;
@@ -72,7 +77,7 @@ export interface PropertyFloor {
 export interface Property {
   id: string;
   title: string;
-  type: "APARTMENT" | "BOARDING";
+  type: PropertyTypeEnum;
 
   // Location
   province: string;
@@ -120,7 +125,7 @@ export interface Property {
 export interface PropertyCreateRequest {
   title: string;
   description?: string;
-  type: "APARTMENT" | "BOARDING";
+  type: PropertyTypeEnum;
   province: string;
   ward: string;
   address: string;
@@ -137,23 +142,26 @@ export interface PropertyUpdateRequest extends Partial<PropertyCreateRequest> {
   id: string;
 }
 
-export interface PropertySearchParams {
-  q?: string; // search query
-  type?: "APARTMENT" | "BOARDING";
-  province?: string;
-  ward?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minArea?: number;
-  maxArea?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  furnishing?: string;
+export interface FilterPropertyQuery {
+  // === khớp tên với FilterPropertyDto ===
+  fromPrice?: number; // Giá từ (VND)
+  toPrice?: number; // Giá đến (VND)
+  bedrooms?: number; // Số phòng ngủ
+  bathrooms?: number; // Số phòng tắm
+  fromArea?: number; // Diện tích từ (m2)
+  toArea?: number; // Diện tích đến (m2)
+  furnishing?: string; // 'Đầy đủ' | 'Cơ bản' | 'Không'
+  isApproved?: boolean; // true/false
+  province?: string; // Tỉnh/thành phố
+  ward?: string; // Phường/xã
+  type?: PropertyTypeEnum; // Loại BĐS
+
+  // === phần FE thêm để phân trang/sort/search tự do ===
+  q?: string;
   page?: number;
   limit?: number;
   sortBy?: "price" | "area" | "createdAt";
   sortOrder?: "asc" | "desc";
-  [key: string]: unknown;
 }
 
 // ========== Chat Types ==========
