@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LandlordAndTenant } from "@/lib/api";
 import { chatService } from "@/lib/api/services/chat";
+import { bookingService } from "@/lib/api/services/booking";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -35,6 +36,8 @@ interface PropertySidebarProps {
   contractCount?: number;
   yearsActive?: number;
   propertyId: string; // ID của property (apartment hoặc boarding)
+  propertyType: "apartment" | "boarding"; // Type của property
+  roomsData?: Array<{ id: string; name: string }>; // Danh sách rooms với ID cho boarding
 }
 
 export function PropertySidebar({
@@ -45,12 +48,15 @@ export function PropertySidebar({
   contractCount = 45,
   yearsActive = 1,
   propertyId,
+  propertyType,
+  roomsData = [],
 }: PropertySidebarProps) {
   const [selectedUnit, setSelectedUnit] = useState<string>("");
   const [reviewText, setReviewText] = useState("");
   const [userRating, setUserRating] = useState<number>(0);
   const [hoveredStar, setHoveredStar] = useState<number>(0);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -96,6 +102,91 @@ export function PropertySidebar({
       toast.error("Lỗi", "Có lỗi xảy ra khi tạo phòng chat. Vui lòng thử lại.");
     } finally {
       setIsCreatingChat(false);
+    }
+  };
+
+  const handleCreateBooking = async () => {
+    // Kiểm tra đăng nhập
+    if (!isAuthenticated || !user) {
+      toast.error(
+        "Vui lòng đăng nhập",
+        "Bạn cần đăng nhập để gửi yêu cầu thuê."
+      );
+      router.push(
+        `/signin?from=${encodeURIComponent(window.location.pathname)}`
+      );
+      return;
+    }
+
+    // Không cho phép tự thuê nhà của mình
+    if (user.id === landlord.id) {
+      toast.error(
+        "Không thể gửi yêu cầu",
+        "Bạn không thể thuê bất động sản của chính mình."
+      );
+      return;
+    }
+
+    // Kiểm tra chọn phòng cho boarding
+    if (propertyType === "boarding") {
+      if (!selectedUnit) {
+        toast.warning(
+          "Vui lòng chọn phòng",
+          "Bạn cần chọn phòng trước khi gửi yêu cầu thuê."
+        );
+        return;
+      }
+    }
+
+    try {
+      setIsCreatingBooking(true);
+
+      // Chuẩn bị data để gửi API
+      let bookingData: { propertyId?: string; roomId?: string };
+
+      if (propertyType === "boarding") {
+        // BOARDING: Tìm roomId từ selectedUnit và chỉ gửi roomId
+        const selectedRoom = roomsData.find(
+          (room) => room.name === selectedUnit
+        );
+        const roomId = selectedRoom?.id;
+
+        if (!roomId) {
+          toast.error("Lỗi", "Không tìm thấy thông tin phòng.");
+          return;
+        }
+
+        bookingData = { roomId };
+      } else {
+        // APARTMENT: Chỉ gửi propertyId
+        bookingData = { propertyId };
+      }
+
+      // Gọi API tạo booking
+      const response = await bookingService.createBooking(bookingData);
+
+      if ((response.code === 201 || response.code === 200) && response.data) {
+        toast.success(
+          "Thành công",
+          "Yêu cầu thuê đã được gửi. Vui lòng chờ chủ nhà xác nhận."
+        );
+
+        // Reset selected unit
+        setSelectedUnit("");
+
+        // Optional: Chuyển hướng đến trang rental requests
+        // router.push("/rental-requests");
+      } else {
+        toast.error("Lỗi", response.message || "Không thể gửi yêu cầu thuê.");
+      }
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      toast.error(
+        "Lỗi",
+        "Có lỗi xảy ra khi gửi yêu cầu thuê. Vui lòng thử lại."
+      );
+    } finally {
+      setIsCreatingBooking(false);
     }
   };
 
@@ -267,9 +358,13 @@ export function PropertySidebar({
               </div>
             )}
 
-            <Button className="w-33 bg-secondary hover:bg-secondary/90">
+            <Button
+              className="w-33 bg-secondary hover:bg-secondary/90"
+              onClick={handleCreateBooking}
+              disabled={isCreatingBooking}
+            >
               <Send className="h-4 w-4 mr-2" />
-              Yêu cầu thuê
+              {isCreatingBooking ? "Đang gửi..." : "Yêu cầu thuê"}
             </Button>
           </div>
         </CardContent>

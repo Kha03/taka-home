@@ -99,7 +99,7 @@ export function PropertyDetailView({
     if (isRoomTypeDetail(property)) {
       // For BOARDING: get visible room names
       return property.rooms
-        .filter((room) => room.isVisible)
+        .filter((room) => !room.isVisible)
         .map((room) => room.name);
     }
     // For APARTMENT: return unit if available
@@ -139,6 +139,21 @@ export function PropertyDetailView({
   };
 
   const propertyId = getPropertyId();
+
+  // Get rooms data with IDs for boarding
+  const getRoomsData = () => {
+    if (isRoomTypeDetail(property)) {
+      return property.rooms
+        .filter((room) => !room.isVisible)
+        .map((room) => ({
+          id: room.id,
+          name: room.name,
+        }));
+    }
+    return [];
+  };
+
+  const roomsData = getRoomsData();
 
   // Tính index bắt đầu của "trang" hiện tại cho strip
   useEffect(() => {
@@ -336,6 +351,8 @@ export function PropertyDetailView({
             units={units}
             unitForApartment={unitForApartment}
             propertyId={propertyId}
+            propertyType={type === "boarding" ? "boarding" : "apartment"}
+            roomsData={roomsData}
           />
         </div>
       </div>
