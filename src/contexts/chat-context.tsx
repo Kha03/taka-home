@@ -241,7 +241,7 @@ export function ChatProvider({
       if (response.code === 200 && response.data) {
         const transformedMessages = response.data.map(transformChatMessage);
         // Reverse the messages array so newest messages appear at the bottom
-        setMessages(transformedMessages.reverse());
+        setMessages(transformedMessages);
         setError(null);
       } else {
         throw new Error(response.message || "Không thể tải tin nhắn");
@@ -316,12 +316,8 @@ export function ChatProvider({
         }
 
         const response = await chatService.startChatForProperty(propertyId);
-        if (
-          response.code === 200 &&
-          response.data &&
-          response.data.length > 0
-        ) {
-          const newChatroom = response.data[0];
+        if (response.code === 200 && response.data) {
+          const newChatroom = response.data;
           const newChat = transformChatroomToChat(newChatroom, currentUserId);
 
           // Add to chat list if not already exists

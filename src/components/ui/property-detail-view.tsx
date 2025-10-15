@@ -128,6 +128,18 @@ export function PropertyDetailView({
 
   const unitForApartment = getUnitForApartment();
 
+  // Get propertyId based on type
+  const getPropertyId = (): string => {
+    if (isRoomTypeDetail(property)) {
+      // For BOARDING: get ID from nested property
+      return property.rooms[0]?.property?.id || "";
+    }
+    // For APARTMENT: get ID directly
+    return property.id || "";
+  };
+
+  const propertyId = getPropertyId();
+
   // Tính index bắt đầu của "trang" hiện tại cho strip
   useEffect(() => {
     if (!carouselApi) return;
@@ -323,6 +335,7 @@ export function PropertyDetailView({
             }
             units={units}
             unitForApartment={unitForApartment}
+            propertyId={propertyId}
           />
         </div>
       </div>

@@ -9,6 +9,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LandlordAndTenant } from "@/lib/api";
+import { chatService } from "@/lib/api/services/chat";
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 interface Review {
   id: number;
@@ -30,6 +34,7 @@ interface PropertySidebarProps {
   propertyCount?: number;
   contractCount?: number;
   yearsActive?: number;
+  propertyId: string; // ID của property (apartment hoặc boarding)
 }
 
 export function PropertySidebar({
@@ -39,11 +44,60 @@ export function PropertySidebar({
   propertyCount = 22,
   contractCount = 45,
   yearsActive = 1,
+  propertyId,
 }: PropertySidebarProps) {
   const [selectedUnit, setSelectedUnit] = useState<string>("");
   const [reviewText, setReviewText] = useState("");
   const [userRating, setUserRating] = useState<number>(0);
   const [hoveredStar, setHoveredStar] = useState<number>(0);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
+
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  const handleStartChat = async () => {
+    // Kiểm tra đăng nhập
+    if (!isAuthenticated || !user) {
+      toast.error(
+        "Vui lòng đăng nhập",
+        "Bạn cần đăng nhập để chat với chủ nhà."
+      );
+      router.push(
+        `/signin?from=${encodeURIComponent(window.location.pathname)}`
+      );
+      return;
+    }
+
+    // Không cho phép chat với chính mình
+    if (user.id === landlord.id) {
+      toast.error("Không thể chat", "Bạn không thể chat với chính mình.");
+      return;
+    }
+
+    try {
+      setIsCreatingChat(true);
+
+      // Gọi API tạo chatroom
+      const response = await chatService.startChatForProperty(propertyId);
+
+      if ((response.code === 201 || response.code === 200) && response.data) {
+        // Lấy chatroom từ response
+        const chatroom = response.data;
+
+        toast.success("Thành công", "Đã tạo phòng chat. Đang chuyển hướng...");
+
+        // Chuyển đến trang chat với chatroomId
+        router.push(`/chat?roomId=${chatroom.id}`);
+      } else {
+        toast.error("Lỗi", response.message || "Không thể tạo phòng chat.");
+      }
+    } catch (error) {
+      console.error("Error creating chat:", error);
+      toast.error("Lỗi", "Có lỗi xảy ra khi tạo phòng chat. Vui lòng thử lại.");
+    } finally {
+      setIsCreatingChat(false);
+    }
+  };
 
   const reviews: Review[] = [
     {
@@ -109,9 +163,13 @@ export function PropertySidebar({
                 </div>
               </div>
             </div>
-            <Button className="bg-secondary hover:bg-secondary/90">
+            <Button
+              className="bg-secondary hover:bg-secondary/90"
+              onClick={handleStartChat}
+              disabled={isCreatingChat}
+            >
               <MessageCircleMore className="h-4 w-4" />
-              Chat ngay
+              {isCreatingChat ? "Đang tạo..." : "Chat ngay"}
             </Button>
           </div>
           <div className="flex items-center gap-2 mb-5 ml-14">

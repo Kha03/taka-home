@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChatProvider, useChat } from "@/contexts/chat-context";
 import { useAuth } from "@/contexts/auth-context";
 import { ChatList, ChatWindow } from "@/components/chat";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 function ChatPageContent() {
   const {
@@ -21,8 +22,23 @@ function ChatPageContent() {
     sendTypingIndicator,
   } = useChat();
   const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const roomId = searchParams.get("roomId");
 
   const [showChatWindow, setShowChatWindow] = useState(false);
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
+
+  // Auto-select chat based on roomId from URL
+  useEffect(() => {
+    if (roomId && chats.length > 0 && !hasAutoSelected) {
+      const chatToSelect = chats.find((chat) => chat.id === roomId);
+      if (chatToSelect) {
+        setActiveChat(chatToSelect);
+        setShowChatWindow(true);
+        setHasAutoSelected(true);
+      }
+    }
+  }, [roomId, chats, hasAutoSelected, setActiveChat]);
 
   if (!user) {
     return (

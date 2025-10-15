@@ -83,8 +83,8 @@ export class ChatService {
    */
   async startChatForProperty(
     propertyId: string
-  ): Promise<ApiResponse<Chatroom[]>> {
-    return apiClient.post<Chatroom[]>(`/chatrooms/property/${propertyId}`);
+  ): Promise<ApiResponse<Chatroom>> {
+    return apiClient.post<Chatroom>(`/chatrooms/property/${propertyId}`);
   }
 
   /**
