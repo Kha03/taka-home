@@ -92,9 +92,8 @@ export function RoomTypes() {
                       placeholder="VND"
                       required
                     />
+                    <DepositField roomIndex={idx} />
                   </div>
-
-                  <DepositField roomIndex={idx} />
 
                   <div>
                     <Label className="mb-2 block">

@@ -9,6 +9,7 @@ import type {
   FilterPropertyQuery,
   Property,
   PropertyCreateRequest,
+  RoomTypeDetail,
 } from "../types";
 
 export class PropertyService {
@@ -109,6 +110,15 @@ export class PropertyService {
     return await apiClient.post<Property>(
       `${this.basePath}/${propertyId}/images`,
       formData
+    );
+  }
+
+  /**
+   * Lấy chi tiết RoomType theo ID (cho BOARDING)
+   */
+  async getRoomTypeById(id: string): Promise<ApiResponse<RoomTypeDetail>> {
+    return await apiClient.get<RoomTypeDetail>(
+      `${this.basePath}/roomtype/${id}`
     );
   }
 }

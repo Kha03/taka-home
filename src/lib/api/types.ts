@@ -72,6 +72,70 @@ export interface PropertyRoomType {
   images?: string[];
   rooms?: PropertyRoom[]; // Rooms nested inside roomTypes
 }
+export interface LandlordAndTenant {
+  id: string;
+  email: string;
+  phone: string;
+  fullName: string;
+  isVerified: boolean;
+  avatarUrl: string | null;
+  status: string;
+  CCCD: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+// RoomType Detail Response (for BOARDING detail page)
+export interface RoomTypeDetail {
+  id: string;
+  name: string;
+  bedrooms: number;
+  bathrooms: number;
+  area: string;
+  price: string;
+  deposit: string;
+  furnishing: string;
+  images: string[];
+  description: string;
+  heroImage: string | null;
+  createdAt: string;
+  updatedAt: string;
+  rooms: Array<{
+    id: string;
+    name: string;
+    property: {
+      id: string;
+      title: string;
+      description: string;
+      type: string;
+      province: string;
+      ward: string;
+      address: string;
+      block: string | null;
+      furnishing: string | null;
+      legalDoc: string | null;
+      price: string | null;
+      deposit: string | null;
+      electricityPricePerKwh: string;
+      waterPricePerM3: string;
+      area: string | null;
+      bedrooms: number | null;
+      bathrooms: number | null;
+      mapLocation: string;
+      isVisible: boolean;
+      isApproved: boolean;
+      heroImage: string | null;
+      landlord: LandlordAndTenant;
+      images: string[] | null;
+      unit: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+    isVisible: boolean;
+    floor: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+}
 
 export interface PropertyFloor {
   name: string;
@@ -91,7 +155,7 @@ export interface Property {
 
   // Apartment specific
   block?: string;
-  floor?: string;
+  floor?: number;
   unit?: string;
 
   // Boarding specific
@@ -101,7 +165,7 @@ export interface Property {
   waterPricePerM3?: number;
 
   description?: string;
-
+  landlord?: LandlordAndTenant;
   // Details
   bedrooms?: number;
   bathrooms?: number;

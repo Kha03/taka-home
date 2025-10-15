@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,56 +9,124 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  MapPin,
-  MessageCircle,
-  Phone,
-} from "lucide-react";
+import type { Property, RoomTypeDetail } from "@/lib/api/types";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { PropertySidebar } from "../property-detail/PropertySidebar";
-import { PropertyMainContent } from "../property-detail/PropertyMainContent";
-import { PropertyDescription } from "../property-detail/PropertyDescription";
 import MapLocation from "../property-detail/MapLocation";
-
-interface PropertyAgent {
-  name: string;
-  phone: string;
-  avatar: string;
-}
-
-interface Property {
-  id: string;
-  title: string;
-  price: string;
-  location: string;
-  area: string;
-  bedrooms: number;
-  bathrooms: number;
-  type: string;
-  images: string[];
-  description: string;
-  features: string[];
-  agent: PropertyAgent;
-}
+import { PropertyDescription } from "../property-detail/PropertyDescription";
+import { PropertyMainContent } from "../property-detail/PropertyMainContent";
+import { PropertySidebar } from "../property-detail/PropertySidebar";
 
 interface PropertyDetailViewProps {
-  property: Property;
+  property: Property | RoomTypeDetail;
+  type: string;
 }
 
-export function PropertyDetailView({ property }: PropertyDetailViewProps) {
+export function PropertyDetailView({
+  property,
+  type,
+}: PropertyDetailViewProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
 
   const thumbnailsPerView = 4;
 
-  const hasImages = property.images && property.images.length > 0;
-  const images = hasImages
-    ? property.images
-    : ["/assets/imgs/property-placeholder.svg"];
+  // Helper function to check if property is RoomTypeDetail
+  const isRoomTypeDetail = (
+    prop: Property | RoomTypeDetail
+  ): prop is RoomTypeDetail => {
+    return (
+      "rooms" in prop && Array.isArray(prop.rooms) && prop.rooms.length > 0
+    );
+  };
+
+  // Get images based on type
+  const getImages = (): string[] => {
+    if (isRoomTypeDetail(property)) {
+      // For BOARDING: use heroImage + images array
+      const imgs: string[] = [];
+      if (property.heroImage) imgs.push(property.heroImage);
+      if (property.images) imgs.push(...property.images);
+      return imgs.length > 0 ? imgs : ["/assets/imgs/property-placeholder.svg"];
+    } else {
+      // For APARTMENT: use heroImage + gallery
+      const imgs: string[] = [];
+      if (property.heroImage) imgs.push(property.heroImage);
+      if (property.gallery) imgs.push(...property.gallery);
+      return imgs.length > 0 ? imgs : ["/assets/imgs/property-placeholder.svg"];
+    }
+  };
+
+  // Get title based on type
+  const getTitle = (): string => {
+    if (isRoomTypeDetail(property)) {
+      return property.rooms[0]?.property?.title || "Chi tiết phòng trọ";
+    }
+    return property.title || "Chi tiết bất động sản";
+  };
+
+  const images = getImages();
+  const title = getTitle();
+
+  // Get landlord data based on type
+  const getLandlord = () => {
+    if (isRoomTypeDetail(property)) {
+      // For BOARDING: landlord is in nested property
+      return property.rooms[0]?.property?.landlord;
+    }
+    // For APARTMENT: landlord would be in property.landlord (if exists)
+    if (property.hasOwnProperty("landlord")) {
+      return (property as Property).landlord;
+    }
+    // Currently Property type doesn't have landlord field, return default
+    return {
+      id: "default",
+      fullName: "Chủ nhà",
+      phone: "0987654321",
+      email: "landlord@example.com",
+      avatarUrl: null,
+      isVerified: false,
+      status: "active",
+      CCCD: null,
+      createdAt: "",
+      updatedAt: "",
+    };
+  };
+
+  // Get available units/rooms
+  const getUnits = (): string[] => {
+    if (isRoomTypeDetail(property)) {
+      // For BOARDING: get visible room names
+      return property.rooms
+        .filter((room) => room.isVisible)
+        .map((room) => room.name);
+    }
+    // For APARTMENT: return unit if available
+    const apartmentProperty = property as Property;
+    if (apartmentProperty.unit) {
+      return [apartmentProperty.unit];
+    }
+    return ["A101", "A102", "A103"]; // Default mock data
+  };
+
+  const landlord = getLandlord();
+  const units = getUnits();
+
+  // Get unit info for APARTMENT
+  const getUnitForApartment = () => {
+    if (!isRoomTypeDetail(property)) {
+      const apartmentProperty = property as Property;
+      return {
+        unit: apartmentProperty.unit || "",
+        floor: apartmentProperty.floor || 0,
+        block: apartmentProperty.block || "",
+      };
+    }
+    return undefined;
+  };
+
+  const unitForApartment = getUnitForApartment();
 
   // Tính index bắt đầu của "trang" hiện tại cho strip
   useEffect(() => {
@@ -129,7 +196,7 @@ export function PropertyDetailView({ property }: PropertyDetailViewProps) {
             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden">
               <img
                 src={images[currentImageIndex]}
-                alt={property.title}
+                alt={title}
                 className="w-full h-full object-cover"
               />
 
@@ -192,7 +259,7 @@ export function PropertyDetailView({ property }: PropertyDetailViewProps) {
                       >
                         <img
                           src={image}
-                          alt={`${property.title} ${index + 1}`}
+                          alt={`${title} ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
                       </button>
@@ -224,9 +291,15 @@ export function PropertyDetailView({ property }: PropertyDetailViewProps) {
           </Card>
 
           {/* Property Information */}
-          <PropertyMainContent />
+          <PropertyMainContent property={property} type={type} />
           {/* Property Description */}
-          <PropertyDescription />
+          <PropertyDescription
+            description={
+              isRoomTypeDetail(property)
+                ? property.rooms[0]?.property?.description || ""
+                : property.description || ""
+            }
+          />
           {/* Map Location */}
           <MapLocation />
         </div>
@@ -234,76 +307,22 @@ export function PropertyDetailView({ property }: PropertyDetailViewProps) {
         {/* Right Column - Agent and Actions */}
         <div className="space-y-6">
           <PropertySidebar
-            units={[
-              "A101",
-              "A102",
-              "A103",
-              "A104",
-              "A105",
-              "A106",
-              "A107",
-              "A108",
-              "A109",
-              "A110",
-              "A111",
-              "A112",
-            ]}
-            reviews={[
-              {
-                id: 1,
-                name: "Nguyễn Thị Người Thuê",
-                avatar: "/vietnamese-woman-profile.jpg",
-                rating: 5,
-                time: "Vừa xong",
-                content:
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-              },
-              {
-                id: 2,
-                name: "Nguyễn Thị Người Thuê",
-                avatar: "/vietnamese-woman-profile.jpg",
-                rating: 5,
-                time: "Vừa xong",
-                content:
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-              },
-              {
-                id: 3,
-                name: "Nguyễn Thị Người Thuê",
-                avatar: "/vietnamese-woman-profile.jpg",
-                rating: 5,
-                time: "Vừa xong",
-                content:
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-              },
-              {
-                id: 33,
-                name: "Nguyễn Thị Người Thuê",
-                avatar: "/vietnamese-woman-profile.jpg",
-                rating: 5,
-                time: "Vừa xong",
-                content:
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-              },
-              {
-                id: 3131,
-                name: "Nguyễn Thị Người Thuê",
-                avatar: "/vietnamese-woman-profile.jpg",
-                rating: 5,
-                time: "Vừa xong",
-                content:
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-              },
-              {
-                id: 1313,
-                name: "Nguyễn Thị Người Thuê",
-                avatar: "/vietnamese-woman-profile.jpg",
-                rating: 5,
-                time: "Vừa xong",
-                content:
-                  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-              },
-            ]}
+            landlord={
+              landlord ?? {
+                id: "default",
+                fullName: "Chủ nhà",
+                phone: "0987654321",
+                email: "landlord@example.com",
+                avatarUrl: null,
+                isVerified: false,
+                status: "active",
+                CCCD: null,
+                createdAt: "",
+                updatedAt: "",
+              }
+            }
+            units={units}
+            unitForApartment={unitForApartment}
           />
         </div>
       </div>

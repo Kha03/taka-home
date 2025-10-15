@@ -7,6 +7,7 @@ import {
   AuthProvider,
   SocketProvider,
 } from "@/components/providers";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -31,7 +32,10 @@ export default function RootLayout({
       >
         <AuthProvider>
           <SocketProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster />
+            </ThemeProvider>
           </SocketProvider>
         </AuthProvider>
       </body>

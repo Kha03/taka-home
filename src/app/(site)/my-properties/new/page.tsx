@@ -30,6 +30,7 @@ import { DepositField } from "@/components/property-form/form/DepositField";
 import { Field } from "@/components/property-form/form/Field";
 import { SelectField } from "@/components/property-form/form/SelectField";
 import { FormSchema, NewPropertyForm } from "@/schema/schema";
+import { toast } from "@/hooks/use-toast";
 
 export default function NewPropertyPage() {
   const router = useRouter();
@@ -130,6 +131,8 @@ export default function NewPropertyPage() {
       return {
         ...baseData,
         unit: formData.unit?.trim() || undefined,
+        block: formData.block?.trim() || undefined,
+        floor: formData.floor ? Number(formData.floor) : undefined,
         bedrooms: toSafeNumber(formData.bedrooms),
         bathrooms: toSafeNumber(formData.bathrooms),
         area: toSafeNumber(formData.area),
@@ -183,7 +186,6 @@ export default function NewPropertyPage() {
               price: toSafeNumber(roomType.price),
               deposit: toSafeNumber(roomType.deposit),
               furnishing: "Cơ bản", // Default furnishing
-              // ❌ DO NOT send images here - will upload after property creation
               heroImage: undefined,
               images: [],
               rooms: assignedRooms, // Rooms nested inside roomType
@@ -302,24 +304,26 @@ export default function NewPropertyPage() {
         } catch {
           // Don't fail the whole process if image upload fails
           // Just show a warning
-          alert(
+          toast.warning(
+            "Lỗi tải ảnh",
             "Bất động sản đã được tạo thành công, nhưng có lỗi khi tải ảnh lên. Bạn có thể tải ảnh lên sau."
           );
         }
 
         const successMessage = response.message || "Đăng tin thành công!";
 
-        // Show success confirmation
-        if (
-          window.confirm(
-            `${successMessage}\n\nBạn có muốn xem danh sách bất động sản của mình không?`
-          )
-        ) {
-          router.push("/my-properties");
-        } else {
-          // Reset form for creating another property
-          methods.reset();
-        }
+        // Show success confirmation with toast
+        toast.confirm(
+          successMessage,
+          "Bạn có muốn xem danh sách bất động sản của mình không?",
+          () => {
+            router.push("/my-properties");
+          },
+          () => {
+            // Reset form for creating another property
+            methods.reset();
+          }
+        );
       } else {
         const errorMessage = response?.message || "Có lỗi xảy ra khi đăng tin";
         setSubmitError(errorMessage);

@@ -3,50 +3,80 @@
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { HeroSearch } from "@/components/hero/hero-search";
 import { PropertyDetailView } from "@/components/ui/property-detail-view";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { propertyService } from "@/lib/api";
+import type { Property, RoomTypeDetail } from "@/lib/api/types";
 
 export default function PropertyDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const propertyId = params.id as string;
+  const type = searchParams.get("type"); // 'boarding' or 'apartment'
 
-  // Mock data - sẽ được thay thế bằng API call thực tế
-  const property = {
-    id: propertyId,
-    title: "Villa Sang Trọng Gần Biển",
-    price: "25 tỷ",
-    location: "Huyện Hòa Vang, Đà Nẵng",
-    area: "500m²",
-    bedrooms: 4,
-    bathrooms: 3,
-    type: "Villa",
-    images: [
-      "/assets/imgs/DetailBDS.png",
-      "/assets/imgs/DetailBDS2.png",
-      "/assets/imgs/house-item.png",
-      "/assets/imgs/house-item.png",
-      "/assets/imgs/house-item.png",
-      "/assets/imgs/house-item.png",
-      "/assets/imgs/house-item.png",
-    ],
-    description:
-      "Villa cao cấp với thiết kế hiện đại, vị trí đắc địa gần biển, đầy đủ tiện nghi. Không gian sống rộng rãi, thoáng mát với sân vườn riêng và hồ bơi. Thích hợp cho gia đình lớn hoặc làm nơi nghỉ dưỡng cuối tuần.",
-    features: [
-      "Gần biển",
-      "Sân vườn",
-      "Hồ bơi riêng",
-      "Garage ô tô",
-      "An ninh 24/7",
-      "Nội thất cao cấp",
-      "Điều hòa trung tâm",
-      "Bếp hiện đại",
-      "Phòng gym",
-      "Sân thượng",
-    ],
-    agent: {
-      name: "Nguyễn Văn A",
-      phone: "0909123456",
-      avatar: "/assets/imgs/avatar.png",
-    },
+  const [property, setProperty] = useState<Property | RoomTypeDetail | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPropertyDetail = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // If type is 'boarding', call getRoomTypeById
+        // Otherwise, call getPropertyById for 'apartment'
+        if (type === "boarding") {
+          const response = await propertyService.getRoomTypeById(propertyId);
+          if (response.code === 200 && response.data) {
+            setProperty(response.data);
+          } else {
+            setError("Không thể tải thông tin phòng trọ");
+          }
+        } else {
+          const response = await propertyService.getPropertyById(propertyId);
+          if (response.code === 200 && response.data) {
+            setProperty(response.data);
+          } else {
+            setError("Không thể tải thông tin bất động sản");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch property detail:", err);
+        setError("Có lỗi xảy ra khi tải dữ liệu");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPropertyDetail();
+  }, [propertyId, type]);
+
+  // Helper function to check if property is RoomTypeDetail
+  const isRoomTypeDetail = (
+    prop: Property | RoomTypeDetail
+  ): prop is RoomTypeDetail => {
+    return (
+      "rooms" in prop &&
+      Array.isArray(prop.rooms) &&
+      prop.rooms.length > 0 &&
+      "property" in prop.rooms[0]
+    );
+  };
+
+  // Helper function to get title from property
+  const getPropertyTitle = (): string => {
+    if (!property) return "Chi tiết";
+
+    // Check if it's RoomTypeDetail (has rooms array with property inside)
+    if (isRoomTypeDetail(property)) {
+      return property.rooms[0].property.title;
+    }
+
+    // Otherwise it's Property (has title directly)
+    return property.title;
   };
 
   const breadcrumbItems = [
@@ -55,7 +85,7 @@ export default function PropertyDetailPage() {
       label: "Tìm kiếm",
     },
     {
-      label: property.title,
+      label: getPropertyTitle(),
       current: true,
     },
   ];
@@ -74,7 +104,21 @@ export default function PropertyDetailPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 pb-8">
-        <PropertyDetailView property={property} />
+        {loading && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Đang tải dữ liệu...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-500">{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && property && (
+          <PropertyDetailView property={property} type={type || "apartment"} />
+        )}
       </div>
     </div>
   );

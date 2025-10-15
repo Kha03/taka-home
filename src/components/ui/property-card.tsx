@@ -16,6 +16,7 @@ interface PropertyCardProps {
   isNew?: boolean;
   isFeatured?: boolean;
   roomType?: string; // Tên loại phòng cho BOARDING
+  type?: "apartment" | "boarding"; // Type để xác định API call
 }
 
 export function PropertyCard({
@@ -28,9 +29,13 @@ export function PropertyCard({
   area,
   imageUrl,
   roomType,
+  type = "apartment",
 }: PropertyCardProps) {
   return (
-    <Link href={`/properties/${id}`} className="h-full">
+    <Link
+      href={`/properties/${id}${type === "boarding" ? "?type=boarding" : ""}`}
+      className="h-full"
+    >
       <Card className="h-full flex flex-col group overflow-hidden border-0 bg-transparent shadow-none hover:bg-secondary/10 hover:shadow-lg transition-all duration-300 cursor-pointer p-2 rounded-[12px]">
         <div className="relative aspect-[325/160] overflow-hidden rounded-[12px]">
           <Image

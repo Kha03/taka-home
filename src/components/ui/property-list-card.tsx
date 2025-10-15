@@ -17,6 +17,7 @@ interface PropertyListCardProps {
   isNew?: boolean;
   isFeatured?: boolean;
   roomType?: string; // Tên loại phòng cho BOARDING
+  type?: "apartment" | "boarding"; // Type để xác định API call
 }
 
 export function PropertyListCard({
@@ -30,9 +31,12 @@ export function PropertyListCard({
   imageUrl,
   timePosted,
   roomType,
+  type = "apartment",
 }: PropertyListCardProps) {
   return (
-    <Link href={`/properties/${id}`}>
+    <Link
+      href={`/properties/${id}${type === "boarding" ? "?type=boarding" : ""}`}
+    >
       <Card className="p-3 group border-none overflow-hidden bg-transparent shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer rounded-[12px] hover:bg-secondary/10">
         <CardContent className="p-0">
           <div className="flex gap-4 min-h-[160px] items-center">

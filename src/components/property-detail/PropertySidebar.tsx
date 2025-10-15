@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { LandlordAndTenant } from "@/lib/api";
 
 interface Review {
   id: number;
@@ -17,17 +18,69 @@ interface Review {
   time: string;
   content: string;
 }
-
+interface UnitForApartment {
+  unit: string;
+  floor?: number;
+  block?: string;
+}
 interface PropertySidebarProps {
+  landlord: LandlordAndTenant;
   units: string[];
-  reviews: Review[];
+  unitForApartment?: UnitForApartment;
+  propertyCount?: number;
+  contractCount?: number;
+  yearsActive?: number;
 }
 
-export function PropertySidebar({ units, reviews }: PropertySidebarProps) {
+export function PropertySidebar({
+  landlord,
+  units,
+  unitForApartment,
+  propertyCount = 22,
+  contractCount = 45,
+  yearsActive = 1,
+}: PropertySidebarProps) {
   const [selectedUnit, setSelectedUnit] = useState<string>("");
   const [reviewText, setReviewText] = useState("");
   const [userRating, setUserRating] = useState<number>(0);
   const [hoveredStar, setHoveredStar] = useState<number>(0);
+
+  const reviews: Review[] = [
+    {
+      id: 1,
+      name: "Nguyễn Văn A",
+      avatar: "/diverse-user-avatars.png",
+      rating: 5,
+      time: "2 ngày trước",
+      content:
+        "Phòng trọ rất tốt, chủ nhà nhiệt tình. Khu vực yên tĩnh, an ninh tốt.",
+    },
+    {
+      id: 2,
+      name: "Trần Thị B",
+      avatar: "/diverse-user-avatars.png",
+      rating: 5,
+      time: "1 tuần trước",
+      content: "Giá cả hợp lý, phòng sạch sẽ. Đầy đủ tiện nghi, rất hài lòng.",
+    },
+    {
+      id: 3,
+      name: "Lê Văn C",
+      avatar: "/diverse-user-avatars.png",
+      rating: 4,
+      time: "2 tuần trước",
+      content: "Vị trí thuận tiện, gần chợ và trường học. Recommend!",
+    },
+  ];
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <div className="space-y-3">
@@ -37,12 +90,16 @@ export function PropertySidebar({ units, reviews }: PropertySidebarProps) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-11 w-11">
-                <AvatarImage src="/vietnamese-woman-realtor.jpg" />
-                <AvatarFallback>NT</AvatarFallback>
+                <AvatarImage
+                  src={landlord.avatarUrl || "/vietnamese-woman-realtor.jpg"}
+                />
+                <AvatarFallback>
+                  {getInitials(landlord.fullName)}
+                </AvatarFallback>
               </Avatar>
               <div>
                 <h3 className="font-semibold text-primary">
-                  Nguyễn Thị Chú Thuê
+                  {landlord.fullName}
                 </h3>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -61,20 +118,24 @@ export function PropertySidebar({ units, reviews }: PropertySidebarProps) {
             <div className="bg-secondary w-5 h-5 flex items-center justify-center rounded-full">
               <Phone className="h-3 w-3 text-primary-foreground" />
             </div>
-            <span className="text-sm">Số điện thoại: 0987654321</span>
+            <span className="text-sm">Số điện thoại: {landlord.phone}</span>
           </div>
 
           <div className="grid grid-cols-3 gap-4 border-dashed p-5 border rounded-[12px] border-[#ccc]">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <span className="text-2xl font-bold text-primary">22</span>
+                <span className="text-2xl font-bold text-primary">
+                  {propertyCount}
+                </span>
                 <img src={"/assets/icons/house-icon.svg"} alt="Property Icon" />
               </div>
               <div className="text-xs text-primary">Bất động sản</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <span className="text-2xl font-bold text-primary">45</span>
+                <span className="text-2xl font-bold text-primary">
+                  {contractCount}
+                </span>
                 <img
                   src={"/assets/icons/contract-icon.svg"}
                   alt="Contract Icon"
@@ -84,7 +145,9 @@ export function PropertySidebar({ units, reviews }: PropertySidebarProps) {
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <span className="text-2xl font-bold text-primary">1</span>
+                <span className="text-2xl font-bold text-primary">
+                  {yearsActive}
+                </span>
                 <img src={"/assets/icons/calendar-icon.svg"} alt="Year Icon" />
               </div>
               <div className="text-xs text-primary">Năm tham gia</div>
@@ -95,24 +158,56 @@ export function PropertySidebar({ units, reviews }: PropertySidebarProps) {
       <Card className="bg-primary-foreground p-5">
         <CardContent className="p-0">
           {/* Rental Inquiry */}
-          <div className="space-y-4 text-center">
+          <div className="space-y-3 text-center">
             <h4 className="font-bold text-lg text-primary">
               Gửi yêu cầu thuê bất động sản này?
+              <span className="text-sm font-normal text-muted-foreground block">
+                Chọn phòng
+              </span>
             </h4>
-            <div className="grid grid-cols-6 gap-2">
-              {units.map((unit) => (
-                <Button
-                  key={unit}
-                  size="sm"
-                  onClick={() => setSelectedUnit(unit)}
-                  className={`text-xs w-14 h-7 text-[#4f4f4f] bg-[#e5e5e5] border-none hover:bg-accent rounded-[30px] ${
-                    selectedUnit === unit ? "bg-secondary text-white " : ""
-                  }`}
-                >
-                  {unit}
-                </Button>
-              ))}
-            </div>
+            {unitForApartment ? (
+              // Display apartment unit info
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Thông tin căn hộ:
+                  </p>
+                  <div className="space-y-1">
+                    {unitForApartment.block && (
+                      <p className="text-base font-semibold text-primary">
+                        Tòa nhà: {unitForApartment.block}
+                      </p>
+                    )}
+                    {unitForApartment.floor && (
+                      <p className="text-base font-semibold text-primary">
+                        Tầng: {unitForApartment.floor}
+                      </p>
+                    )}
+                    {unitForApartment.unit && (
+                      <p className="text-base font-semibold text-primary">
+                        Căn hộ: {unitForApartment.unit}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Display room selection for boarding
+              <div className="grid grid-cols-6 gap-2">
+                {units.map((unit) => (
+                  <Button
+                    key={unit}
+                    size="sm"
+                    onClick={() => setSelectedUnit(unit)}
+                    className={`text-xs w-14 h-7 text-[#4f4f4f] bg-[#e5e5e5] border-none hover:bg-accent rounded-[30px] ${
+                      selectedUnit === unit ? "bg-secondary text-white " : ""
+                    }`}
+                  >
+                    {unit}
+                  </Button>
+                ))}
+              </div>
+            )}
 
             <Button className="w-33 bg-secondary hover:bg-secondary/90">
               <Send className="h-4 w-4 mr-2" />

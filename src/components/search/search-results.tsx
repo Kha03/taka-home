@@ -277,7 +277,7 @@ export function SearchResults() {
                 return (
                   <PropertyCard
                     key={item.id}
-                    id={item.property.id} // Link to parent property
+                    id={item.id}
                     title={item.property.title}
                     roomType={item.name} // Display room type name
                     price={`${item.price.toLocaleString("vi-VN")}VND/Tháng`}
@@ -290,6 +290,7 @@ export function SearchResults() {
                       item.images?.[0] ||
                       "/assets/imgs/house-item.png"
                     }
+                    type="boarding"
                   />
                 );
               }
@@ -312,6 +313,7 @@ export function SearchResults() {
                     item.gallery?.[0] ||
                     "/assets/imgs/house-item.png"
                   }
+                  type="apartment"
                 />
               );
             })}
@@ -324,7 +326,7 @@ export function SearchResults() {
                 return (
                   <PropertyListCard
                     key={item.id}
-                    id={item.property.id} // Link to parent property
+                    id={item.id}
                     title={item.property.title}
                     roomType={item.name} // Display room type name
                     price={`${item.price.toLocaleString("vi-VN")}VND/Tháng`}
@@ -337,6 +339,7 @@ export function SearchResults() {
                       item.images?.[0] ||
                       "/assets/imgs/house-item.png"
                     }
+                    type="boarding"
                   />
                 );
               }
@@ -360,6 +363,7 @@ export function SearchResults() {
                     "/assets/imgs/house-item.png"
                   }
                   timePosted={item.updatedAt}
+                  type="apartment"
                 />
               );
             })}
