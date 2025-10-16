@@ -1,7 +1,7 @@
 import { PropertyRoomBadge } from "@/components/myproperties/property-room-badge";
 import { PropertyStatusBadge } from "@/components/myproperties/property-status-badge";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 import { PropertyDetails } from "../property-detail/PropertyDetails";

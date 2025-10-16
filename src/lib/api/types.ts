@@ -177,13 +177,15 @@ export interface Property {
 
   // Images
   heroImage?: string;
-  gallery?: string[];
+  images?: string[]; // API returns 'images', not 'gallery'
+  gallery?: string[]; // Keep for backward compatibility
 
   // Room types for boarding
   roomTypes?: PropertyRoomType[];
 
   // Metadata
   isVisible?: boolean;
+  isApproved?: boolean;
   status?: "draft" | "pending" | "approved" | "rejected";
   ownerId?: string;
   createdAt?: string;

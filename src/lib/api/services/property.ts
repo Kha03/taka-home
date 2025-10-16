@@ -73,18 +73,26 @@ export class PropertyService {
   }
 
   /**
-   * Thay đổi trạng thái visible của property
+   * Lấy properties cho admin (filter theo isApproved)
    */
-  async toggleVisibility(
-    id: string,
-    isVisible: boolean
-  ): Promise<ApiResponse<Property>> {
-    return await apiClient.patch<Property>(
-      `${this.basePath}/${id}/visibility`,
-      {
-        isVisible,
-      }
+  async getPropertiesForAdmin(
+    params?: FilterPropertyQuery
+  ): Promise<ApiResponse<Property[]>> {
+    return await apiClient.get<Property[]>(
+      `${this.basePath}/filter`,
+      params as Record<string, unknown>
     );
+  }
+
+  /**
+   * Duyệt property (admin)
+   */
+  async approveProperties(
+    propertyId: string[]
+  ): Promise<ApiResponse<Property>> {
+    return await apiClient.patch<Property>(`${this.basePath}/approve`, {
+      propertyIds: propertyId,
+    });
   }
 
   async uploadPropertyImages(

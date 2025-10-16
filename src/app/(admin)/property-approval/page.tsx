@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { Check, X } from "lucide-react";
+
+// Components
 import StatusTab from "@/components/ui/status-tab";
 import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
 import PropertyListItem, {
   PropertyStatus,
 } from "@/components/property-approval/PropertyApprovalItem";
-import {
-  mockPropertyApprovalData,
-  PropertyApprovalData,
-} from "@/components/property-approval/mock-data";
 import {
   Pagination,
   PaginationContent,
@@ -20,130 +19,269 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+// Services & Utilities
+import { propertyService } from "@/lib/api/services/property";
+import {
+  type PropertyOrRoomType,
+  getPropertyId,
+  getDisplayId,
+  getPropertyTitle,
+  getRoomTypeName,
+  getPropertyLocation,
+  getPropertyImages,
+  getPropertyDetails,
+  getApprovalStatus,
+  getUpdatedDate,
+} from "@/lib/utils/property-helpers";
+
+// Constants
+const PAGE_SIZE = 10;
+
+// Types
+interface PropertyListResponse {
+  data: PropertyOrRoomType[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
 export default function PropertyApprovalPage() {
+  // State
   const [activeTab, setActiveTab] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [properties, setProperties] = useState<PropertyApprovalData[]>(
-    mockPropertyApprovalData
-  );
+  const [properties, setProperties] = useState<PropertyOrRoomType[]>([]);
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(
     new Set()
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: PAGE_SIZE,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+  const [tabCounts, setTabCounts] = useState({
+    all: 0,
+    pending: 0,
+    approved: 0,
+  });
 
-  const PAGE_SIZE = 6;
+  // Fetch counts for all tabs
+  const fetchCounts = useCallback(async () => {
+    try {
+      // Fetch all properties
+      const allResponse = await propertyService.getProperties({
+        page: 1,
+        limit: 1,
+      });
 
-  // Calculate counts dynamically
-  const counts = useMemo(() => {
-    const all = properties.length;
-    const pending = properties.filter((p) => p.status === "cho-duyet").length;
-    const approved = properties.filter((p) => p.status === "da-duyet").length;
-    const rejected = properties.filter((p) => p.status === "tu-choi").length;
+      // Fetch pending properties
+      const pendingResponse = await propertyService.getProperties({
+        page: 1,
+        limit: 1,
+        isApproved: false,
+      });
 
-    return { all, pending, approved, rejected };
-  }, [properties]);
+      // Fetch approved properties
+      const approvedResponse = await propertyService.getProperties({
+        page: 1,
+        limit: 1,
+        isApproved: true,
+      });
+
+      // Extract totalItems from pagination
+      const allData = allResponse.data as unknown as PropertyListResponse;
+      const pendingData =
+        pendingResponse.data as unknown as PropertyListResponse;
+      const approvedData =
+        approvedResponse.data as unknown as PropertyListResponse;
+
+      setTabCounts({
+        all: allData.pagination?.totalItems || 0,
+        pending: pendingData.pagination?.totalItems || 0,
+        approved: approvedData.pagination?.totalItems || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching counts:", error);
+    }
+  }, []);
+
+  // Fetch properties based on active tab
+  const fetchProperties = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const query: Record<string, unknown> = {
+        page: currentPage,
+        limit: PAGE_SIZE,
+      };
+
+      // Add isApproved filter based on active tab
+      if (activeTab === "cho-duyet") {
+        query.isApproved = false;
+      } else if (activeTab === "da-duyet") {
+        query.isApproved = true;
+      }
+
+      const response = await propertyService.getProperties(query);
+
+      if (response.code === 200 && response.data) {
+        const responseData = response.data as unknown as PropertyListResponse;
+
+        if (responseData.data && Array.isArray(responseData.data)) {
+          setProperties(responseData.data);
+          if (responseData.pagination) {
+            setPagination(responseData.pagination);
+          }
+        } else if (Array.isArray(response.data)) {
+          setProperties(response.data as PropertyOrRoomType[]);
+        } else {
+          setProperties([response.data] as PropertyOrRoomType[]);
+        }
+      } else {
+        setProperties([]);
+      }
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      toast.error("Không thể tải danh sách bất động sản");
+      setProperties([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeTab, currentPage]);
+
+  // Fetch counts on mount
+  useEffect(() => {
+    fetchCounts();
+  }, [fetchCounts]);
+
+  // Fetch properties when tab or page changes
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
 
   const propertyTabs = [
-    { id: "all", label: "Tất cả", count: counts.all },
-    { id: "cho-duyet", label: "Chờ duyệt", count: counts.pending },
-    { id: "da-duyet", label: "Đã duyệt", count: counts.approved },
-    { id: "tu-choi", label: "Từ chối", count: counts.rejected },
+    { id: "all", label: "Tất cả", count: tabCounts.all },
+    { id: "cho-duyet", label: "Chờ duyệt", count: tabCounts.pending },
+    { id: "da-duyet", label: "Đã duyệt", count: tabCounts.approved },
   ];
 
-  // Filter properties based on active tab
-  const filteredProperties = useMemo(() => {
-    if (activeTab === "all") {
-      return properties;
-    }
-    return properties.filter((property) => property.status === activeTab);
-  }, [properties, activeTab]);
+  // Group boarding properties to avoid duplicates
+  const paginatedProperties = useMemo(() => {
+    if (!Array.isArray(properties)) return [];
 
-  const totalPages = Math.ceil(filteredProperties.length / PAGE_SIZE) || 1;
+    const seen = new Map<string, PropertyOrRoomType>();
 
-  // Ensure current page within bounds when filters change
-  if (currentPage > totalPages) {
-    setCurrentPage(totalPages);
-  }
+    properties.forEach((item) => {
+      const propertyId = getPropertyId(item);
+      if (!seen.has(propertyId)) {
+        seen.set(propertyId, item);
+      }
+    });
 
-  const paginatedProperties = useMemo(
-    () =>
-      filteredProperties.slice(
-        (currentPage - 1) * PAGE_SIZE,
-        currentPage * PAGE_SIZE
-      ),
-    [filteredProperties, currentPage]
-  );
+    return Array.from(seen.values());
+  }, [properties]);
 
-  // Handle individual property selection
-  const handlePropertySelect = (propertyId: string, selected: boolean) => {
-    const newSelected = new Set(selectedProperties);
-    if (selected) {
-      newSelected.add(propertyId);
-    } else {
-      newSelected.delete(propertyId);
-    }
-    setSelectedProperties(newSelected);
-  };
-
-  // Handle individual property approval
-  const handleApproveProperty = (propertyId: string) => {
-    setProperties((prev) =>
-      prev.map((property) =>
-        property.id === propertyId
-          ? { ...property, status: "da-duyet" as PropertyStatus }
-          : property
-      )
-    );
-    // Remove from selected if it was selected
+  // Handlers
+  const handlePropertySelect = (itemId: string, selected: boolean) => {
     setSelectedProperties((prev) => {
       const newSelected = new Set(prev);
-      newSelected.delete(propertyId);
+      if (selected) {
+        newSelected.add(itemId);
+      } else {
+        newSelected.delete(itemId);
+      }
       return newSelected;
     });
   };
 
-  // Handle individual property rejection
-  const handleRejectProperty = (propertyId: string) => {
-    setProperties((prev) =>
-      prev.map((property) =>
-        property.id === propertyId
-          ? { ...property, status: "tu-choi" as PropertyStatus }
-          : property
-      )
-    );
-    // Remove from selected if it was selected
-    setSelectedProperties((prev) => {
-      const newSelected = new Set(prev);
-      newSelected.delete(propertyId);
-      return newSelected;
-    });
+  const handleApproveProperty = async (item: PropertyOrRoomType) => {
+    try {
+      const propertyId = getPropertyId(item);
+      const displayId = getDisplayId(item);
+
+      const response = await propertyService.approveProperties([propertyId]);
+
+      if (response.code === 200) {
+        toast.success("Duyệt bất động sản thành công");
+        
+        // Clear selection
+        setSelectedProperties((prev) => {
+          const newSelected = new Set(prev);
+          newSelected.delete(displayId);
+          return newSelected;
+        });
+
+        // Refresh both counts and properties
+        await Promise.all([fetchCounts(), fetchProperties()]);
+      }
+    } catch (error) {
+      console.error("Error approving property:", error);
+      toast.error("Không thể duyệt bất động sản");
+    }
   };
 
-  // Handle bulk approval
-  const handleBulkApprove = () => {
+  const handleRejectProperty = () => {
+    toast.info("Chức năng từ chối đang được phát triển");
+  };
+
+  const handleBulkApprove = async () => {
     if (selectedProperties.size === 0) return;
 
-    setProperties((prev) =>
-      prev.map((property) =>
-        selectedProperties.has(property.id)
-          ? { ...property, status: "da-duyet" as PropertyStatus }
-          : property
-      )
-    );
-    setSelectedProperties(new Set());
+    try {
+      const propertyIds = properties
+        .filter((item) => selectedProperties.has(getDisplayId(item)))
+        .map((item) => getPropertyId(item));
+
+      const response = await propertyService.approveProperties(propertyIds);
+
+      if (response.code === 200) {
+        toast.success(`Duyệt thành công ${propertyIds.length} bất động sản`);
+        
+        // Clear selection
+        setSelectedProperties(new Set());
+
+        // Refresh both counts and properties
+        await Promise.all([fetchCounts(), fetchProperties()]);
+      }
+    } catch (error) {
+      console.error("Error bulk approving:", error);
+      toast.error("Không thể duyệt hàng loạt");
+    }
   };
 
-  // Handle bulk rejection
   const handleBulkReject = () => {
     if (selectedProperties.size === 0) return;
-
-    setProperties((prev) =>
-      prev.map((property) =>
-        selectedProperties.has(property.id)
-          ? { ...property, status: "tu-choi" as PropertyStatus }
-          : property
-      )
-    );
+    toast.info("Chức năng từ chối đang được phát triển");
     setSelectedProperties(new Set());
+  };
+
+  // Map Property/RoomType to PropertyListItem format
+  const mapPropertyToApprovalFormat = (item: PropertyOrRoomType) => {
+    const details = getPropertyDetails(item);
+    const images = getPropertyImages(item);
+
+    return {
+      id: getDisplayId(item),
+      title: getPropertyTitle(item),
+      roomType: getRoomTypeName(item) ? "Phòng trọ" : undefined,
+      beds: details.bedrooms,
+      baths: details.bathrooms,
+      areaM2: details.area,
+      priceMonthly: details.price,
+      updatedAt: getUpdatedDate(item) || new Date().toISOString(),
+      location: getPropertyLocation(item),
+      images: images.length > 0 ? images : ["/assets/imgs/house-item.png"],
+      status: getApprovalStatus(item)
+        ? ("da-duyet" as PropertyStatus)
+        : ("cho-duyet" as PropertyStatus),
+    };
   };
 
   return (
@@ -188,82 +326,92 @@ export default function PropertyApprovalPage() {
 
         {/* Properties List */}
         <div className="space-y-3">
-          {paginatedProperties.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#DCBB87] mx-auto mb-4"></div>
+              <p className="text-gray-500 text-lg">Đang tải dữ liệu...</p>
+            </div>
+          ) : paginatedProperties.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
                 Không tìm thấy bất động sản nào
               </p>
             </div>
           ) : (
-            paginatedProperties.map((property) => (
-              <PropertyListItem
-                key={property.id}
-                id={property.id}
-                title={property.title}
-                beds={property.beds}
-                baths={property.baths}
-                areaM2={property.areaM2}
-                priceMonthly={property.priceMonthly}
-                updatedAt={property.updatedAt}
-                location={property.location}
-                images={property.images}
-                status={property.status}
-                selectable
-                selected={selectedProperties.has(property.id)}
-                onSelectChange={(selected) =>
-                  handlePropertySelect(property.id, selected)
-                }
-                onApprove={() => handleApproveProperty(property.id)}
-                onReject={() => handleRejectProperty(property.id)}
-                className="cursor-pointer"
-              />
-            ))
+            paginatedProperties.map((item) => {
+              const mapped = mapPropertyToApprovalFormat(item);
+              const displayId = getDisplayId(item);
+
+              return (
+                <PropertyListItem
+                  key={displayId}
+                  {...mapped}
+                  selectable
+                  selected={selectedProperties.has(displayId)}
+                  onSelectChange={(selected) =>
+                    handlePropertySelect(displayId, selected)
+                  }
+                  onApprove={() => handleApproveProperty(item)}
+                  onReject={handleRejectProperty}
+                  className="cursor-pointer"
+                />
+              );
+            })
           )}
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {pagination.totalPages > 1 && (
           <Pagination className="pt-4">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
                   className={
-                    currentPage === 1 ? "pointer-events-none opacity-40" : ""
-                  }
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setCurrentPage((p) => Math.max(1, p - 1));
-                  }}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      href="#"
-                      isActive={page === currentPage}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCurrentPage(page);
-                      }}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  className={
-                    currentPage === totalPages
+                    !pagination.hasPrevPage
                       ? "pointer-events-none opacity-40"
                       : ""
                   }
                   onClick={(e) => {
                     e.preventDefault();
-                    setCurrentPage((p) => Math.min(totalPages, p + 1));
+                    if (pagination.hasPrevPage) {
+                      setCurrentPage((p) => Math.max(1, p - 1));
+                    }
+                  }}
+                />
+              </PaginationItem>
+              {Array.from(
+                { length: pagination.totalPages },
+                (_, i) => i + 1
+              ).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    isActive={page === currentPage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(page);
+                    }}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  className={
+                    !pagination.hasNextPage
+                      ? "pointer-events-none opacity-40"
+                      : ""
+                  }
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (pagination.hasNextPage) {
+                      setCurrentPage((p) =>
+                        Math.min(pagination.totalPages, p + 1)
+                      );
+                    }
                   }}
                 />
               </PaginationItem>

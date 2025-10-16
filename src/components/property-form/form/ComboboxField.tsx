@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown, CircleAlert, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { NewPropertyForm } from "@/schema/schema";
 import { useFormContextStrict } from "./useFormContextStrict";
 

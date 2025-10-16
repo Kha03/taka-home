@@ -5,7 +5,7 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CircleAlert } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { useFormContextStrict } from "./useFormContextStrict";
 import { NewPropertyForm } from "@/schema/schema";
 

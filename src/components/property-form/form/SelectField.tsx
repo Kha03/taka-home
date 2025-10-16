@@ -12,7 +12,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { CircleAlert } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { NewPropertyForm } from "@/schema/schema";
 import { useFormContextStrict } from "./useFormContextStrict";
 

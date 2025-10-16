@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageBubbleProps } from "@/types/chat";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { Check, CheckCheck, Clock } from "lucide-react";
 
 export function MessageBubble({

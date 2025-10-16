@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { ChatProvider, useChat } from "@/contexts/chat-context";
 import { useAuth } from "@/contexts/auth-context";
 import { ChatList, ChatWindow } from "@/components/chat";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";

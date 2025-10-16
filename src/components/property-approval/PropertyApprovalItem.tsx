@@ -18,6 +18,7 @@ export type PropertyStatus = "cho-duyet" | "tu-choi" | "da-duyet";
 export type PropertyListItemProps = {
   id?: string | number;
   title: string;
+  roomType?: string; // "Phòng trọ" for boarding properties
   beds: number;
   baths: number;
   areaM2: number;
@@ -74,6 +75,7 @@ const statusMap: Record<
 export default function PropertyListItem(props: PropertyListItemProps) {
   const {
     title,
+    roomType,
     beds,
     baths,
     areaM2,
@@ -134,13 +136,26 @@ export default function PropertyListItem(props: PropertyListItemProps) {
 
       {/* Main image */}
       <div className="relative h-30 w-40 overflow-hidden rounded-[8px] md:h-33 md:w-54 shrink-0">
-        <Image src={mainImage} alt={title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 216px" />
+        <Image
+          src={mainImage}
+          alt={title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, 216px"
+        />
       </div>
 
       {/* Content section - grows to fill available space */}
       <div className="flex-1 min-w-0 flex flex-col justify-between gap-2 h-full">
-        {/* Title and status */}
-        <p className="line-clamp-2 text-lg font-bold text-primary">{title}</p>
+        {/* Title and room type */}
+        <div className="flex  gap-2 items-center">
+          <p className="line-clamp-2 text-lg font-bold text-primary">{title}</p>
+          {roomType && (
+            <span className="text-xs font-medium text-[#DCBB87] bg-[#DCBB87]/30 px-2 py-0.5 rounded-full w-fit">
+              {roomType}
+            </span>
+          )}
+        </div>
 
         {/* Stats and info in horizontal layout */}
         <div className="flex items-center justify-between">
@@ -189,30 +204,30 @@ export default function PropertyListItem(props: PropertyListItemProps) {
       {/* Status pill */}
       <div className="flex flex-col items-center justify-between gap-2 shrink-0 h-full ">
         {StatusPill}
-        <div className="flex items-center justify-center gap-1 w-full">
-          <Button
-            variant="outline"
-            className="h-6 w-6 rounded-full bg-[#00AE26]/20 text-[#00AE26] hover:bg-[#00AE26]/40 border-none flex-shrink-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              props.onApprove?.();
-            }}
-            disabled={status === "da-duyet"}
-          >
-            <Check className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-6 w-6 rounded-full bg-[#FA0000]/25 text-[#FA0000] hover:bg-[#FA0000]/50 border-none flex-shrink-0"
-            onClick={(e) => {
-              e.stopPropagation();
-              props.onReject?.();
-            }}
-            disabled={status === "tu-choi"}
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
+        {status === "cho-duyet" && (
+          <div className="flex items-center justify-center gap-1 w-full">
+            <Button
+              variant="outline"
+              className="h-6 w-6 rounded-full bg-[#00AE26]/20 text-[#00AE26] hover:bg-[#00AE26]/40 border-none flex-shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onApprove?.();
+              }}
+            >
+              <Check className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-6 w-6 rounded-full bg-[#FA0000]/25 text-[#FA0000] hover:bg-[#FA0000]/50 border-none flex-shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onReject?.();
+              }}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </Card>
   );

@@ -53,7 +53,7 @@ export function PropertyDetailView({
       // For APARTMENT: use heroImage + gallery
       const imgs: string[] = [];
       if (property.heroImage) imgs.push(property.heroImage);
-      if (property.gallery) imgs.push(...property.gallery);
+      if (property.images) imgs.push(...property.images);
       return imgs.length > 0 ? imgs : ["/assets/imgs/property-placeholder.svg"];
     }
   };

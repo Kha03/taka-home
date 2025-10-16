@@ -23,48 +23,17 @@ import {
 } from "@/components/ui/pagination";
 import { Grid, List } from "lucide-react";
 import { propertyService } from "@/lib/api/services";
-import type { Property, PropertyTypeEnum } from "@/lib/api/types";
-
-// Define RoomType interface for BOARDING properties (returned as room types)
-interface RoomType {
-  id: string;
-  name: string;
-  bedrooms: number;
-  bathrooms: number;
-  area: number;
-  price: number;
-  deposit: number;
-  furnishing: string;
-  images: string[];
-  description: string;
-  heroImage: string | null;
-  rooms: Array<{
-    id: string;
-    name: string;
-    floor: number;
-    isVisible: boolean;
-  }>;
-  property: {
-    id: string;
-    title: string;
-    province: string;
-    ward: string;
-    address: string;
-    isApproved: boolean;
-    landlord: {
-      id: string;
-      name: string;
-    };
-  };
-}
-
-// Union type for mixed response (Property for APARTMENT, RoomType for BOARDING)
-type PropertyOrRoomType = Property | RoomType;
-
-// Type guard to check if item is RoomType (BOARDING)
-function isRoomType(item: PropertyOrRoomType): item is RoomType {
-  return "property" in item && "rooms" in item && !("type" in item);
-}
+import type { PropertyTypeEnum } from "@/lib/api/types";
+import {
+  type PropertyOrRoomType,
+  isRoomType,
+  getPropertyTitle,
+  getPropertyLocation,
+  getPropertyImage,
+  getPropertyDetails,
+  getRoomTypeName,
+  getUpdatedDate,
+} from "@/lib/utils/property-helpers";
 
 // Response data interface from API
 interface PropertyListResponse {
@@ -272,48 +241,21 @@ export function SearchResults() {
         (viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {properties.map((item) => {
-              // Check if this is a RoomType (BOARDING)
-              if (isRoomType(item)) {
-                return (
-                  <PropertyCard
-                    key={item.id}
-                    id={item.id}
-                    title={item.property.title}
-                    roomType={item.name} // Display room type name
-                    price={`${item.price.toLocaleString("vi-VN")}VND/Tháng`}
-                    location={`${item.property.address}, ${item.property.ward}, ${item.property.province}`}
-                    bedrooms={item.bedrooms}
-                    bathrooms={item.bathrooms}
-                    area={item.area}
-                    imageUrl={
-                      item.heroImage ||
-                      item.images?.[0] ||
-                      "/assets/imgs/house-item.png"
-                    }
-                    type="boarding"
-                  />
-                );
-              }
+              const details = getPropertyDetails(item);
 
-              // Otherwise it's a regular Property (APARTMENT)
               return (
                 <PropertyCard
                   key={item.id}
                   id={item.id}
-                  title={item.title}
-                  price={`${(item.price || 0).toLocaleString(
-                    "vi-VN"
-                  )}VND/Tháng`}
-                  location={`${item.address}, ${item.ward}, ${item.province}`}
-                  bedrooms={item.bedrooms || 0}
-                  bathrooms={item.bathrooms || 0}
-                  area={item.area || 0}
-                  imageUrl={
-                    item.heroImage ||
-                    item.gallery?.[0] ||
-                    "/assets/imgs/house-item.png"
-                  }
-                  type="apartment"
+                  title={getPropertyTitle(item)}
+                  roomType={getRoomTypeName(item)}
+                  price={`${details.price.toLocaleString("vi-VN")}VND/Tháng`}
+                  location={getPropertyLocation(item)}
+                  bedrooms={details.bedrooms}
+                  bathrooms={details.bathrooms}
+                  area={details.area}
+                  imageUrl={getPropertyImage(item)}
+                  type={isRoomType(item) ? "boarding" : "apartment"}
                 />
               );
             })}
@@ -321,49 +263,22 @@ export function SearchResults() {
         ) : (
           <div className="flex flex-col gap-4">
             {properties.map((item) => {
-              // Check if this is a RoomType (BOARDING)
-              if (isRoomType(item)) {
-                return (
-                  <PropertyListCard
-                    key={item.id}
-                    id={item.id}
-                    title={item.property.title}
-                    roomType={item.name} // Display room type name
-                    price={`${item.price.toLocaleString("vi-VN")}VND/Tháng`}
-                    location={`${item.property.address}, ${item.property.ward}, ${item.property.province}`}
-                    bedrooms={item.bedrooms}
-                    bathrooms={item.bathrooms}
-                    area={item.area}
-                    imageUrl={
-                      item.heroImage ||
-                      item.images?.[0] ||
-                      "/assets/imgs/house-item.png"
-                    }
-                    type="boarding"
-                  />
-                );
-              }
+              const details = getPropertyDetails(item);
 
-              // Otherwise it's a regular Property (APARTMENT)
               return (
                 <PropertyListCard
                   key={item.id}
                   id={item.id}
-                  title={item.title}
-                  price={`${(item.price || 0).toLocaleString(
-                    "vi-VN"
-                  )}VND/Tháng`}
-                  location={`${item.address}, ${item.ward}, ${item.province}`}
-                  bedrooms={item.bedrooms || 0}
-                  bathrooms={item.bathrooms || 0}
-                  area={item.area || 0}
-                  imageUrl={
-                    item.heroImage ||
-                    item.gallery?.[0] ||
-                    "/assets/imgs/house-item.png"
-                  }
-                  timePosted={item.updatedAt}
-                  type="apartment"
+                  title={getPropertyTitle(item)}
+                  roomType={getRoomTypeName(item)}
+                  price={`${details.price.toLocaleString("vi-VN")}VND/Tháng`}
+                  location={getPropertyLocation(item)}
+                  bedrooms={details.bedrooms}
+                  bathrooms={details.bathrooms}
+                  area={details.area}
+                  imageUrl={getPropertyImage(item)}
+                  timePosted={getUpdatedDate(item)}
+                  type={isRoomType(item) ? "boarding" : "apartment"}
                 />
               );
             })}

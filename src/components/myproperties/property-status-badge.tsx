@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 interface PropertyStatusBadgeProps {
   status: "Đang cho thuê" | "Trống" | string;

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 import { MessageInputProps } from "@/types/chat";
 import { Image as ImageIcon, Send } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
