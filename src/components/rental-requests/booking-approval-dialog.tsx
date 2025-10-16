@@ -117,8 +117,7 @@ export function BookingApprovalDialog({
                     </p>
                     <p className="text-sm text-blue-800">
                       Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của
-                      khách thuê. Sau khi xử lý xong, vui lòng thông báo cho
-                      khách thuê mở ứng dụng <strong>VNPT SmartCA</strong> trên
+                      bạn. Hãy mở ứng dụng <strong>VNPT SmartCA</strong> trên
                       điện thoại để ký xác nhận hợp đồng. Sau khi ký thành công,
                       hệ thống sẽ tự động cập nhật trạng thái.
                     </p>

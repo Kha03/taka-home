@@ -141,10 +141,10 @@ export type BookingCondition =
 export interface BookingContract {
   id: string;
   contractCode: string;
-  tenant: { id: string };
-  landlord: { id: string };
-  property: { id: string };
-  room: { id: string } | null;
+  tenant?: { id: string };
+  landlord?: { id: string };
+  property?: { id: string };
+  room?: { id: string } | null;
   startDate: string;
   endDate: string;
   status: string;
@@ -236,6 +236,10 @@ export class BookingService {
    */
   async rejectBooking(id: string): Promise<ApiResponse<Booking>> {
     return apiClient.post<Booking>(`${this.basePath}/${id}/reject`);
+  }
+  // người thuê kí hợp đồng booking
+  async signContract(id: string): Promise<ApiResponse<Booking>> {
+    return apiClient.post<Booking>(`${this.basePath}/${id}/sign`);
   }
 }
 

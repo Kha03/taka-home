@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ContractFilter from "@/components/contracts/contract-filter";
 import StatusTab from "@/components/ui/status-tab";
 import ContractCard from "@/components/contracts/contract-card";
@@ -12,11 +12,25 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { bookingService, type Booking } from "@/lib/api/services/booking";
+import { contractService } from "@/lib/api/services/contract";
+import {
+  paymentService,
+  PaymentPurpose,
+  type CreatePaymentDto,
+} from "@/lib/api/services/payment";
+import { PaymentModal } from "@/components/payment/payment-modal";
+import { toast } from "sonner";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Card, CardContent } from "@/components/ui/card";
+import { FileText } from "lucide-react";
 
 interface Contract {
   id: string;
+  bookingId: string;
   type: string;
   tenant: string;
+  landlord: string;
   startDate: string;
   endDate: string;
   address: string;
@@ -24,7 +38,18 @@ interface Contract {
   propertyType: string;
   category: string;
   price: number;
-  status: "active" | "expired";
+  deposit: number; // Số tiền đặt cọc
+  status:
+    | "active"
+    | "expired"
+    | "pending_signature"
+    | "pending_landlord"
+    | "awaiting_deposit"
+    | "awaiting_landlord_deposit"; // Tenant đã đặt cọc, chờ landlord
+  contractCode?: string;
+  contractId?: string;
+  bookingStatus: string;
+  contractStatus?: string; // Status của contract từ backend
   invoices: Invoice[];
 }
 
@@ -35,194 +60,315 @@ interface Invoice {
   status: "paid" | "pending" | "overdue";
 }
 
-const mockContracts: Contract[] = [
-  {
-    id: "#A101-23485",
-    type: "Hợp đồng thuê nhà",
-    tenant: "Nguyễn Phạm Hữu Hiếu Huy",
-    startDate: "01/07/2025",
-    endDate: "01/01/2026",
-    address:
-      "Nguyễn Xiển, Phường Long Thạnh Mỹ (Quận 9 cũ), Thành phố Thủ Đức, Tp Hồ Chí Minh",
-    propertyCode: "A101",
-    propertyType: "Nội thất đầy đủ",
-    category: "Chung cư",
-    price: 12000000,
-    status: "active",
-    invoices: [
-      {
-        id: 7,
-        month: "Tháng 8 Năm 2025",
-        dueDate: "10/09/2025",
-        status: "pending",
-      },
-      {
-        id: 6,
-        month: "Tháng 7 Năm 2025",
-        dueDate: "10/08/2025",
-        status: "paid",
-      },
-      {
-        id: 5,
-        month: "Tháng 6 Năm 2025",
-        dueDate: "10/07/2025",
-        status: "paid",
-      },
-      {
-        id: 4,
-        month: "Tháng 5 Năm 2025",
-        dueDate: "10/06/2025",
-        status: "paid",
-      },
-      {
-        id: 3,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-    ],
-  },
-  {
-    id: "#A101-22185",
-    type: "Hợp đồng thuê nhà",
-    tenant: "Nguyễn Phạm Hữu Hiếu Huy",
-    startDate: "01/07/2025",
-    endDate: "01/01/2026",
-    address:
-      "Nguyễn Xiển, Phường Long Thạnh Mỹ (Quận 9 cũ), Thành phố Thủ Đức, Tp Hồ Chí Minh",
-    propertyCode: "A101",
-    propertyType: "Nội thất đầy đủ",
-    category: "Chung cư",
-    price: 12000000,
-    status: "active",
-    invoices: [
-      {
-        id: 7,
-        month: "Tháng 8 Năm 2025",
-        dueDate: "10/09/2025",
-        status: "pending",
-      },
-      {
-        id: 6,
-        month: "Tháng 7 Năm 2025",
-        dueDate: "10/08/2025",
-        status: "paid",
-      },
-      {
-        id: 5,
-        month: "Tháng 6 Năm 2025",
-        dueDate: "10/07/2025",
-        status: "paid",
-      },
-      {
-        id: 4,
-        month: "Tháng 5 Năm 2025",
-        dueDate: "10/06/2025",
-        status: "paid",
-      },
-      {
-        id: 3,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 312,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 13,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 23,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 43,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 121,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 32131,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 3131,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 3133,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 13133,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-      {
-        id: 1133,
-        month: "Tháng 4 Năm 2025",
-        dueDate: "10/05/2025",
-        status: "paid",
-      },
-    ],
-  },
-];
-
 export default function ContractsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string>("TENANT");
 
-  const contractTabs = [
-    { id: "all", label: "Tất cả", count: 12 },
-    { id: "active", label: "Còn hiệu lực", count: 2 },
-    { id: "expired", label: "Hết hiệu lực", count: 10 },
-  ];
+  // Payment modal states
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(
+    null
+  );
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
 
   const PAGE_SIZE = 4;
 
-  // (Optional future) filter contracts by tab / search; currently just returns all
+  // Fetch bookings when component mounts
+  useEffect(() => {
+    const fetchContracts = async () => {
+      try {
+        setLoading(true);
+
+        // Get user role from localStorage
+        const savedUser = localStorage.getItem("account_info");
+        if (savedUser) {
+          const userData = JSON.parse(savedUser);
+          console.log("🔍 userData:", userData);
+          // roles is an array, get the first role
+          const roles = userData.roles || [];
+          console.log("🔍 roles array:", roles);
+          const finalRole = roles[0] || "TENANT";
+          console.log("🔍 Final userRole:", finalRole);
+          setUserRole(finalRole);
+        }
+
+        // Fetch all bookings
+        const response = await bookingService.getMyBookings();
+
+        if (response.data) {
+          setBookings(response.data);
+
+          // Convert bookings to contracts
+          // Chỉ PENDING_LANDLORD là chưa có contract, các status khác đều có contract
+          const contractsData = response.data
+            .filter((booking) => {
+              // Giữ tất cả bookings có contract HOẶC đang chờ duyệt
+              return (
+                booking.contract !== null ||
+                booking.status === "PENDING_LANDLORD"
+              );
+            })
+            .map((booking) => bookingToContract(booking));
+
+          setContracts(contractsData);
+        }
+      } catch (error) {
+        console.error("Error fetching contracts:", error);
+        toast.error("Không thể tải danh sách hợp đồng");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContracts();
+  }, []);
+
+  // Convert booking to contract format
+  const bookingToContract = (booking: Booking): Contract => {
+    const property = booking.property;
+    const room = booking.room;
+    const roomType = room?.roomType;
+    const isBoarding = property.type === "BOARDING";
+
+    const price = isBoarding
+      ? parseFloat(roomType?.price || "0")
+      : property.price || 0;
+
+    // Calculate deposit based on property type
+    const deposit = isBoarding
+      ? parseFloat(roomType?.deposit || "0")
+      : parseFloat(property.deposit || "0");
+
+    const propertyCode = isBoarding
+      ? room?.name || "N/A"
+      : (typeof property.unit === "string"
+          ? property.unit
+          : property.unit?.name) || "N/A";
+    const furnishing = isBoarding
+      ? roomType?.furnishing || "Chưa có thông tin"
+      : property.furnishing || "Chưa có thông tin";
+
+    // Map booking status to contract status based on booking status AND contract status
+    let contractStatus: Contract["status"] = "pending_landlord";
+
+    console.log("🔍 Booking:", {
+      bookingId: booking.id,
+      bookingStatus: booking.status,
+      contractStatus: booking.contract?.status,
+      contractId: booking.contract?.id,
+    });
+
+    if (booking.status === "ACTIVE") {
+      contractStatus = "active";
+    } else if (booking.status === "PENDING_LANDLORD") {
+      contractStatus = "pending_landlord";
+      console.log("✅ Set status to pending_landlord");
+    } else if (booking.status === "PENDING_SIGNATURE") {
+      // Xem xét contract status để biết ai cần ký
+      const backendStatus = booking.contract?.status;
+      console.log("🔍 Backend contract status:", backendStatus);
+      if (backendStatus === "PENDING_LANDLORD_SIGNATURE") {
+        // Chờ landlord ký
+        contractStatus = "pending_landlord";
+        console.log("✅ Set status to pending_landlord (waiting for landlord)");
+      } else if (backendStatus === "PENDING_TENANT_SIGNATURE") {
+        // Chờ tenant ký
+        contractStatus = "pending_signature";
+        console.log("✅ Set status to pending_signature (waiting for tenant)");
+      } else {
+        // Mặc định chờ ký (có thể là cả 2 chưa ký)
+        contractStatus = "pending_signature";
+        console.log("✅ Set status to pending_signature (default)");
+      }
+    } else if (booking.status === "AWAITING_DEPOSIT") {
+      // Khi đang chờ đặt cọc và contract status là SIGNED
+      // thì hiển thị yêu cầu đặt cọc
+      if (booking.contract?.status === "SIGNED") {
+        contractStatus = "awaiting_deposit";
+      } else {
+        contractStatus = "pending_signature";
+      }
+    } else if (booking.status === "ESCROW_FUNDED_T") {
+      // Tenant đã đặt cọc, chờ landlord đặt cọc
+      contractStatus = "awaiting_landlord_deposit";
+    } else if (booking.status === "ESCROW_FUNDED_L") {
+      // Landlord đã đặt cọc, chờ tenant đặt cọc
+      contractStatus = "awaiting_deposit";
+    } else if (["SETTLED", "CANCELLED"].includes(booking.status)) {
+      contractStatus = "expired";
+    }
+
+    console.log("✅ Final mapped status:", contractStatus);
+
+    return {
+      id: booking.contract?.contractCode || booking.id,
+      bookingId: booking.id,
+      type: "Hợp đồng thuê nhà",
+      tenant: booking.tenant.fullName,
+      landlord: property.landlord.fullName,
+      startDate: booking.contract?.startDate
+        ? new Date(booking.contract.startDate).toLocaleDateString("vi-VN")
+        : "Chưa xác định",
+      endDate: booking.contract?.endDate
+        ? new Date(booking.contract.endDate).toLocaleDateString("vi-VN")
+        : "Chưa xác định",
+      address: `${property.address}, ${property.ward}, ${property.province}`,
+      propertyCode: propertyCode,
+      propertyType: furnishing,
+      category: property.type === "APARTMENT" ? "Chung cư" : "Nhà trọ",
+      price: price,
+      deposit: deposit, // Số tiền đặt cọc
+      status: contractStatus,
+      contractCode: booking.contract?.contractCode,
+      contractId: booking.contract?.id,
+      bookingStatus: booking.status,
+      contractStatus: booking.contract?.status, // Thêm contract status từ backend
+      invoices: [], // TODO: Fetch invoices when ACTIVE
+    };
+  };
+
+  // Handle view contract file
+  const handleViewContract = async (contractId: string) => {
+    try {
+      const response = await contractService.getFileUrl(contractId);
+      if (response.data?.fileUrl) {
+        window.open(response.data.fileUrl, "_blank");
+      } else {
+        toast.error("Không tìm thấy file hợp đồng");
+      }
+    } catch (error) {
+      console.error("Error viewing contract:", error);
+      toast.error("Không thể mở file hợp đồng");
+    }
+  };
+
+  // Handle sign contract
+  const handleSignContract = async (bookingId: string) => {
+    try {
+      await bookingService.signContract(bookingId);
+      toast.success("Yêu cầu ký hợp đồng đã được thực hiện thành công");
+
+      // Refresh contracts - không filter để giữ tất cả bookings
+      const response = await bookingService.getMyBookings();
+      if (response.data) {
+        const contractsData = response.data.map((booking) =>
+          bookingToContract(booking)
+        );
+        setContracts(contractsData);
+      }
+    } catch (error) {
+      console.error("Error signing contract:", error);
+      toast.error("Không thể ký hợp đồng. Vui lòng thử lại");
+    }
+  };
+
+  // Handle deposit payment - open modal
+  const handleDepositPayment = (contractId: string) => {
+    const contract = contracts.find((c) => c.contractId === contractId);
+    if (!contract) {
+      toast.error("Không tìm thấy hợp đồng");
+      return;
+    }
+
+    setSelectedContractId(contractId);
+    setPaymentAmount(contract.deposit); // Số tiền đặt cọc từ deposit field
+    setShowPaymentModal(true);
+  };
+
+  // Process deposit payment when user confirms in modal
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handlePaymentSuccess = async (_method: string) => {
+    if (!selectedContractId) return;
+
+    try {
+      // Determine payment purpose based on user role
+      const purpose =
+        userRole === "TENANT"
+          ? PaymentPurpose.TENANT_ESCROW_DEPOSIT
+          : PaymentPurpose.LANDLORD_ESCROW_DEPOSIT;
+
+      const paymentDto: CreatePaymentDto = {
+        contractId: selectedContractId,
+        amount: paymentAmount,
+        method: "VNPAY", // Currently only VNPAY is supported
+        purpose: purpose,
+      };
+
+      const response = await paymentService.createPayment(paymentDto);
+
+      if (response.data?.paymentUrl) {
+        // Close modal and redirect to payment URL
+        setShowPaymentModal(false);
+        toast.success("Đang chuyển đến trang thanh toán...");
+
+        // Redirect to VNPay
+        window.location.href = response.data.paymentUrl;
+      } else {
+        toast.error("Không thể tạo thanh toán");
+      }
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      toast.error("Không thể tạo thanh toán. Vui lòng thử lại");
+    }
+  };
+
+  // Filter contracts based on tab and search
   const filteredContracts = useMemo(() => {
-    // Basic search across id, tenant, propertyCode
     const q = searchQuery.trim().toLowerCase();
-    let list = mockContracts;
+    let list = contracts;
+
     if (q) {
       list = list.filter(
         (c) =>
           c.id.toLowerCase().includes(q) ||
           c.tenant.toLowerCase().includes(q) ||
-          c.propertyCode.toLowerCase().includes(q)
+          c.propertyCode.toLowerCase().includes(q) ||
+          c.address.toLowerCase().includes(q)
       );
     }
-    // activeTab logic placeholder (e.g., filter by status) – extend later
-    if (activeTab === "active")
+
+    if (activeTab === "active") {
       return list.filter((c) => c.status === "active");
-    if (activeTab === "expired")
+    }
+    if (activeTab === "expired") {
       return list.filter((c) => c.status === "expired");
+    }
+    if (activeTab === "pending") {
+      // Chờ xử lý bao gồm: chờ duyệt, chờ ký và chờ đặt cọc
+      return list.filter(
+        (c) =>
+          c.status === "pending_landlord" ||
+          c.status === "pending_signature" ||
+          c.status === "awaiting_deposit"
+      );
+    }
     return list;
-  }, [activeTab, searchQuery]);
+  }, [contracts, activeTab, searchQuery]);
+
+  // Update tab counts
+  const contractTabs = useMemo(() => {
+    const allCount = contracts.length;
+    const activeCount = contracts.filter((c) => c.status === "active").length;
+    const expiredCount = contracts.filter((c) => c.status === "expired").length;
+    const pendingCount = contracts.filter(
+      (c) =>
+        c.status === "pending_landlord" ||
+        c.status === "pending_signature" ||
+        c.status === "awaiting_deposit"
+    ).length;
+
+    return [
+      { id: "all", label: "Tất cả", count: allCount },
+      { id: "pending", label: "Chờ xử lý", count: pendingCount },
+      { id: "active", label: "Còn hiệu lực", count: activeCount },
+      { id: "expired", label: "Hết hiệu lực", count: expiredCount },
+    ];
+  }, [contracts]);
 
   const totalPages = Math.ceil(filteredContracts.length / PAGE_SIZE) || 1;
 
@@ -257,12 +403,54 @@ export default function ContractsPage() {
           setSearchQuery={setSearchQuery}
         />
 
-        {/* Contracts List */}
-        <div className="space-y-6">
-          {paginatedContracts.map((contract) => (
-            <ContractCard key={contract.id} contract={contract} />
-          ))}
-        </div>
+        {/* Loading State */}
+        {loading ? (
+          <div className="text-center py-12">
+            <LoadingSpinner size="xl" text="Đang tải..." />
+          </div>
+        ) : paginatedContracts.length === 0 ? (
+          <div className="text-center py-12">
+            <Card className="bg-primary-foreground p-8">
+              <CardContent>
+                <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Không tìm thấy hợp đồng nào
+                </h3>
+                <p className="text-gray-500">
+                  {searchQuery
+                    ? "Thử thay đổi từ khóa tìm kiếm"
+                    : "Bạn chưa có hợp đồng nào"}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <>
+            {/* Contracts List */}
+            <div className="space-y-6">
+              {paginatedContracts.map((contract) => (
+                <ContractCard
+                  key={contract.id}
+                  contract={{
+                    ...contract,
+                    onViewContract: handleViewContract,
+                    onSignContract: handleSignContract,
+                    onDepositPayment: handleDepositPayment,
+                  }}
+                  userRole={userRole}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Payment Modal */}
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          amount={paymentAmount}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
 
         {/* Pagination */}
         {totalPages > 1 && (

@@ -37,10 +37,9 @@ export function PaymentModal({
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Call the payment success callback which will handle API call and redirect
+    await onPaymentSuccess(selectedMethod);
     setIsProcessing(false);
-    onPaymentSuccess(selectedMethod);
   };
 
   return (
@@ -86,7 +85,6 @@ export function PaymentModal({
                     <p className="font-semibold text-gray-900">VNPay</p>
                     <p className="text-sm text-gray-500">Ví điện tử VNPay</p>
                   </div>
-                  <div className="h-5 w-5 rounded-full border-2 border-gray-300 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-500" />
                 </Label>
               </div>
 
@@ -110,7 +108,6 @@ export function PaymentModal({
                       Sử dụng số dư trong ví
                     </p>
                   </div>
-                  <div className="h-5 w-5 rounded-full border-2 border-gray-300 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-500" />
                 </Label>
               </div>
             </RadioGroup>
