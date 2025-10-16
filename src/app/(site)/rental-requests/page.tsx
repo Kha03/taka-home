@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { bookingService, type Booking } from "@/lib/api/services/booking";
 import { toast } from "sonner";
+import { BookingApprovalDialog } from "@/components/rental-requests/booking-approval-dialog";
 
 type RentalRequestStatus = "all" | "pending" | "approved" | "rejected";
 
@@ -34,6 +35,10 @@ export default function RentalRequestsPage() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [bookingToReject, setBookingToReject] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState(false);
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [bookingToApprove, setBookingToApprove] = useState<Booking | null>(
+    null
+  );
 
   const PAGE_SIZE = 4;
 
@@ -63,6 +68,41 @@ export default function RentalRequestsPage() {
   const handleRejectClick = (bookingId: string) => {
     setBookingToReject(bookingId);
     setRejectDialogOpen(true);
+  };
+
+  // Xử lý mở dialog duyệt booking
+  const handleApproveClick = (bookingId: string) => {
+    const booking = bookings.find((b) => b.id === bookingId);
+    if (booking) {
+      setBookingToApprove(booking);
+      setApprovalDialogOpen(true);
+    }
+  };
+
+  // Xử lý duyệt booking
+  const handleApproveBooking = async (bookingId: string) => {
+    try {
+      const response = await bookingService.approveBooking(bookingId);
+
+      if (response.data) {
+        toast.success(
+          "Duyệt yêu cầu thuê thành công! Vui lòng ký trên ứng dụng VNPT SmartCA"
+        );
+
+        // Refresh bookings
+        const bookingsResponse = await bookingService.getMyBookings();
+        if (bookingsResponse.data) {
+          setBookings(bookingsResponse.data);
+        }
+
+        // Return updated booking data
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error approving booking:", error);
+      toast.error("Không thể duyệt yêu cầu thuê. Vui lòng thử lại");
+      throw error;
+    }
   };
 
   // Xử lý từ chối booking
@@ -224,16 +264,14 @@ export default function RentalRequestsPage() {
           user: {
             name: booking.tenant.fullName,
             avatar: booking.tenant.avatarUrl || "/placeholder.svg",
+            phone: booking.tenant.phone,
           },
           status: mapStatus(booking.status),
           timestamp: new Date(booking.createdAt).toLocaleDateString("vi-VN"),
         },
       ],
       onRejectRequest: () => handleRejectClick(booking.id),
-      onApproveRequest: () => {
-        // TODO: Implement approve logic
-        console.log("Approve booking:", booking.id);
-      },
+      onApproveRequest: () => handleApproveClick(booking.id),
     };
   };
 
@@ -365,6 +403,14 @@ export default function RentalRequestsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Approval Dialog with PDF Preview */}
+      <BookingApprovalDialog
+        open={approvalDialogOpen}
+        onOpenChange={setApprovalDialogOpen}
+        booking={bookingToApprove}
+        onConfirmApprove={handleApproveBooking}
+      />
     </div>
   );
 }

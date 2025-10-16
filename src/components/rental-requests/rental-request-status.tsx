@@ -3,11 +3,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "../ui/button";
 import { Check, MessageCircle, X } from "lucide-react";
 import { Close } from "@radix-ui/react-dialog";
+import { use } from "react";
 
 interface RentalRequestStatusProps {
   user: {
     name: string;
     avatar: string;
+    phone?: string;
   };
   status: "pending" | "approved" | "rejected";
   reason?: string;
@@ -38,7 +40,7 @@ export function RentalRequestStatus({
           : "bg-[#00AE26]/20"
       )}
     >
-      <Avatar className="w-9 h-9">
+      <Avatar className="w-9 h-9 ml-2 flex items-center justify-center">
         <AvatarImage src={user.avatar} alt={user.name} />
         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
       </Avatar>
@@ -46,14 +48,10 @@ export function RentalRequestStatus({
       <div className="flex-1">
         <div className="flex items-center gap-3">
           <p className="font-bold text-primary text-sm">{user.name}</p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-primary hover:bg-primary/10 bg-[#c3c3c3]/20 rounded-[30px] text-xs h-5 font-normal"
-          >
-            <MessageCircle className="w-2 h-2" />
-            Nhắn tin
-          </Button>
+          <span className="text-xs text-accent">
+            Số điện thoại:
+            <span className="text-primary font-bold"> {user.phone}</span>
+          </span>
         </div>
 
         <div className="flex items-center gap-3 mt-1">
@@ -86,6 +84,7 @@ export function RentalRequestStatus({
           </Button>
           <Button
             size="sm"
+            onClick={onApprove}
             className="text-primary-foreground rounded-[30px] text-xs"
           >
             <Check className="w-3 h-3" />

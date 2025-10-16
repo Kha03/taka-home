@@ -6,12 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { cn } from "@/lib/utils/utils";
 import { Chat, Message, TypingUser, User } from "@/types/chat";
-import {
-  ArrowLeft,
-  Info,
-  MessageCircle,
-  MoreVertical,
-} from "lucide-react";
+import { ArrowLeft, Info, MessageCircle, MoreVertical } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { MessageBubble } from "./message-bubble";
 import { MessageInput } from "./message-input";

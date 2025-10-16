@@ -138,6 +138,23 @@ export type BookingCondition =
   | "NOT_APPROVED" // Từ chối (REJECTED)
   | "APPROVED"; // Đã duyệt (APPROVED)
 
+export interface BookingContract {
+  id: string;
+  contractCode: string;
+  tenant: { id: string };
+  landlord: { id: string };
+  property: { id: string };
+  room: { id: string } | null;
+  startDate: string;
+  endDate: string;
+  status: string;
+  contractFileUrl: string | null;
+  blockchainTxHash: string | null;
+  smartContractAddress: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Booking {
   id: string;
   tenant: BookingUser;
@@ -145,6 +162,7 @@ export interface Booking {
   room: BookingRoom | null; // Có cho boarding house, null cho apartment
   status: BookingStatus;
   contractId: string | null;
+  contract?: BookingContract | null; // Contract details khi approve
   signedAt: string | null;
   escrowDepositDueAt: string | null;
   escrowDepositFundedAt: string | null;
@@ -155,6 +173,7 @@ export interface Booking {
   handoverAt: string | null;
   activatedAt: string | null;
   closedAt: string | null;
+  signedPdfUrl?: string; // URL của file PDF đã ký
   createdAt: string;
   updatedAt: string;
 }
@@ -208,7 +227,7 @@ export class BookingService {
    * PATCH /bookings/:id/approve
    */
   async approveBooking(id: string): Promise<ApiResponse<Booking>> {
-    return apiClient.patch<Booking>(`${this.basePath}/${id}/approve`);
+    return apiClient.post<Booking>(`${this.basePath}/${id}/approve`);
   }
 
   /**

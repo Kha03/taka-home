@@ -28,6 +28,7 @@ export interface PropertyRoomProps {
     user: {
       name: string;
       avatar: string;
+      phone?: string;
     };
     status: "pending" | "approved" | "rejected";
     reason?: string;
