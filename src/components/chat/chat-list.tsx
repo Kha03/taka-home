@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { cn } from "@/lib/utils/utils";
 import { ChatListItemProps } from "@/types/chat";
 import { MessageCircle, Search } from "lucide-react";
@@ -169,10 +170,7 @@ export function ChatList({
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#DCBB87] mx-auto mb-2"></div>
-          <p className="text-sm text-gray-500">Đang tải...</p>
-        </div>
+        <LoadingSpinner text="Đang tải..." />
       </div>
     );
   }

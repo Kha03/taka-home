@@ -2,6 +2,7 @@
 
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { HeroSearch } from "@/components/hero/hero-search";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PropertyDetailView } from "@/components/ui/property-detail-view";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -106,7 +107,7 @@ export default function PropertyDetailPage() {
       <div className="max-w-7xl mx-auto px-4 pb-8">
         {loading && (
           <div className="text-center py-12">
-            <p className="text-gray-500">Đang tải dữ liệu...</p>
+            <LoadingSpinner size="lg" text="Đang tải dữ liệu..." />
           </div>
         )}
 

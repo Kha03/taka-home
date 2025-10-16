@@ -7,6 +7,7 @@ import { Check, X } from "lucide-react";
 // Components
 import StatusTab from "@/components/ui/status-tab";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import PropertyListItem, {
   PropertyStatus,
 } from "@/components/property-approval/PropertyApprovalItem";
@@ -345,8 +346,7 @@ export default function PropertyApprovalPage() {
         <div className="space-y-3">
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#DCBB87] mx-auto mb-4"></div>
-              <p className="text-gray-500 text-lg">Đang tải dữ liệu...</p>
+              <LoadingSpinner size="lg" text="Đang tải dữ liệu..." />
             </div>
           ) : paginatedProperties.length === 0 ? (
             <div className="text-center py-12">

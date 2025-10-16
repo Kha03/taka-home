@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/ui/property-card";
 import { PropertyListCard } from "@/components/ui/property-list-card";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -224,7 +225,7 @@ export function SearchResults() {
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">
-          <p className="text-gray-500">Đang tải dữ liệu...</p>
+          <LoadingSpinner size="lg" text="Đang tải dữ liệu..." />
         </div>
       )}
 

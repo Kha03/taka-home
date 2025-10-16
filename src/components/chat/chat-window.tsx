@@ -3,15 +3,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { cn } from "@/lib/utils/utils";
 import { Chat, Message, TypingUser, User } from "@/types/chat";
 import {
   ArrowLeft,
   Info,
-  MapPin,
   MessageCircle,
   MoreVertical,
-  Star,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { MessageBubble } from "./message-bubble";
@@ -191,10 +190,7 @@ export function ChatWindow({
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#DCBB87] mx-auto mb-2"></div>
-              <p className="text-sm text-gray-500">Đang tải tin nhắn...</p>
-            </div>
+            <LoadingSpinner text="Đang tải tin nhắn..." />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">

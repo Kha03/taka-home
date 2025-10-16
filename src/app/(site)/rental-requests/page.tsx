@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import StatusTab from "@/components/ui/status-tab";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PropertyRoom } from "@/components/myproperties/PropertyRoom";
 import {
   Pagination,
@@ -253,68 +254,42 @@ export default function RentalRequestsPage() {
         {/* Loading State */}
         {loading ? (
           <div className="text-center py-12">
+            <LoadingSpinner size="xl" text="Đang tải..." />
+          </div>
+        ) : paginatedBookings.length === 0 ? (
+          <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
               <svg
-                className="animate-spin w-16 h-16 mx-auto"
+                className="w-16 h-16 mx-auto"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
                 <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Đang tải...
+              Không tìm thấy yêu cầu nào
             </h3>
+            <p className="text-gray-500">
+              Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+            </p>
           </div>
         ) : (
           <>
             {/* Rental Request Properties List */}
             <div className="space-y-4">
-              {paginatedBookings.length > 0 ? (
-                paginatedBookings.map((booking) => (
-                  <PropertyRoom
-                    key={booking.id}
-                    {...bookingToPropertyRoom(booking)}
-                  />
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 mb-4">
-                    <svg
-                      className="w-16 h-16 mx-auto"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Không tìm thấy yêu cầu nào
-                  </h3>
-                  <p className="text-gray-500">
-                    Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                  </p>
-                </div>
-              )}
+              {paginatedBookings.map((booking) => (
+                <PropertyRoom
+                  key={booking.id}
+                  {...bookingToPropertyRoom(booking)}
+                />
+              ))}
             </div>
 
             {/* Pagination */}
