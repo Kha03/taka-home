@@ -185,7 +185,7 @@ export default function NewPropertyPage() {
               area: toSafeNumber(roomType.area),
               price: toSafeNumber(roomType.price),
               deposit: toSafeNumber(roomType.deposit),
-              furnishing: "Cơ bản", // Default furnishing
+              furnishing: formData.furnishing || "Cơ bản", // Default furnishing
               heroImage: undefined,
               images: [],
               rooms: assignedRooms, // Rooms nested inside roomType

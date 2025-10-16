@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import PropertyListItem, {
   PropertyStatus,
 } from "@/components/property-approval/PropertyApprovalItem";
+import { PropertyApprovalModal } from "@/components/property-approval/PropertyApprovalModal";
 import {
   Pagination,
   PaginationContent,
@@ -72,6 +73,12 @@ export default function PropertyApprovalPage() {
     pending: 0,
     approved: 0,
   });
+
+  // Modal state
+  const [selectedPropertyForView, setSelectedPropertyForView] =
+    useState<PropertyOrRoomType | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [allRoomTypes, setAllRoomTypes] = useState<PropertyOrRoomType[]>([]); // Store all room types for modal
 
   // Fetch counts for all tabs
   const fetchCounts = useCallback(async () => {
@@ -172,20 +179,30 @@ export default function PropertyApprovalPage() {
     { id: "da-duyet", label: "Đã duyệt", count: tabCounts.approved },
   ];
 
-  // Group boarding properties to avoid duplicates
+  // Group boarding properties to avoid duplicates in list view
+  // But keep track of all room types for each property
   const paginatedProperties = useMemo(() => {
     if (!Array.isArray(properties)) return [];
 
-    const seen = new Map<string, PropertyOrRoomType>();
+    const grouped = new Map<
+      string,
+      { item: PropertyOrRoomType; allTypes: PropertyOrRoomType[] }
+    >();
 
     properties.forEach((item) => {
       const propertyId = getPropertyId(item);
-      if (!seen.has(propertyId)) {
-        seen.set(propertyId, item);
+      if (!grouped.has(propertyId)) {
+        grouped.set(propertyId, {
+          item: item, // First roomType for display in list
+          allTypes: [item], // All roomTypes for modal
+        });
+      } else {
+        // Add this roomType to allTypes array
+        grouped.get(propertyId)!.allTypes.push(item);
       }
     });
 
-    return Array.from(seen.values());
+    return Array.from(grouped.values());
   }, [properties]);
 
   // Handlers
@@ -210,7 +227,7 @@ export default function PropertyApprovalPage() {
 
       if (response.code === 200) {
         toast.success("Duyệt bất động sản thành công");
-        
+
         // Clear selection
         setSelectedProperties((prev) => {
           const newSelected = new Set(prev);
@@ -243,7 +260,7 @@ export default function PropertyApprovalPage() {
 
       if (response.code === 200) {
         toast.success(`Duyệt thành công ${propertyIds.length} bất động sản`);
-        
+
         // Clear selection
         setSelectedProperties(new Set());
 
@@ -338,7 +355,8 @@ export default function PropertyApprovalPage() {
               </p>
             </div>
           ) : (
-            paginatedProperties.map((item) => {
+            paginatedProperties.map((groupedItem) => {
+              const { item, allTypes } = groupedItem;
               const mapped = mapPropertyToApprovalFormat(item);
               const displayId = getDisplayId(item);
 
@@ -351,6 +369,11 @@ export default function PropertyApprovalPage() {
                   onSelectChange={(selected) =>
                     handlePropertySelect(displayId, selected)
                   }
+                  onClick={() => {
+                    setSelectedPropertyForView(item);
+                    setAllRoomTypes(allTypes); // Store all room types for modal
+                    setIsModalOpen(true);
+                  }}
                   onApprove={() => handleApproveProperty(item)}
                   onReject={handleRejectProperty}
                   className="cursor-pointer"
@@ -359,6 +382,20 @@ export default function PropertyApprovalPage() {
             })
           )}
         </div>
+
+        {/* Property Detail Modal */}
+        <PropertyApprovalModal
+          property={selectedPropertyForView}
+          allRoomTypes={allRoomTypes} // Pass all room types to modal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          onApprove={() => {
+            if (selectedPropertyForView) {
+              handleApproveProperty(selectedPropertyForView);
+            }
+          }}
+          onReject={handleRejectProperty}
+        />
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (

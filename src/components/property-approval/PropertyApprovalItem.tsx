@@ -116,6 +116,7 @@ export default function PropertyListItem(props: PropertyListItemProps) {
   return (
     <Card
       tabIndex={0}
+      onClick={onClick}
       className={`group flex items-center flex-row gap-2.5 rounded-[8px] border-none shadow-none bg-transparent p-3 transition hover:bg-accent/10  ${
         className ?? ""
       }`}
