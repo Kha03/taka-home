@@ -13,6 +13,7 @@ export interface PropertyRoomProps {
   image: string;
   status?: string;
   roomCode?: string;
+  roomType?: string; // Loại phòng cho boarding house
   isRented?: boolean;
   bedrooms: number;
   bathrooms: number;
@@ -32,6 +33,8 @@ export interface PropertyRoomProps {
     reason?: string;
     timestamp: string;
   }>;
+  onApproveRequest?: (requestIndex: number) => void;
+  onRejectRequest?: (requestIndex: number) => void;
 }
 
 export function PropertyRoom({
@@ -39,6 +42,7 @@ export function PropertyRoom({
   image,
   status,
   roomCode,
+  roomType,
   isRented = false,
   bedrooms,
   bathrooms,
@@ -50,6 +54,8 @@ export function PropertyRoom({
   currency = "VND",
   showRentalStatus = false,
   rentalRequests = [],
+  onApproveRequest,
+  onRejectRequest,
 }: PropertyRoomProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price);
@@ -75,8 +81,14 @@ export function PropertyRoom({
             {/* Room Code Badge */}
             <div>
               {roomCode && (
-                <div className="mb-1.5">
+                <div className="mb-1.5 flex items-center gap-2">
                   <PropertyRoomBadge roomCode={roomCode} isRented={isRented} />
+                  {/* Room Type Badge - Chỉ hiển thị cho boarding house */}
+                  {roomType && (
+                    <div className="px-2 py-1 bg-accent/80 rounded text-xs font-medium text-primary">
+                      <span>{roomType}</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -140,14 +152,8 @@ export function PropertyRoom({
                   status={request.status}
                   reason={request.reason}
                   timestamp={request.timestamp}
-                  onApprove={() => {
-                    // Handle approve logic here
-                    console.log("Approved request from:", request.user.name);
-                  }}
-                  onReject={() => {
-                    // Handle reject logic here
-                    console.log("Rejected request from:", request.user.name);
-                  }}
+                  onApprove={() => onApproveRequest?.(index)}
+                  onReject={() => onRejectRequest?.(index)}
                 />
               ))}
             </div>
