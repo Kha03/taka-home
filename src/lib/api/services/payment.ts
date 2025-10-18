@@ -38,5 +38,14 @@ export class PaymentService {
   ): Promise<ApiResponse<PaymentResponse>> {
     return apiClient.post<PaymentResponse>(`${this.basePath}`, dto);
   }
+  async createPaymentByInvoice(
+    invoiceId: string,
+    method: "VNPAY"
+  ): Promise<ApiResponse<PaymentResponse>> {
+    return apiClient.post<PaymentResponse>(
+      `${this.basePath}/invoice/${invoiceId}`,
+      { method }
+    );
+  }
 }
 export const paymentService = new PaymentService();

@@ -241,6 +241,10 @@ export class BookingService {
   async signContract(id: string): Promise<ApiResponse<Booking>> {
     return apiClient.post<Booking>(`${this.basePath}/${id}/sign`);
   }
+  //Bàn giao phòng
+  async handover(id: string): Promise<ApiResponse<Booking>> {
+    return apiClient.post<Booking>(`${this.basePath}/${id}/handover`);
+  }
 }
 
 // Export singleton instance

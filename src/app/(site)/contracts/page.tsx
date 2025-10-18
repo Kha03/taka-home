@@ -19,7 +19,9 @@ import {
   PaymentPurpose,
   type CreatePaymentDto,
 } from "@/lib/api/services/payment";
+import { invoiceService, type Invoice } from "@/lib/api/services/invoice";
 import { PaymentModal } from "@/components/payment/payment-modal";
+import InvoiceDetailDialog from "@/components/contracts/invoice-detail-dialog";
 import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -45,16 +47,18 @@ interface Contract {
     | "pending_signature"
     | "pending_landlord"
     | "awaiting_deposit"
-    | "awaiting_landlord_deposit"; // Tenant đã đặt cọc, chờ landlord
+    | "awaiting_landlord_deposit"
+    | "ready_for_handover"; // Tenant đã đặt cọc, chờ landlord
   contractCode?: string;
   contractId?: string;
   bookingStatus: string;
   contractStatus?: string; // Status của contract từ backend
-  invoices: Invoice[];
+  invoices: ContractInvoice[];
 }
 
-interface Invoice {
-  id: number;
+interface ContractInvoice {
+  id: number; // Số thứ tự hiển thị
+  invoiceId: string; // UUID từ API để thanh toán
   month: string;
   dueDate: string;
   status: "paid" | "pending" | "overdue";
@@ -75,6 +79,12 @@ export default function ContractsPage() {
     null
   );
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
+
+  // Invoice modal states
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([]);
+  const [loadingInvoice, setLoadingInvoice] = useState(false);
 
   const PAGE_SIZE = 4;
 
@@ -115,7 +125,56 @@ export default function ContractsPage() {
             })
             .map((booking) => bookingToContract(booking));
 
-          setContracts(contractsData);
+          // Fetch invoices for DUAL_ESCROW_FUNDED and ACTIVE contracts
+          const contractsWithInvoices = await Promise.all(
+            contractsData.map(async (contract) => {
+              if (
+                (contract.bookingStatus === "DUAL_ESCROW_FUNDED" ||
+                  contract.bookingStatus === "ACTIVE") &&
+                contract.contractId
+              ) {
+                try {
+                  const invoiceResponse =
+                    await invoiceService.getInvoiceByContractId(
+                      contract.contractId
+                    );
+                  if (invoiceResponse.data && invoiceResponse.data.length > 0) {
+                    // Map API invoices to contract invoice format
+                    const mappedInvoices = invoiceResponse.data.map(
+                      (apiInvoice, index) => ({
+                        id: index + 1, // Số thứ tự hiển thị
+                        invoiceId: apiInvoice.id, // UUID từ API
+                        month: new Date(
+                          apiInvoice.billingPeriod
+                        ).toLocaleDateString("vi-VN", {
+                          month: "2-digit",
+                          year: "numeric",
+                        }),
+                        dueDate: new Date(
+                          apiInvoice.dueDate
+                        ).toLocaleDateString("vi-VN"),
+                        status:
+                          apiInvoice.status === "PAID"
+                            ? ("paid" as const)
+                            : apiInvoice.status === "OVERDUE"
+                            ? ("overdue" as const)
+                            : ("pending" as const),
+                      })
+                    );
+                    return { ...contract, invoices: mappedInvoices };
+                  }
+                } catch (error) {
+                  console.error(
+                    `Error fetching invoices for contract ${contract.contractId}:`,
+                    error
+                  );
+                }
+              }
+              return contract;
+            })
+          );
+
+          setContracts(contractsWithInvoices);
         }
       } catch (error) {
         console.error("Error fetching contracts:", error);
@@ -199,6 +258,12 @@ export default function ContractsPage() {
     } else if (booking.status === "ESCROW_FUNDED_L") {
       // Landlord đã đặt cọc, chờ tenant đặt cọc
       contractStatus = "awaiting_deposit";
+    } else if (booking.status === "DUAL_ESCROW_FUNDED") {
+      // Cả hai bên đã đặt cọc, hợp đồng đang hoạt động
+      contractStatus = "active";
+    } else if (booking.status === "READY_FOR_HANDOVER") {
+      // Sẵn sàng bàn giao
+      contractStatus = "ready_for_handover";
     } else if (["SETTLED", "CANCELLED"].includes(booking.status)) {
       contractStatus = "expired";
     }
@@ -228,7 +293,7 @@ export default function ContractsPage() {
       contractId: booking.contract?.id,
       bookingStatus: booking.status,
       contractStatus: booking.contract?.status, // Thêm contract status từ backend
-      invoices: [], // TODO: Fetch invoices when ACTIVE
+      invoices: [], // Will be populated for DUAL_ESCROW_FUNDED status
     };
   };
 
@@ -314,6 +379,142 @@ export default function ContractsPage() {
     } catch (error) {
       console.error("Error creating payment:", error);
       toast.error("Không thể tạo thanh toán. Vui lòng thử lại");
+    }
+  };
+
+  // Handle view invoice detail
+  const handleViewInvoice = async (contractId: string) => {
+    try {
+      setLoadingInvoice(true);
+      toast.loading("Đang tải thông tin hóa đơn...");
+      const response = await invoiceService.getInvoiceByContractId(contractId);
+
+      console.log("📄 Invoice Response:", response);
+      console.log("📄 Invoice Data:", response.data);
+
+      toast.dismiss();
+
+      if (response.data && response.data.length > 0) {
+        // API returns an array of invoices, take the first one (or latest)
+        const invoice = response.data[0];
+        console.log("📄 Selected Invoice:", invoice);
+
+        setSelectedInvoice(invoice);
+        setSelectedInvoices(response.data);
+        setShowInvoiceDialog(true);
+      } else {
+        toast.error("Không tìm thấy hóa đơn");
+      }
+    } catch (error) {
+      console.error("Error fetching invoice:", error);
+      toast.dismiss();
+      toast.error("Không thể tải thông tin hóa đơn");
+    } finally {
+      setLoadingInvoice(false);
+    }
+  };
+
+  // Handle pay invoice
+  const handlePayInvoice = async (invoiceId: string) => {
+    try {
+      toast.loading("Đang tạo thanh toán...");
+
+      const response = await paymentService.createPaymentByInvoice(
+        invoiceId,
+        "VNPAY"
+      );
+
+      toast.dismiss();
+
+      if (response.data?.paymentUrl) {
+        toast.success("Đang chuyển đến trang thanh toán...");
+        // Redirect to VNPay
+        window.location.href = response.data.paymentUrl;
+      } else {
+        toast.error("Không thể tạo thanh toán");
+      }
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      toast.dismiss();
+      toast.error("Không thể tạo thanh toán. Vui lòng thử lại");
+    }
+  };
+
+  // Handle handover - chủ nhà xác nhận bàn giao
+  const handleHandover = async (bookingId: string) => {
+    try {
+      toast.loading("Đang xác nhận bàn giao...");
+
+      await bookingService.handover(bookingId);
+
+      toast.dismiss();
+      toast.success("Bàn giao thành công! Hợp đồng đã được kích hoạt.");
+
+      // Refresh contracts list
+      const response = await bookingService.getMyBookings();
+      if (response.data) {
+        const contractsData = response.data
+          .filter((booking) => {
+            return (
+              booking.contract !== null || booking.status === "PENDING_LANDLORD"
+            );
+          })
+          .map((booking) => bookingToContract(booking));
+
+        // Fetch invoices for DUAL_ESCROW_FUNDED contracts
+        const contractsWithInvoices = await Promise.all(
+          contractsData.map(async (contract) => {
+            if (
+              (contract.bookingStatus === "DUAL_ESCROW_FUNDED" ||
+                contract.bookingStatus === "ACTIVE") &&
+              contract.contractId
+            ) {
+              try {
+                const invoiceResponse =
+                  await invoiceService.getInvoiceByContractId(
+                    contract.contractId
+                  );
+                if (invoiceResponse.data && invoiceResponse.data.length > 0) {
+                  const mappedInvoices = invoiceResponse.data.map(
+                    (apiInvoice, index) => ({
+                      id: index + 1,
+                      invoiceId: apiInvoice.id,
+                      month: new Date(
+                        apiInvoice.billingPeriod
+                      ).toLocaleDateString("vi-VN", {
+                        month: "2-digit",
+                        year: "numeric",
+                      }),
+                      dueDate: new Date(apiInvoice.dueDate).toLocaleDateString(
+                        "vi-VN"
+                      ),
+                      status:
+                        apiInvoice.status === "PAID"
+                          ? ("paid" as const)
+                          : apiInvoice.status === "OVERDUE"
+                          ? ("overdue" as const)
+                          : ("pending" as const),
+                    })
+                  );
+                  return { ...contract, invoices: mappedInvoices };
+                }
+              } catch (error) {
+                console.error(
+                  `Error fetching invoices for contract ${contract.contractId}:`,
+                  error
+                );
+              }
+            }
+            return contract;
+          })
+        );
+
+        setContracts(contractsWithInvoices);
+      }
+    } catch (error) {
+      console.error("Error handover:", error);
+      toast.dismiss();
+      toast.error("Không thể xác nhận bàn giao. Vui lòng thử lại");
     }
   };
 
@@ -436,6 +637,9 @@ export default function ContractsPage() {
                     onViewContract: handleViewContract,
                     onSignContract: handleSignContract,
                     onDepositPayment: handleDepositPayment,
+                    onViewInvoice: handleViewInvoice,
+                    onPayInvoice: handlePayInvoice,
+                    onHandover: handleHandover,
                   }}
                   userRole={userRole}
                 />
@@ -450,6 +654,14 @@ export default function ContractsPage() {
           onClose={() => setShowPaymentModal(false)}
           amount={paymentAmount}
           onPaymentSuccess={handlePaymentSuccess}
+        />
+
+        {/* Invoice Detail Dialog */}
+        <InvoiceDetailDialog
+          isOpen={showInvoiceDialog}
+          onClose={() => setShowInvoiceDialog(false)}
+          invoice={selectedInvoice}
+          onPayInvoice={handlePayInvoice}
         />
 
         {/* Pagination */}

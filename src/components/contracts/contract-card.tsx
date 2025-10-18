@@ -17,6 +17,7 @@ import {
   MapPin,
   Eye,
   AlertCircle,
+  FileText,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -36,7 +37,8 @@ import {
 } from "@/components/ui/dialog";
 
 interface Invoice {
-  id: number;
+  id: number; // Số thứ tự hiển thị
+  invoiceId: string; // UUID từ API để thanh toán (Invoice.id)
   month: string;
   dueDate: string;
   status: "paid" | "pending" | "overdue";
@@ -61,7 +63,8 @@ interface Contract {
     | "pending_signature"
     | "pending_landlord"
     | "awaiting_deposit"
-    | "awaiting_landlord_deposit";
+    | "awaiting_landlord_deposit"
+    | "ready_for_handover";
   contractCode?: string;
   contractId?: string;
   bookingStatus: string;
@@ -70,6 +73,9 @@ interface Contract {
   onViewContract?: (contractId: string) => void;
   onSignContract?: (bookingId: string) => void;
   onDepositPayment?: (contractId: string) => void;
+  onViewInvoice?: (contractId: string) => void;
+  onPayInvoice?: (invoiceId: string) => void;
+  onHandover?: (bookingId: string) => void;
 }
 
 interface ContractCardProps {
@@ -133,43 +139,22 @@ export default function ContractCard({
           icon: <AlertCircle className="w-6 h-6 text-purple-600" />,
           text: userRole === "LANDLORD" ? "Chờ đặt cọc" : "Chờ chủ nhà",
         };
+      case "ready_for_handover":
+        return {
+          bgColor: "bg-[#10B981]/20",
+          icon: <CheckCircle className="w-6 h-6 text-emerald-600" />,
+          text: "Sẵn sàng bàn giao",
+        };
+      default:
+        return {
+          bgColor: "bg-gray-100",
+          icon: <Calendar className="w-6 h-6 text-gray-600" />,
+          text: "Không xác định",
+        };
     }
   };
 
   const statusDisplay = getStatusDisplay(contract.status);
-
-  //   const getStatusIcon = (status: Invoice["status"]) => {
-  //     switch (status) {
-  //       case "paid":
-  //         return <CheckCircle className="w-4 h-4 text-green-500" />;
-  //       case "pending":
-  //         return <Clock className="w-4 h-4 text-orange-500" />;
-  //       case "overdue":
-  //         return <AlertCircle className="w-4 h-4 text-red-500" />;
-  //     }
-  //   };
-
-  //   const getStatusText = (status: Invoice["status"]) => {
-  //     switch (status) {
-  //       case "paid":
-  //         return "Đã thanh toán";
-  //       case "pending":
-  //         return "Nhận tin";
-  //       case "overdue":
-  //         return "Quá hạn";
-  //     }
-  //   };
-
-  //   const getStatusBadgeColor = (status: Invoice["status"]) => {
-  //     switch (status) {
-  //       case "paid":
-  //         return "bg-green-100 text-green-800 hover:bg-green-100";
-  //       case "pending":
-  //         return "bg-orange-100 text-orange-800 hover:bg-orange-100";
-  //       case "overdue":
-  //         return "bg-red-100 text-red-800 hover:bg-red-100";
-  //     }
-  //   };
 
   const toggleContractExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -482,6 +467,58 @@ export default function ContractCard({
         </div>
       )}
 
+      {contract.status === "ready_for_handover" && (
+        <div className="ml-35 mb-2">
+          <Card className="bg-emerald-50 border-emerald-200 p-1">
+            <CardContent className="py-2">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="space-y-2 flex-1">
+                  <p className="text-sm font-semibold text-emerald-900">
+                    {userRole === "LANDLORD"
+                      ? "Sẵn sàng bàn giao"
+                      : "Chờ bàn giao"}
+                  </p>
+                  <p className="text-sm text-emerald-800">
+                    {userRole === "LANDLORD"
+                      ? "Cả hai bên đã hoàn tất đặt cọc. Vui lòng xác nhận bàn giao để kích hoạt hợp đồng."
+                      : "Cả hai bên đã hoàn tất đặt cọc. Đang chờ chủ nhà xác nhận bàn giao để kích hoạt hợp đồng."}
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                    {contract.contractId && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-primary"
+                        onClick={() =>
+                          contract.onViewContract?.(contract.contractId!)
+                        }
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Xem hợp đồng
+                      </Button>
+                    )}
+                    {userRole === "LANDLORD" &&
+                      contract.bookingId &&
+                      contract.onHandover && (
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            contract.onHandover?.(contract.bookingId)
+                          }
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Xác nhận bàn giao
+                        </Button>
+                      )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {contract.status === "active" && contract.contractId && (
         <div className="ml-35 mb-4">
           <Button
@@ -496,6 +533,34 @@ export default function ContractCard({
       )}
 
       {/* Only show invoice section when contract is active */}
+      {contract.status === "active" &&
+        contract.bookingStatus === "DUAL_ESCROW_FUNDED" &&
+        contract.invoices.length === 0 && (
+          <CardContent className="ml-35 relative rounded-2xl border border-dashed border-[#E5E5E5] p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 text-gray-500" />
+                <div>
+                  <div className="font-semibold text-foreground">
+                    Hóa đơn thanh toán
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Xem chi tiết hóa đơn của bạn
+                  </div>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => contract.onViewInvoice?.(contract.contractId!)}
+                className="bg-[#D4A574] hover:bg-[#D4A574]/90"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Xem hóa đơn
+              </Button>
+            </div>
+          </CardContent>
+        )}
+
       {contract.status === "active" && contract.invoices.length > 0 && (
         <CardContent className="ml-35 relative rounded-2xl border border-dashed border-[#E5E5E5] p-6">
           <Collapsible open={isExpanded} onOpenChange={toggleContractExpansion}>
@@ -536,21 +601,40 @@ export default function ContractCard({
                 </div>
               </div>
 
-              {mostRecentInvoice.status === "paid" ? (
-                <div className="flex items-center gap-2 text-xs text-foreground">
-                  <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
-                    <Check className="h-3 w-3 text-primary-foreground" />
+              <div className="flex items-center gap-2">
+                {contract.bookingStatus === "DUAL_ESCROW_FUNDED" &&
+                  contract.contractId && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs text-primary"
+                      onClick={() =>
+                        contract.onViewInvoice?.(contract.contractId!)
+                      }
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      Chi tiết
+                    </Button>
+                  )}
+                {mostRecentInvoice.status === "paid" ? (
+                  <div className="flex items-center gap-2 text-xs text-foreground">
+                    <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
+                      <Check className="h-3 w-3 text-primary-foreground" />
+                    </div>
+                    <span>Đã thanh toán</span>
                   </div>
-                  <span>Đã thanh toán</span>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
-                >
-                  Chưa thanh toán
-                </Button>
-              )}
+                ) : (
+                  <Button
+                    size="sm"
+                    className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
+                    onClick={() =>
+                      contract.onPayInvoice?.(mostRecentInvoice.invoiceId)
+                    }
+                  >
+                    Thanh toán
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Các hóa đơn còn lại */}
@@ -583,21 +667,40 @@ export default function ContractCard({
                     </div>
                   </div>
 
-                  {invoice.status === "paid" ? (
-                    <div className="flex items-center gap-2 text-xs text-foreground">
-                      <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
-                        <Check className="h-3 w-3 text-primary-foreground" />
+                  <div className="flex items-center gap-2">
+                    {contract.bookingStatus === "DUAL_ESCROW_FUNDED" &&
+                      contract.contractId && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() =>
+                            contract.onViewInvoice?.(contract.contractId!)
+                          }
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
+                          Chi tiết
+                        </Button>
+                      )}
+                    {invoice.status === "paid" ? (
+                      <div className="flex items-center gap-2 text-xs text-foreground">
+                        <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </div>
+                        <span>Đã thanh toán</span>
                       </div>
-                      <span>Đã thanh toán</span>
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
-                    >
-                      Chưa thanh toán
-                    </Button>
-                  )}
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
+                        onClick={() =>
+                          contract.onPayInvoice?.(invoice.invoiceId)
+                        }
+                      >
+                        Thanh toán
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </CollapsibleContent>
