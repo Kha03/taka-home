@@ -44,5 +44,9 @@ export class InvoiceService {
   ): Promise<ApiResponse<Invoice[]>> {
     return apiClient.get<Invoice[]>(`${this.basePath}/contract/${contractId}`);
   }
+
+  async getInvoiceById(invoiceId: string): Promise<ApiResponse<Invoice>> {
+    return apiClient.get<Invoice>(`${this.basePath}/${invoiceId}`);
+  }
 }
 export const invoiceService = new InvoiceService();

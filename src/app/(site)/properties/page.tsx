@@ -32,7 +32,7 @@ interface Invoice {
   id: number;
   month: string;
   dueDate: string;
-  status: "paid" | "pending" | "overdue";
+  status: "PAID" | "PENDING" | "OVERDUE";
 }
 
 const mockContracts: Contract[] = [
