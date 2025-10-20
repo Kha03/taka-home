@@ -11,7 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, User, Settings, Plus } from "lucide-react";
+import { WalletBalance } from "@/components/wallet/wallet-balance";
+import { LogOut, User, Settings, Plus, Wallet } from "lucide-react";
 import Link from "next/link";
 
 export function UserMenu() {
@@ -59,6 +60,7 @@ export function UserMenu() {
               <p className="text-xs leading-none text-muted-foreground">
                 {user.email}
               </p>
+              <WalletBalance variant="compact" className="mt-2" />
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -66,6 +68,12 @@ export function UserMenu() {
             <Link href="/my-properties/new" className="cursor-pointer">
               <Plus className="mr-2 h-4 w-4" />
               <span>Đăng tin mới</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/wallet" className="cursor-pointer">
+              <Wallet className="mr-2 h-4 w-4" />
+              <span>Quản lý ví</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>

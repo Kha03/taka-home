@@ -6,10 +6,6 @@ import { NotificationBell } from "@/components/notifications";
 export function IconActions() {
   return (
     <div className="flex items-center gap-3">
-      <Button variant="default" size="post" className="gap-2">
-        <Send className="text-xl" />
-        <span>Đăng tin</span>
-      </Button>
       <Button variant="golden" size="icon-sm" className="rounded-full">
         <Heart className="text-xl" />
       </Button>

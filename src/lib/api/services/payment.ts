@@ -30,7 +30,12 @@ export enum PaymentStatusEnum {
   FAILED = "FAILED",
   REFUNDED = "REFUNDED",
 }
-
+export interface WalletResponse {
+  walletId: string;
+  availableBalance: number;
+  currency: string;
+  updatedAt: string;
+}
 export class PaymentService {
   private basePath = "/payments";
   async createPayment(
@@ -46,6 +51,9 @@ export class PaymentService {
       `${this.basePath}/invoice/${invoiceId}`,
       { method }
     );
+  }
+  async getWalletMe(): Promise<ApiResponse<WalletResponse>> {
+    return apiClient.get<WalletResponse>(`/wallet/me`);
   }
 }
 export const paymentService = new PaymentService();
