@@ -395,3 +395,13 @@ export interface UploadResponse {
 export interface MultipleUploadResponse {
   files: UploadResponse[];
 }
+
+// ========== Notification Types ==========
+export interface NotificationResponse {
+  id: string;
+  type: "GENERAL" | "PAYMENT" | "CONTRACT" | "PENALTY" | "SYSTEM";
+  title: string;
+  content: string;
+  status: "PENDING" | "COMPLETED";
+  createdAt: string;
+}

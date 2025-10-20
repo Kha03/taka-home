@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import StatusTab from "@/components/ui/status-tab";
 import ContractFilter from "@/components/contracts/contract-filter";
 import ContractCard from "@/components/contracts/contract-card";
@@ -38,45 +38,67 @@ export default function ContractsPage() {
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  // Handle view invoice detail
-  const handleViewInvoice = async (contractId: string) => {
-    try {
-      const invoices = await actions.viewInvoice(contractId);
-      if (invoices && invoices.length > 0) {
-        setSelectedInvoice(invoices[0]); // Take first invoice
-        setShowInvoiceDialog(true);
-      } else {
-        alert("Không tìm thấy hóa đơn");
-      }
-    } catch (error) {
-      console.error("Error viewing invoice:", error);
-      alert("Không thể tải thông tin hóa đơn");
-    }
-  };
+  // Memoized: Handle view invoice detail to avoid re-creating on every render
+  const handleViewInvoice = useCallback(
+    async (contractId: string, invoiceId?: string) => {
+      try {
+        const invoices = await actions.viewInvoice(contractId);
+        if (invoices && invoices.length > 0) {
+          const targetInvoice = invoiceId
+            ? invoices.find((inv) => inv.id === invoiceId) || invoices[0]
+            : invoices[0];
 
+          setSelectedInvoice(targetInvoice);
+          setShowInvoiceDialog(true);
+        } else {
+          alert("Không tìm thấy hóa đơn");
+        }
+      } catch (error) {
+        console.error("Error viewing invoice:", error);
+        alert("Không thể tải thông tin hóa đơn");
+      }
+    },
+    [actions]
+  );
+
+  // Optimized: Filter logic with early returns to avoid unnecessary processing
   const filteredContracts = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    let list = contracts;
-    if (q) {
-      list = list.filter(
+    // Early return for no filters
+    if (!searchQuery.trim() && activeTab === "all") {
+      return contracts;
+    }
+
+    let filtered = contracts;
+
+    // Apply search filter first (most selective)
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      filtered = filtered.filter(
         (c) =>
-          c.id.toLowerCase().includes(q) ||
-          c.tenant.toLowerCase().includes(q) ||
-          c.propertyCode.toLowerCase().includes(q) ||
-          c.address.toLowerCase().includes(q)
+          c.id.toLowerCase().includes(query) ||
+          c.tenant.toLowerCase().includes(query) ||
+          c.propertyCode.toLowerCase().includes(query) ||
+          c.address.toLowerCase().includes(query)
       );
     }
-    if (activeTab === "active")
-      return list.filter((c) => c.status === "active");
-    if (activeTab === "expired")
-      return list.filter((c) => c.status === "expired");
-    if (activeTab === "pending")
-      return list.filter((c) =>
-        ["pending_landlord", "pending_signature", "awaiting_deposit"].includes(
-          c.status
-        )
-      );
-    return list;
+
+    // Apply status filter
+    switch (activeTab) {
+      case "active":
+        return filtered.filter((c) => c.status === "active");
+      case "expired":
+        return filtered.filter((c) => c.status === "expired");
+      case "pending":
+        return filtered.filter((c) =>
+          [
+            "pending_landlord",
+            "pending_signature",
+            "awaiting_deposit",
+          ].includes(c.status)
+        );
+      default:
+        return filtered;
+    }
   }, [contracts, activeTab, searchQuery]);
 
   const contractTabs = useMemo(() => {
@@ -96,30 +118,39 @@ export default function ContractsPage() {
     ];
   }, [contracts]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredContracts.length / PAGE_SIZE)
-  );
-  const current = Math.min(currentPage, totalPages);
-  const pageItems = useMemo(
-    () =>
-      filteredContracts.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE),
-    [filteredContracts, current]
+  // Optimized: Memoized pagination to avoid recalculating on unrelated re-renders
+  const paginationData = useMemo(() => {
+    const totalPages = Math.max(
+      1,
+      Math.ceil(filteredContracts.length / PAGE_SIZE)
+    );
+    const current = Math.min(currentPage, totalPages);
+    const pageItems = filteredContracts.slice(
+      (current - 1) * PAGE_SIZE,
+      current * PAGE_SIZE
+    );
+
+    return { totalPages, current, pageItems };
+  }, [filteredContracts, currentPage]);
+
+  const { totalPages, current, pageItems } = paginationData;
+
+  // Memoized: Deposit payment handlers
+  const handleDepositPayment = useCallback(
+    (contractId: string) => {
+      const { amount } = actions.depositPayment(contractId);
+      setSelectedContractId(contractId);
+      setPaymentAmount(amount);
+      setShowPaymentModal(true);
+    },
+    [actions]
   );
 
-  // deposit flow handlers
-  const handleDepositPayment = (contractId: string) => {
-    const { amount } = actions.depositPayment(contractId);
-    setSelectedContractId(contractId);
-    setPaymentAmount(amount);
-    setShowPaymentModal(true);
-  };
-
-  const handlePaymentSuccess = async (_method: string) => {
+  const handlePaymentSuccess = useCallback(async () => {
     if (!selectedContractId) return;
     await actions.createDepositPayment(selectedContractId, paymentAmount);
     setShowPaymentModal(false);
-  };
+  }, [selectedContractId, paymentAmount, actions]);
 
   return (
     <div className="min-h-screen bg-[#FFF7E9] p-4">
@@ -232,7 +263,7 @@ export default function ContractsPage() {
           onPaymentSuccess={handlePaymentSuccess}
         />
 
-        {/* Invoice Detail Dialog (kept API identical for compatibility). You can wire actions.viewInvoice here if needed. */}
+        {/* Invoice Detail Dialog - Optimized with memoized handlers */}
         <InvoiceDetailDialog
           isOpen={showInvoiceDialog}
           onClose={() => setShowInvoiceDialog(false)}

@@ -41,7 +41,7 @@ interface ContractCardProps {
     onViewContract?: (contractId: string) => void;
     onSignContract?: (bookingId: string) => void;
     onDepositPayment?: (contractId: string) => void;
-    onViewInvoice?: (contractId: string) => void;
+    onViewInvoice?: (contractId: string, invoiceId?: string) => void;
     onPayInvoice?: (invoiceId: string) => void;
     onHandover?: (bookingId: string) => void;
   };
@@ -663,7 +663,10 @@ export default function ContractCard({
                         variant="outline"
                         className="text-xs text-primary"
                         onClick={() =>
-                          contract.onViewInvoice?.(contract.contractId!)
+                          contract.onViewInvoice?.(
+                            contract.contractId!,
+                            mostRecentInvoice.invoiceId
+                          )
                         }
                       >
                         <Eye className="w-3 h-3 mr-1" />
@@ -735,9 +738,12 @@ export default function ContractCard({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-xs"
+                          className="text-xs text-primary"
                           onClick={() =>
-                            contract.onViewInvoice?.(contract.contractId!)
+                            contract.onViewInvoice?.(
+                              contract.contractId!,
+                              invoice.invoiceId
+                            )
                           }
                         >
                           <Eye className="w-3 h-3 mr-1" />

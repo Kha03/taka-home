@@ -86,7 +86,7 @@ export default function RentalRequestsPage() {
 
       if (response.data) {
         toast.success(
-          "Duyệt yêu cầu thuê thành công! Vui lòng ký trên ứng dụng VNPT SmartCA"
+          "Duyệt yêu cầu thuê thành công! Vui lòng đợi người thuê xác nhận hợp đồng."
         );
 
         // Refresh bookings

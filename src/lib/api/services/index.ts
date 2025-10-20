@@ -10,3 +10,4 @@ export {
 export { propertyService, PropertyService } from "./property";
 export { chatService, ChatService } from "./chat";
 export { bookingService, BookingService } from "./booking";
+export { notificationService, NotificationService } from "./notification";

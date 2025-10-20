@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Bell, Heart, Send, MessageCircle } from "lucide-react";
+import { Heart, Send, MessageCircle } from "lucide-react";
+import { NotificationBell } from "@/components/notifications";
 
 export function IconActions() {
   return (
@@ -23,15 +24,7 @@ export function IconActions() {
           3
         </span>
       </div>
-      <div className="relative">
-        <Button variant="golden" size="icon-sm" className="rounded-full">
-          <Bell className="text-xl" />
-        </Button>
-        {/* Badge for unread messages */}
-        <span className="absolute top-[-4px] right-[-4px] w-5 h-5 px-1 flex items-center justify-center text-[12px] font-semibold text-white bg-[#FF0004] rounded-full">
-          3
-        </span>
-      </div>
+      <NotificationBell className="rounded-full" />
     </div>
   );
 }
