@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -10,7 +10,8 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import type { Property, RoomTypeDetail } from "@/lib/api/types";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, MapPin } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import MapLocation from "../property-detail/MapLocation";
 import { PropertyDescription } from "../property-detail/PropertyDescription";
@@ -154,6 +155,18 @@ export function PropertyDetailView({
   };
 
   const roomsData = getRoomsData();
+
+  // Get mapLocation based on type
+  const getMapLocation = (): string | undefined => {
+    if (isRoomTypeDetail(property)) {
+      // For BOARDING: get mapLocation from nested property
+      return property.rooms[0]?.property?.mapLocation;
+    }
+    // For APARTMENT: get mapLocation directly
+    return (property as Property).mapLocation;
+  };
+
+  const mapLocation = getMapLocation();
 
   // Tính index bắt đầu của "trang" hiện tại cho strip
   useEffect(() => {
@@ -328,7 +341,29 @@ export function PropertyDetailView({
             }
           />
           {/* Map Location */}
-          <MapLocation />
+          {mapLocation ? (
+            <MapLocation mapLocation={mapLocation} />
+          ) : (
+            <Card className="shadow-none bg-background border-0 p-4 rounded-[12px]">
+              <CardContent className="p-0">
+                <div className="font-bold text-primary mb-4 flex items-center gap-2">
+                  <div className="w-6 h-6 flex items-center justify-center bg-[#D9D9D9] rounded-full">
+                    <MapPin className="h-3 w-3 text-primary" />
+                  </div>
+                  Vị trí bất động sản trên bản đồ
+                </div>
+                <div className="w-full h-[160px] rounded-lg overflow-hidden relative">
+                  <Image
+                    src="/assets/imgs/map-location.png"
+                    alt="Map location"
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Right Column - Agent and Actions */}
