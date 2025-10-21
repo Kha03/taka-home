@@ -170,16 +170,43 @@ export default function ContractsPage() {
   );
 
   const handleInvoicePayment = useCallback(
-    (invoiceId: string) => {
-      const invoice = selectedInvoice;
-      if (!invoice) return;
+    async (invoiceId: string) => {
+      // Nếu đang xem invoice dialog, dùng selectedInvoice
+      if (selectedInvoice && selectedInvoice.id === invoiceId) {
+        setPaymentType("invoice");
+        setSelectedInvoiceId(invoiceId);
+        setPaymentAmount(selectedInvoice.totalAmount);
+        setShowPaymentModal(true);
+        return;
+      }
 
-      setPaymentType("invoice");
-      setSelectedInvoiceId(invoiceId);
-      setPaymentAmount(invoice.totalAmount);
-      setShowPaymentModal(true);
+      // Nếu không, tìm trong contracts data
+      // Tìm contract có invoice này
+      for (const contract of contracts) {
+        if (contract.invoices) {
+          const invoice = contract.invoices.find(
+            (inv) => inv.invoiceId === invoiceId
+          );
+          if (invoice && contract.contractId) {
+            // Fetch invoice details để lấy totalAmount
+            try {
+              const invoices = await actions.viewInvoice(contract.contractId);
+              const fullInvoice = invoices?.find((inv) => inv.id === invoiceId);
+              if (fullInvoice) {
+                setPaymentType("invoice");
+                setSelectedInvoiceId(invoiceId);
+                setPaymentAmount(fullInvoice.totalAmount);
+                setShowPaymentModal(true);
+              }
+            } catch (error) {
+              console.error("Error fetching invoice:", error);
+            }
+            return;
+          }
+        }
+      }
     },
-    [selectedInvoice]
+    [selectedInvoice, contracts, actions]
   );
 
   return (
