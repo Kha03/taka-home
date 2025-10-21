@@ -348,10 +348,12 @@ export interface RentalRequestUpdateRequest {
 // ========== Auth Types ==========
 export interface User {
   id: string;
+  email?: string;
   fullName: string;
   avatarUrl?: string;
   status: "ACTIVE" | "INACTIVE" | "BANNED";
   phone?: string;
+  CCCD?: string;
 }
 
 export interface Account {
@@ -360,6 +362,8 @@ export interface Account {
   roles: ("TENANT" | "LANDLORD" | "ADMIN")[];
   isVerified: boolean;
   user: User;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LoginRequest {

@@ -3,13 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/services/auth";
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-}
+import { User } from "@/lib/api";
 
 interface AuthContextType {
   user: User | null;
@@ -80,8 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const user: User = {
           id: account.user.id,
           email: account.email,
-          name: account.user.fullName,
-          avatar: account.user.avatarUrl || "/assets/imgs/avatar.png",
+          fullName: account.user.fullName,
+          avatarUrl: account.user.avatarUrl || "/assets/imgs/avatar.png",
+          status: account.user.status,
+          CCCD: account.user.CCCD || "",
         };
 
         // Store token and user data
@@ -143,8 +139,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const user: User = {
             id: account.id,
             email: account.email,
-            name: account.user.fullName,
-            avatar: account.user.avatarUrl || "/assets/imgs/avatar.png",
+            fullName: account.user.fullName,
+            avatarUrl: account.user.avatarUrl || "/assets/imgs/avatar.png",
+            status: account.user.status,
           };
 
           // Store token and user data

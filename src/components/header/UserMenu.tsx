@@ -31,7 +31,7 @@ export function UserMenu() {
     );
   }
 
-  const initials = user.name
+  const initials = user.fullName
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -44,7 +44,7 @@ export function UserMenu() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarImage src={user.avatarUrl} alt={user.fullName} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </Button>
@@ -56,7 +56,9 @@ export function UserMenu() {
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
+              <p className="text-sm font-medium leading-none">
+                {user.fullName}
+              </p>
               <p className="text-xs leading-none text-muted-foreground">
                 {user.email}
               </p>

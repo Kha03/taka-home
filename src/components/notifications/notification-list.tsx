@@ -12,7 +12,7 @@ import type { NotificationResponse } from "@/lib/api/types";
 import { Button } from "../ui/button";
 
 export interface NotificationListProps {
-  userId?: string;
+  userId?: string | null;
   autoRefresh?: boolean;
   refreshInterval?: number;
   onNotificationClick?: (notification: NotificationResponse) => void;
@@ -36,7 +36,7 @@ export function NotificationList({
     markAllAsCompleted,
     deleteNotification,
   } = useNotifications({
-    userId,
+    userId: userId || undefined,
     autoRefresh,
     refreshInterval,
   });

@@ -56,11 +56,11 @@ function ChatPageContent() {
   // Convert auth user to chat user format
   const currentUser = {
     id: user.id,
-    name: user.name,
-    avatar: user.avatar || "/assets/imgs/avatar.png",
+    name: user.fullName,
+    avatar: user.avatarUrl || "/assets/imgs/avatar.png",
     role: "tenant" as const, // You can determine this from user data if available
     email: user.email,
-    phone: "",
+    phone: user.phone || "",
   };
 
   const handleChatSelect = (chat: typeof activeChat) => {

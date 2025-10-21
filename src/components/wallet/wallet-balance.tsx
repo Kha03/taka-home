@@ -108,7 +108,7 @@ export function WalletBalance({
   // Card variant (default)
   return (
     <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
         {showTitle && (
           <CardTitle className="text-sm font-medium">Số dư ví</CardTitle>
         )}
@@ -126,7 +126,7 @@ export function WalletBalance({
           <Button
             variant="outline"
             size="sm"
-            className="mt-3 w-full"
+            className="mt-3 w-full text-primary"
             onClick={refetch}
             disabled={loading}
           >

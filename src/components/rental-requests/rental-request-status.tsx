@@ -1,9 +1,7 @@
 import { cn } from "@/lib/utils/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Check, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { Check, MessageCircle, X } from "lucide-react";
-import { Close } from "@radix-ui/react-dialog";
-import { use } from "react";
 
 interface RentalRequestStatusProps {
   user: {
