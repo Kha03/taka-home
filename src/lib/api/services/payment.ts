@@ -2,7 +2,7 @@ import { apiClient } from "../client";
 import { ApiResponse } from "../types";
 
 export interface CreatePaymentDto {
-  contractId: string;
+  contractId?: string;
   amount: number;
   method: "VNPAY";
   purpose: PaymentPurpose;
@@ -36,6 +36,19 @@ export interface WalletResponse {
   currency: string;
   updatedAt: string;
 }
+export interface WalletHistoryResponse {
+  id: string;
+  walletId: string;
+  direction: "CREDIT" | "DEBIT";
+  type: "TOPUP" | "CONTRACT_PAYMENT" | "REFUND";
+  amount: string;
+  status: "PENDING" | "COMPLETED" | "FAILED";
+  refId: string;
+  note: string;
+  completedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
 export class PaymentService {
   private basePath = "/payments";
   async createPayment(
@@ -54,6 +67,9 @@ export class PaymentService {
   }
   async getWalletMe(): Promise<ApiResponse<WalletResponse>> {
     return apiClient.get<WalletResponse>(`/wallet/me`);
+  }
+  async getWalletHistory(): Promise<ApiResponse<WalletHistoryResponse[]>> {
+    return apiClient.get<WalletHistoryResponse[]>(`/wallet/transactions`);
   }
 }
 export const paymentService = new PaymentService();

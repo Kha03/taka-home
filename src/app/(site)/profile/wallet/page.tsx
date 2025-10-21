@@ -1,6 +1,6 @@
 "use client";
 
-import { WalletBalance } from "@/components/wallet";
+import { WalletBalance, WalletTransactionHistory } from "@/components/wallet";
 
 export default function WalletPage() {
   return (
@@ -12,8 +12,11 @@ export default function WalletPage() {
         </h2>
       </div>
 
-      {/* Wallet Component */}
+      {/* Wallet Balance */}
       <WalletBalance className="bg-primary-foreground gap-1" showRefresh />
+
+      {/* Transaction History */}
+      <WalletTransactionHistory />
     </div>
   );
 }

@@ -121,7 +121,7 @@ export default function DashboardPage() {
   // Redirect if not landlord
   if (userRole && userRole !== "LANDLORD") {
     return (
-      <Card className="border-none shadow-sm">
+      <Card className="border-none shadow-sm bg-primary-foreground">
         <CardContent className="py-12 text-center">
           <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -418,7 +418,7 @@ export default function DashboardPage() {
             <Link href="/my-properties">
               <Button
                 variant="outline"
-                className="w-full h-auto py-4 flex-col gap-2"
+                className="w-full h-auto py-4 flex-col gap-2 text-primary"
               >
                 <Eye className="w-6 h-6" />
                 <span>Xem tài sản</span>
