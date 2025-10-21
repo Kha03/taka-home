@@ -191,7 +191,11 @@ export function useContracts() {
         return { amount: c.deposit };
       },
 
-      createDepositPayment: async (contractId: string, amount: number) => {
+      createDepositPayment: async (
+        contractId: string,
+        amount: number,
+        method: "VNPAY" | "WALLET"
+      ) => {
         try {
           const purpose =
             userRole === "TENANT"
@@ -201,16 +205,28 @@ export function useContracts() {
           const paymentDto: CreatePaymentDto = {
             contractId,
             amount,
-            method: "VNPAY",
+            method,
             purpose,
           };
 
           const response = await paymentService.createPayment(paymentDto);
-          if (response.data?.paymentUrl) {
-            toast.success("Đang chuyển đến trang thanh toán...");
-            window.location.href = response.data.paymentUrl;
+
+          // Nếu thanh toán bằng WALLET, response sẽ có status PAID và không có paymentUrl
+          if (method === "WALLET") {
+            if (response.data?.status === "PAID") {
+              toast.success("Thanh toán thành công!");
+              await refresh();
+            } else {
+              toast.error("Thanh toán thất bại. Vui lòng kiểm tra số dư ví");
+            }
           } else {
-            toast.error("Không thể tạo thanh toán");
+            // Nếu thanh toán bằng VNPAY, chuyển hướng đến trang thanh toán
+            if (response.data?.paymentUrl) {
+              toast.success("Đang chuyển đến trang thanh toán...");
+              window.location.href = response.data.paymentUrl;
+            } else {
+              toast.error("Không thể tạo thanh toán");
+            }
           }
         } catch (e) {
           console.error(e);
@@ -250,7 +266,7 @@ export function useContracts() {
       },
 
       // Optimized: Use cached invoice data to avoid extra API call
-      payInvoice: async (invoiceId: string) => {
+      payInvoice: async (invoiceId: string, method: "VNPAY" | "WALLET") => {
         try {
           toast.loading("Đang tạo thanh toán...");
 
@@ -281,16 +297,29 @@ export function useContracts() {
           // Create payment
           const response = await paymentService.createPaymentByInvoice(
             foundInvoice.id,
-            "VNPAY"
+            method
           );
 
           toast.dismiss();
 
-          if (response.data?.paymentUrl) {
-            toast.success("Đang chuyển đến trang thanh toán...");
-            window.location.href = response.data.paymentUrl;
+          // Nếu thanh toán bằng WALLET, response sẽ có status PAID và không có paymentUrl
+          if (method === "WALLET") {
+            if (response.data?.status === "PAID") {
+              toast.success("Thanh toán thành công!");
+              // Clear cache and refresh
+              invoiceCache.clear();
+              await refresh();
+            } else {
+              toast.error("Thanh toán thất bại. Vui lòng kiểm tra số dư ví");
+            }
           } else {
-            toast.error("Không thể tạo thanh toán");
+            // Nếu thanh toán bằng VNPAY, chuyển hướng đến trang thanh toán
+            if (response.data?.paymentUrl) {
+              toast.success("Đang chuyển đến trang thanh toán...");
+              window.location.href = response.data.paymentUrl;
+            } else {
+              toast.error("Không thể tạo thanh toán");
+            }
           }
         } catch (e) {
           console.error(e);
@@ -316,7 +345,7 @@ export function useContracts() {
         }
       },
     }),
-    [contracts, userRole, refresh, fetchInvoicesForContracts]
+    [contracts, userRole, refresh]
   );
 
   // Clear cache on unmount

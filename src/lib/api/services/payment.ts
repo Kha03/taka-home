@@ -4,7 +4,7 @@ import { ApiResponse } from "../types";
 export interface CreatePaymentDto {
   contractId?: string;
   amount: number;
-  method: "VNPAY";
+  method: "VNPAY" | "WALLET";
   purpose: PaymentPurpose;
 }
 export enum PaymentPurpose {
@@ -58,7 +58,7 @@ export class PaymentService {
   }
   async createPaymentByInvoice(
     invoiceId: string,
-    method: "VNPAY"
+    method: "VNPAY" | "WALLET"
   ): Promise<ApiResponse<PaymentResponse>> {
     return apiClient.post<PaymentResponse>(
       `${this.basePath}/invoice/${invoiceId}`,

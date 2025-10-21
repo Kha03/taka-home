@@ -16,7 +16,7 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   amount: number;
-  onPaymentSuccess: (method: string) => void;
+  onPaymentSuccess: (method: "VNPAY" | "WALLET") => void;
 }
 
 export function PaymentModal({
@@ -25,7 +25,9 @@ export function PaymentModal({
   amount,
   onPaymentSuccess,
 }: PaymentModalProps) {
-  const [selectedMethod, setSelectedMethod] = useState("vnpay");
+  const [selectedMethod, setSelectedMethod] = useState<"VNPAY" | "WALLET">(
+    "VNPAY"
+  );
   const [isProcessing, setIsProcessing] = useState(false);
 
   const formatCurrency = (value: number) => {
@@ -37,9 +39,14 @@ export function PaymentModal({
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    // Call the payment success callback which will handle API call and redirect
-    await onPaymentSuccess(selectedMethod);
-    setIsProcessing(false);
+    try {
+      // Call the payment success callback which will handle API call and redirect
+      await onPaymentSuccess(selectedMethod as "VNPAY" | "WALLET");
+    } catch (error) {
+      console.error("Payment error:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -65,17 +72,19 @@ export function PaymentModal({
             </Label>
             <RadioGroup
               value={selectedMethod}
-              onValueChange={setSelectedMethod}
+              onValueChange={(value) =>
+                setSelectedMethod(value as "VNPAY" | "WALLET")
+              }
             >
               {/* VNPay Option */}
               <div className="relative">
                 <RadioGroupItem
-                  value="vnpay"
-                  id="vnpay"
+                  value="VNPAY"
+                  id="VNPAY"
                   className="peer sr-only"
                 />
                 <Label
-                  htmlFor="vnpay"
+                  htmlFor="VNPAY"
                   className="flex cursor-pointer items-center gap-4 rounded-lg border-2 border-gray-200 p-4 transition-all hover:border-blue-300 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50"
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
@@ -88,15 +97,15 @@ export function PaymentModal({
                 </Label>
               </div>
 
-              {/* Credit Card Option */}
+              {/* Wallet Option */}
               <div className="relative">
                 <RadioGroupItem
-                  value="card"
-                  id="card"
+                  value="WALLET"
+                  id="WALLET"
                   className="peer sr-only"
                 />
                 <Label
-                  htmlFor="card"
+                  htmlFor="WALLET"
                   className="flex cursor-pointer items-center gap-4 rounded-lg border-2 border-gray-200 p-4 transition-all hover:border-blue-300 peer-data-[state=checked]:border-blue-500 peer-data-[state=checked]:bg-blue-50"
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">

@@ -33,6 +33,12 @@ export default function ContractsPage() {
     null
   );
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [paymentType, setPaymentType] = useState<"deposit" | "invoice">(
+    "deposit"
+  );
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
+    null
+  );
 
   // Invoice dialog states
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
@@ -139,6 +145,7 @@ export default function ContractsPage() {
   const handleDepositPayment = useCallback(
     (contractId: string) => {
       const { amount } = actions.depositPayment(contractId);
+      setPaymentType("deposit");
       setSelectedContractId(contractId);
       setPaymentAmount(amount);
       setShowPaymentModal(true);
@@ -146,11 +153,34 @@ export default function ContractsPage() {
     [actions]
   );
 
-  const handlePaymentSuccess = useCallback(async () => {
-    if (!selectedContractId) return;
-    await actions.createDepositPayment(selectedContractId, paymentAmount);
-    setShowPaymentModal(false);
-  }, [selectedContractId, paymentAmount, actions]);
+  const handlePaymentSuccess = useCallback(
+    async (method: "VNPAY" | "WALLET") => {
+      if (paymentType === "deposit" && selectedContractId) {
+        await actions.createDepositPayment(
+          selectedContractId,
+          paymentAmount,
+          method
+        );
+      } else if (paymentType === "invoice" && selectedInvoiceId) {
+        await actions.payInvoice(selectedInvoiceId, method);
+      }
+      setShowPaymentModal(false);
+    },
+    [paymentType, selectedContractId, selectedInvoiceId, paymentAmount, actions]
+  );
+
+  const handleInvoicePayment = useCallback(
+    (invoiceId: string) => {
+      const invoice = selectedInvoice;
+      if (!invoice) return;
+
+      setPaymentType("invoice");
+      setSelectedInvoiceId(invoiceId);
+      setPaymentAmount(invoice.totalAmount);
+      setShowPaymentModal(true);
+    },
+    [selectedInvoice]
+  );
 
   return (
     <div className="min-h-screen bg-[#FFF7E9] p-4">
@@ -196,7 +226,7 @@ export default function ContractsPage() {
                   onSignContract: actions.signContract,
                   onDepositPayment: handleDepositPayment,
                   onViewInvoice: handleViewInvoice,
-                  onPayInvoice: actions.payInvoice,
+                  onPayInvoice: handleInvoicePayment,
                   onHandover: actions.handover,
                 }}
                 userRole={userRole}
@@ -268,7 +298,7 @@ export default function ContractsPage() {
           isOpen={showInvoiceDialog}
           onClose={() => setShowInvoiceDialog(false)}
           invoice={selectedInvoice}
-          onPayInvoice={actions.payInvoice}
+          onPayInvoice={handleInvoicePayment}
         />
       </div>
     </div>
