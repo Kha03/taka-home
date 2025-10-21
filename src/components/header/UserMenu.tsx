@@ -73,21 +73,9 @@ export function UserMenu() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/wallet" className="cursor-pointer">
-              <Wallet className="mr-2 h-4 w-4" />
-              <span>Quản lý ví</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
             <Link href="/profile" className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               <span>Hồ sơ</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/settings" className="cursor-pointer">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Cài đặt</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

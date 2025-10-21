@@ -5,11 +5,13 @@
 
 "use client";
 
-import { Wallet, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Wallet, RefreshCw, Plus } from "lucide-react";
 import { useWallet } from "@/hooks/use-wallet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils/utils";
+import { WalletTopupDialog } from "./wallet-topup-dialog";
 
 export interface WalletBalanceProps {
   showRefresh?: boolean;
@@ -28,6 +30,9 @@ export function WalletBalance({
     autoRefresh: true,
     refreshInterval: 60000, // 1 phút
   });
+
+  // State cho dialog nạp tiền
+  const [isTopupDialogOpen, setIsTopupDialogOpen] = useState(false);
 
   if (loading && !wallet) {
     return (
@@ -107,36 +112,57 @@ export function WalletBalance({
 
   // Card variant (default)
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-        {showTitle && (
-          <CardTitle className="text-sm font-medium">Số dư ví</CardTitle>
-        )}
-        <Wallet className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-green-600">
-          {formatBalance(wallet.availableBalance)}
-        </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Cập nhật lần cuối:{" "}
-          {new Date(wallet.updatedAt).toLocaleString("vi-VN")}
-        </p>
-        {showRefresh && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3 w-full text-primary"
-            onClick={refetch}
-            disabled={loading}
-          >
-            <RefreshCw
-              className={cn("mr-2 h-4 w-4", loading && "animate-spin")}
-            />
-            Làm mới
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+    <>
+      <Card className={className}>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+          {showTitle && (
+            <CardTitle className="text-sm font-medium">Số dư ví</CardTitle>
+          )}
+          <Wallet className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-green-600">
+            {formatBalance(wallet.availableBalance)}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Cập nhật lần cuối:{" "}
+            {new Date(wallet.updatedAt).toLocaleString("vi-VN")}
+          </p>
+          <div className="flex gap-2 mt-3">
+            {showRefresh && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-primary"
+                onClick={refetch}
+                disabled={loading}
+              >
+                <RefreshCw
+                  className={cn("mr-2 h-4 w-4", loading && "animate-spin")}
+                />
+                Làm mới
+              </Button>
+            )}
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={() => setIsTopupDialogOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nạp tiền
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dialog nạp tiền */}
+      <WalletTopupDialog
+        open={isTopupDialogOpen}
+        onOpenChange={setIsTopupDialogOpen}
+        onSuccess={() => {
+          refetch(); // Refresh lại số dư sau khi nạp tiền thành công
+        }}
+      />
+    </>
   );
 }

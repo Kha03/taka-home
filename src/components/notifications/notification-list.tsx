@@ -10,6 +10,7 @@ import { NotificationItem } from "./notification-item";
 import { useNotifications } from "@/hooks/use-notifications";
 import type { NotificationResponse } from "@/lib/api/types";
 import { Button } from "../ui/button";
+import { LoadingSpinner } from "../ui/loading-spinner";
 
 export interface NotificationListProps {
   userId?: string | null;
@@ -54,8 +55,7 @@ export function NotificationList({
   if (loading && notifications.length === 0) {
     return (
       <div className={`p-8 text-center ${className}`}>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-2 text-sm text-gray-500">Đang tải thông báo...</p>
+        <LoadingSpinner text="Đang tải thông báo..." />
       </div>
     );
   }
