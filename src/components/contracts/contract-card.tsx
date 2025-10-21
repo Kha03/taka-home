@@ -35,6 +35,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import type { ContractVM } from "@/types/contracts";
+import { ContractExpiryAlert } from "./contract-expiry-alert";
+import { ContractExtensionDialog } from "./contract-extension-dialog";
+import { EscrowBalanceCard } from "./escrow-balance-card";
 
 interface ContractCardProps {
   contract: ContractVM & {
@@ -242,6 +245,54 @@ export default function ContractCard({
   const [dialogStep, setDialogStep] = useState<
     "confirm" | "signing" | "success"
   >("confirm");
+  const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
+
+  // Calculate days remaining until contract end
+  const daysUntilEnd = useMemo(() => {
+    if (!contract.endDate) return null;
+
+    try {
+      // Parse endDate - handle both ISO and DD/MM/YYYY formats
+      let endDate: Date;
+
+      // Check if it's DD/MM/YYYY format (e.g., "15/11/2025")
+      if (contract.endDate.includes("/")) {
+        const [day, month, year] = contract.endDate.split("/").map(Number);
+        endDate = new Date(year, month - 1, day); // month is 0-indexed
+      } else {
+        // Assume ISO format or other parseable format
+        endDate = new Date(contract.endDate);
+      }
+
+      // Validate the date
+      if (isNaN(endDate.getTime())) {
+        return null;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+
+      const diffTime = endDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      return diffDays;
+    } catch {
+      return null;
+    }
+  }, [contract.endDate]);
+
+  // Show extension alert if contract is active and expires within 60 days
+  const shouldShowExtensionAlert = useMemo(() => {
+    return (
+      userRole === "TENANT" &&
+      contract.status === "active" &&
+      daysUntilEnd !== null &&
+      daysUntilEnd > 0 &&
+      daysUntilEnd <= 60
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [daysUntilEnd]);
 
   const mostRecentInvoice = contract.invoices[0];
   const remainingInvoices = contract.invoices.slice(1);
@@ -571,8 +622,19 @@ export default function ContractCard({
         </div>
       )}
 
-      {contract.status === "active" && contract.contractId && (
+      {/* Extension Alert for Tenant */}
+      {shouldShowExtensionAlert && daysUntilEnd && (
         <div className="ml-35 mb-4">
+          <ContractExpiryAlert
+            endDate={contract.endDate}
+            daysRemaining={daysUntilEnd}
+            onExtendClick={() => setExtensionDialogOpen(true)}
+          />
+        </div>
+      )}
+
+      {contract.status === "active" && contract.contractId && (
+        <div className="ml-35 mb-2">
           <Button
             variant="outline"
             onClick={() => contract.onViewContract?.(contract.contractId!)}
@@ -581,6 +643,13 @@ export default function ContractCard({
             <Eye className="w-4 h-4 mr-2" />
             Xem hợp đồng
           </Button>
+        </div>
+      )}
+
+      {/* Escrow Balance */}
+      {contract.status === "active" && contract.contractId && (
+        <div className="ml-35 mb-4">
+          <EscrowBalanceCard contractId={contract.contractId} />
         </div>
       )}
 
@@ -860,6 +929,18 @@ export default function ContractCard({
           </Collapsible>
         </CardContent>
       )}
+
+      {/* Extension Dialog */}
+      <ContractExtensionDialog
+        contractId={contract.contractId || contract.id}
+        currentEndDate={contract.endDate}
+        open={extensionDialogOpen}
+        onOpenChange={setExtensionDialogOpen}
+        onSuccess={() => {
+          // Could trigger a refresh here if needed
+          console.log("Extension request sent successfully");
+        }}
+      />
 
       <SigningDialog
         open={dialogOpen}

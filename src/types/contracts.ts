@@ -1,3 +1,5 @@
+import { User } from "@/lib/api";
+
 export interface ContractInvoice {
   id: number; // Số thứ tự hiển thị
   invoiceId: string; // UUID từ API để thanh toán
@@ -34,3 +36,13 @@ export interface ContractVM {
   contractStatus?: string; // Status của contract từ backend
   invoices: ContractInvoice[];
 }
+export interface ContractExtensionRequest {
+  contractId: string;
+  extensionMonths: number;
+  requestNote: string;
+}
+// export interface ContractExtension {
+//   id: string;
+//   contractId: string;
+//   contract: ContractVM;
+// }
