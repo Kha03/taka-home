@@ -19,6 +19,7 @@ interface AuthContextType {
     password: string,
     phone?: string
   ) => Promise<{ success: boolean; error?: string }>;
+  setAuthFromToken: (token: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -193,12 +194,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const setAuthFromToken = async (token: string) => {
+    try {
+      // Không set loading = true để tránh ảnh hưởng UI khác
+
+      // Decode JWT token to get user info
+      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      
+      // Create user object from token payload
+      const user: User = {
+        id: tokenPayload.sub,
+        email: tokenPayload.email,
+        fullName: tokenPayload.fullName || tokenPayload.name || tokenPayload.email,
+        avatarUrl: tokenPayload.picture || "/assets/imgs/avatar.png",
+        status: "ACTIVE",
+        CCCD: "",
+      };
+
+      // Store token and user data (using same keys as normal login)
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+      localStorage.setItem("accessToken", token); // For compatibility
+      document.cookie = `auth-token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      console.error("Set auth from token error:", error);
+      return {
+        success: false,
+        error: "Không thể xử lý token xác thực",
+      };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
     login,
     register,
+    setAuthFromToken,
     logout,
   };
 

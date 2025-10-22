@@ -31,6 +31,11 @@ export const createGoogleAuthUrl = (action: 'signin' | 'signup' = 'signin'): str
 
 export const handleGoogleAuth = (action: 'signin' | 'signup' = 'signin'): void => {
   try {
+    // Save current page URL for redirect after login
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('oauth_redirect_url', window.location.pathname);
+    }
+    
     const authUrl = createGoogleAuthUrl(action);
     // Redirect to Google OAuth
     window.location.href = authUrl;
