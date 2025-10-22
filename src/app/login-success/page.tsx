@@ -57,11 +57,11 @@ export default function LoginSuccessPage() {
           );
           
           // Redirect sau 2 giây
-        //   setTimeout(() => {
-        //     const from = localStorage.getItem('oauth_redirect_url') || '/';
-        //     localStorage.removeItem('oauth_redirect_url');
-        //     router.push(from);
-        //   }, 2000);
+          setTimeout(() => {
+            const from = localStorage.getItem('oauth_redirect_url') || '/';
+            localStorage.removeItem('oauth_redirect_url');
+            router.push(from);
+          }, 2000);
         } else {
           setStatus('error');
           setMessage(result.error || 'Có lỗi xảy ra khi đăng nhập');
