@@ -38,6 +38,7 @@ import type { ContractVM } from "@/types/contracts";
 import { ContractExpiryAlert } from "./contract-expiry-alert";
 import { ContractExtensionDialog } from "./contract-extension-dialog";
 import { EscrowBalanceCard } from "./escrow-balance-card";
+import { ContractExtensionStatus } from "./contract-extension-status";
 
 interface ContractCardProps {
   contract: ContractVM & {
@@ -653,6 +654,17 @@ export default function ContractCard({
         </div>
       )}
 
+      {/* Extension Requests Button */}
+      {contract.status === "active" && contract.contractId && userRole && (
+        <div className="ml-35 mb-4">
+          <ContractExtensionStatus
+            contractId={contract.contractId}
+            userRole={userRole}
+            propertyType={contract.propertyType}
+          />
+        </div>
+      )}
+
       {/* Invoices */}
       {contract.status === "active" &&
         (contract.bookingStatus === "DUAL_ESCROW_FUNDED" ||
@@ -871,7 +883,7 @@ export default function ContractCard({
                             <ChevronDown className="w-4 h-4 text-primary-foreground" />
                           </div>
                           <span>
-                            Xem thêm {remainingInvoices.length} hợp đồng
+                            Xem thêm {remainingInvoices.length} hóa đơn
                           </span>
                         </>
                       )}

@@ -41,8 +41,37 @@ export interface ContractExtensionRequest {
   extensionMonths: number;
   requestNote: string;
 }
-// export interface ContractExtension {
-//   id: string;
-//   contractId: string;
-//   contract: ContractVM;
-// }
+
+export interface ContractExtension {
+  id: string;
+  contractId: string;
+  extensionMonths: number;
+  newMonthlyRent: number | null;
+  newElectricityPrice: number | null;
+  newWaterPrice: number | null;
+  requestNote: string;
+  responseNote: string | null;
+  status:
+    | "PENDING"
+    | "LANDLORD_RESPONDED"
+    | "AWAITING_SIGNATURES"
+    | "LANDLORD_SIGNED"
+    | "AWAITING_ESCROW"
+    | "ESCROW_FUNDED_T"
+    | "ESCROW_FUNDED_L"
+    | "ACTIVE"
+    | "REJECTED"
+    | "CANCELLED";
+  respondedAt: string;
+  extensionContractFileUrl: string | null;
+  landlordSignedAt: string | null;
+  tenantSignedAt: string | null;
+  transactionIdLandlordSign: string | null;
+  transactionIdTenantSign: string | null;
+  escrowDepositDueAt: string | null;
+  tenantEscrowDepositFundedAt: string | null;
+  landlordEscrowDepositFundedAt: string | null;
+  activatedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
