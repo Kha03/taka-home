@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
+import { handleGoogleAuth, isGoogleOAuthConfigured } from "@/lib/auth/google-oauth";
 
 export function SignInForm() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -101,6 +102,8 @@ export function SignInForm() {
             variant="outline"
             className="w-full text-primary text-xs"
             size="sm"
+            onClick={() => handleGoogleAuth('signin')}
+            disabled={!isGoogleOAuthConfigured()}
           >
             {/* Inline Google icon */}
             <svg className="mr-1.5 h-4 w-4" viewBox="0 0 24 24" aria-hidden>

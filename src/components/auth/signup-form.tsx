@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PasswordInput } from "@/components/ui/passwordinput";
 import { useAuth } from "@/contexts/auth-context";
+import { handleGoogleAuth, isGoogleOAuthConfigured } from "@/lib/auth/google-oauth";
 
 export function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -166,6 +167,8 @@ export function SignUpForm() {
           type="button"
           className="w-full text-primary text-xs h-8"
           size="sm"
+          onClick={() => handleGoogleAuth('signup')}
+          disabled={!isGoogleOAuthConfigured()}
         >
           <svg className="mr-1.5 h-4 w-4" viewBox="0 0 24 24" aria-hidden>
             <path
