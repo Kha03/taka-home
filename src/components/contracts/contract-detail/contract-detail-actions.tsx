@@ -15,7 +15,7 @@ import { contractService } from "@/lib/api/services/contract";
 import { paymentService, PaymentPurpose } from "@/lib/api/services/payment";
 import { toast } from "sonner";
 import { PaymentModal } from "@/components/payment/payment-modal";
-import { EscrowBalanceCard } from "@/components/contracts/escrow-balance-card";
+import { EscrowBalanceDetailCard } from "@/components/contracts/escrow-balance-detail-card";
 import {
   Dialog,
   DialogContent,
@@ -373,11 +373,16 @@ export function ContractDetailActions({
 
       case "ACTIVE":
       case "DUAL_ESCROW_FUNDED":
+        const { property, room } = booking;
+        const requiredDeposit = room
+          ? parseFloat(room.roomType.deposit)
+          : parseFloat(property.deposit || "0");
+
         return (
           <div className="space-y-4">
             {booking.contract?.id && (
               <Card className="bg-primary-foreground">
-                <CardContent className="py-6">
+                <CardContent>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <FileText className="w-5 h-5 text-primary" />
@@ -403,7 +408,12 @@ export function ContractDetailActions({
               </Card>
             )}
             {booking.contract?.id && (
-              <EscrowBalanceCard contractId={booking.contract.id} />
+              <EscrowBalanceDetailCard
+                contractId={booking.contract.id}
+                requiredDeposit={requiredDeposit}
+                userRole={userRole}
+                onRefresh={onRefresh}
+              />
             )}
           </div>
         );

@@ -90,6 +90,7 @@ export default function ContractDetailPage() {
               Hợp đồng không tồn tại hoặc đã bị xóa
             </p>
             <Button
+              variant="link"
               onClick={() => router.push("/contracts")}
               className="w-full"
             >
@@ -106,7 +107,7 @@ export default function ContractDetailPage() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Back Button */}
         <Button
-          variant="ghost"
+          variant="link"
           onClick={() => router.push("/contracts")}
           className="mb-4 text-primary hover:text-primary/80"
         >
