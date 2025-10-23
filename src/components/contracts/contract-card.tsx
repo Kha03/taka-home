@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -32,6 +33,7 @@ import {
   Eye,
   AlertCircle,
   FileText,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import type { ContractVM } from "@/types/contracts";
@@ -240,6 +242,7 @@ export default function ContractCard({
   contract,
   userRole,
 }: ContractCardProps) {
+  const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -397,6 +400,18 @@ export default function ContractCard({
           </div>
         </div>
       </CardHeader>
+
+      {/* View Detail Button */}
+      <div className="ml-35 mb-0">
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/contracts/${contract.bookingId}`)}
+          className="text-primary hover:text-primary/80"
+        >
+          <ExternalLink className="w-4 h-4 mr-2" />
+          Xem chi tiết hợp đồng
+        </Button>
+      </div>
 
       {/* Actions by status */}
       {contract.status === "pending_signature" && contract.contractId && (
