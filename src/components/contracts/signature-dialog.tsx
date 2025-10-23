@@ -95,7 +95,7 @@ export function SignatureDialog({
           {extension.extensionContractFileUrl && (
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full text-primary"
               onClick={handleDownloadContract}
               type="button"
             >
@@ -146,6 +146,7 @@ export function SignatureDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
+            className="text-red-500 border-red-500"
           >
             Hủy
           </Button>

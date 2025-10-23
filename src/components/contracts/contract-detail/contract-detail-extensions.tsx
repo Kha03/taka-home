@@ -10,14 +10,14 @@ interface ContractDetailExtensionsProps {
   contractId: string;
   userRole: string;
   endDate: string;
-  propertyType: string;
+  requiredDeposit: number;
 }
 
 export function ContractDetailExtensions({
   contractId,
   userRole,
   endDate,
-  propertyType,
+  requiredDeposit,
 }: ContractDetailExtensionsProps) {
   const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
 
@@ -75,7 +75,7 @@ export function ContractDetailExtensions({
           <ContractExtensionStatus
             contractId={contractId}
             userRole={userRole}
-            propertyType={propertyType}
+            requiredDeposit={requiredDeposit}
           />
         </CardContent>
       </Card>

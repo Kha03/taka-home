@@ -675,7 +675,7 @@ export default function ContractCard({
           <ContractExtensionStatus
             contractId={contract.contractId}
             userRole={userRole}
-            propertyType={contract.propertyType}
+            requiredDeposit={contract.deposit}
           />
         </div>
       )}

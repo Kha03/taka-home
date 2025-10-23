@@ -49,14 +49,10 @@ export class ContractService {
       status,
       responseNote,
       newMonthlyRent,
-      newElectricityPrice,
-      newWaterPrice,
     }: {
       status: "LANDLORD_RESPONDED";
       responseNote: string;
       newMonthlyRent: number | null;
-      newElectricityPrice: number | null;
-      newWaterPrice: number | null;
     }
   ): Promise<ApiResponse<void>> {
     return apiClient.patch<void>(
@@ -65,8 +61,6 @@ export class ContractService {
         status,
         responseNote,
         newMonthlyRent,
-        newElectricityPrice,
-        newWaterPrice,
       }
     );
   }

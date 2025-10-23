@@ -18,6 +18,21 @@ export function ContractExpiryAlert({
   onExtendClick,
   className,
 }: ContractExpiryAlertProps) {
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    } catch {
+      return dateString;
+    }
+  };
+
   const getAlertConfig = () => {
     if (daysRemaining <= 30) {
       return {
@@ -66,8 +81,8 @@ export function ContractExpiryAlert({
           >
             <p>
               Hợp đồng của bạn sẽ hết hạn vào ngày
-              <span className="font-semibold"> {endDate}</span> ({daysRemaining}{" "}
-              ngày nữa).
+              <span className="font-semibold"> {formatDate(endDate)}</span> (
+              {daysRemaining} ngày nữa).
             </p>
             <p>
               Bạn có muốn gửi yêu cầu gia hạn hợp đồng không? Chủ nhà sẽ xem xét

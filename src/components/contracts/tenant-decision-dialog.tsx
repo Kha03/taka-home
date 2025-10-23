@@ -29,7 +29,6 @@ interface TenantDecisionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   extension: ContractExtension;
-  propertyType: string;
   onSuccess: () => void;
 }
 
@@ -37,13 +36,10 @@ export function TenantDecisionDialog({
   open,
   onOpenChange,
   extension,
-  propertyType,
   onSuccess,
 }: TenantDecisionDialogProps) {
   const [loading, setLoading] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-
-  const isApartment = propertyType === "apartment";
 
   const formatCurrency = (amount: number | null) => {
     if (!amount) return "Không thay đổi";
@@ -123,28 +119,6 @@ export function TenantDecisionDialog({
                     {formatCurrency(extension.newMonthlyRent)}
                   </span>
                 </div>
-
-                {!isApartment && (
-                  <>
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-950/20 dark:to-amber-900/20 rounded-lg">
-                      <span className="text-sm text-muted-foreground">
-                        Giá điện mới:
-                      </span>
-                      <span className="text-sm font-bold text-amber-600">
-                        {formatCurrency(extension.newElectricityPrice)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-cyan-50 to-cyan-100 dark:from-cyan-950/20 dark:to-cyan-900/20 rounded-lg">
-                      <span className="text-sm text-muted-foreground">
-                        Giá nước mới:
-                      </span>
-                      <span className="text-sm font-bold text-cyan-600">
-                        {formatCurrency(extension.newWaterPrice)}
-                      </span>
-                    </div>
-                  </>
-                )}
               </div>
 
               {extension.responseNote && (

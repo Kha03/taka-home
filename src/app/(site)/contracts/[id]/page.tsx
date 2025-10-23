@@ -10,7 +10,7 @@ import { ContractDetailHeader } from "@/components/contracts/contract-detail/con
 import { ContractDetailInfo } from "@/components/contracts/contract-detail/contract-detail-info";
 import { ContractDetailActions } from "@/components/contracts/contract-detail/contract-detail-actions";
 import { ContractDetailInvoices } from "@/components/contracts/contract-detail/contract-detail-invoices";
-import { ContractDetailExtensions } from "@/components/contracts/contract-detail/contract-detail-extensions";
+import { ContractDetailExtensions } from "@/components/contracts/contract-detail";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function ContractDetailPage() {
@@ -143,7 +143,11 @@ export default function ContractDetailPage() {
             contractId={booking.contract.id}
             userRole={userRole}
             endDate={booking.contract.endDate}
-            propertyType={booking.property.type}
+            requiredDeposit={
+              booking.room
+                ? parseFloat(booking.room.roomType.deposit)
+                : parseFloat(booking.property.deposit || "0")
+            }
           />
         )}
       </div>

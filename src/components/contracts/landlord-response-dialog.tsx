@@ -22,7 +22,6 @@ interface LandlordResponseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   extension: ContractExtension;
-  propertyType: string;
   onSuccess: () => void;
 }
 
@@ -30,18 +29,13 @@ export function LandlordResponseDialog({
   open,
   onOpenChange,
   extension,
-  propertyType,
   onSuccess,
 }: LandlordResponseDialogProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     newMonthlyRent: "",
-    newElectricityPrice: "",
-    newWaterPrice: "",
     responseNote: "",
   });
-
-  const isApartment = propertyType === "apartment";
 
   const handleSubmit = async () => {
     // Validation
@@ -58,14 +52,6 @@ export function LandlordResponseDialog({
         newMonthlyRent: formData.newMonthlyRent
           ? parseFloat(formData.newMonthlyRent)
           : null,
-        newElectricityPrice:
-          !isApartment && formData.newElectricityPrice
-            ? parseFloat(formData.newElectricityPrice)
-            : null,
-        newWaterPrice:
-          !isApartment && formData.newWaterPrice
-            ? parseFloat(formData.newWaterPrice)
-            : null,
       });
 
       toast.success("Thành công", "Đã gửi phản hồi yêu cầu gia hạn");
@@ -121,50 +107,6 @@ export function LandlordResponseDialog({
             />
           </div>
 
-          {/* Electricity & Water for non-apartment */}
-          {!isApartment && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="newElectricityPrice">
-                  Giá điện mới (đ/kWh){" "}
-                  <span className="text-muted-foreground text-xs">
-                    (Tùy chọn)
-                  </span>
-                </Label>
-                <Input
-                  id="newElectricityPrice"
-                  type="number"
-                  placeholder="Để trống nếu giữ nguyên"
-                  value={formData.newElectricityPrice}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      newElectricityPrice: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="newWaterPrice">
-                  Giá nước mới (đ/m³){" "}
-                  <span className="text-muted-foreground text-xs">
-                    (Tùy chọn)
-                  </span>
-                </Label>
-                <Input
-                  id="newWaterPrice"
-                  type="number"
-                  placeholder="Để trống nếu giữ nguyên"
-                  value={formData.newWaterPrice}
-                  onChange={(e) =>
-                    setFormData({ ...formData, newWaterPrice: e.target.value })
-                  }
-                />
-              </div>
-            </>
-          )}
-
           {/* Response Note */}
           <div className="space-y-2">
             <Label htmlFor="responseNote">
@@ -187,6 +129,7 @@ export function LandlordResponseDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
+            className="text-red-500 border-red-500"
           >
             Hủy
           </Button>

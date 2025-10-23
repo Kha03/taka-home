@@ -20,7 +20,10 @@ import {
   Wallet,
   History,
 } from "lucide-react";
-import { contractService } from "@/lib/api/services/contract";
+import {
+  contractService,
+  type EscrowBalanceResponse,
+} from "@/lib/api/services/contract";
 import { ContractExtension } from "@/types/contracts";
 import { LandlordResponseDialog } from "./landlord-response-dialog";
 import { TenantDecisionDialog } from "./tenant-decision-dialog";
@@ -30,13 +33,13 @@ import { ExtensionEscrowDepositDialog } from "./extension-escrow-deposit-dialog"
 interface ContractExtensionStatusProps {
   contractId: string;
   userRole: string;
-  propertyType: string; // để biết có cần electricity/water price không
+  requiredDeposit: number; // Số tiền cọc yêu cầu
 }
 
 export function ContractExtensionStatus({
   contractId,
   userRole,
-  propertyType,
+  requiredDeposit,
 }: ContractExtensionStatusProps) {
   const [extensions, setExtensions] = useState<ContractExtension[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +51,8 @@ export function ContractExtensionStatus({
   const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
   const [escrowDepositDialogOpen, setEscrowDepositDialogOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState(0);
+  const [escrowBalance, setEscrowBalance] =
+    useState<EscrowBalanceResponse | null>(null);
 
   useEffect(() => {
     const fetchExtensions = async () => {
@@ -66,7 +71,21 @@ export function ContractExtensionStatus({
       }
     };
 
+    const fetchEscrowBalance = async () => {
+      try {
+        const response = await contractService.getEscrowByContractId(
+          contractId
+        );
+        if (response.code === 200 && response.data) {
+          setEscrowBalance(response.data);
+        }
+      } catch (err) {
+        console.error("Error fetching escrow balance:", err);
+      }
+    };
+
     fetchExtensions();
+    fetchEscrowBalance();
   }, [contractId]);
 
   const fetchExtensions = async () => {
@@ -82,6 +101,17 @@ export function ContractExtensionStatus({
       console.error("Error fetching extensions:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEscrowBalance = async () => {
+    try {
+      const response = await contractService.getEscrowByContractId(contractId);
+      if (response.code === 200 && response.data) {
+        setEscrowBalance(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching escrow balance:", err);
     }
   };
 
@@ -201,9 +231,25 @@ export function ContractExtensionStatus({
     setSignatureDialogOpen(true);
   };
 
-  const handleDeposit = (extension: ContractExtension, amount: number) => {
+  const handleDeposit = async (extension: ContractExtension) => {
+    // Tính toán số tiền thiếu dựa trên escrow balance
+    let depositAmt = 100000; // Default fallback
+
+    if (escrowBalance) {
+      const tenantBalance = parseFloat(escrowBalance.balanceTenant);
+      const landlordBalance = parseFloat(escrowBalance.balanceLandlord);
+
+      if (userRole === "TENANT") {
+        const shortage = Math.max(0, requiredDeposit - tenantBalance);
+        depositAmt = shortage || 100000;
+      } else if (userRole === "LANDLORD") {
+        const shortage = Math.max(0, requiredDeposit - landlordBalance);
+        depositAmt = shortage || 100000;
+      }
+    }
+
     setSelectedExtension(extension);
-    setDepositAmount(amount);
+    setDepositAmount(depositAmt);
     setEscrowDepositDialogOpen(true);
   };
 
@@ -223,6 +269,7 @@ export function ContractExtensionStatus({
           </Button>
         );
       }
+      // Chủ nhà ký TRƯỚC khi người thuê ký
       if (
         extension.status === "AWAITING_SIGNATURES" &&
         !extension.landlordSignedAt
@@ -235,7 +282,7 @@ export function ContractExtensionStatus({
             className="w-full"
           >
             <FileSignature className="w-4 h-4 mr-2" />
-            Ký hợp đồng gia hạn
+            Ký hợp đồng gia hạn (Chủ nhà ký trước)
           </Button>
         );
       }
@@ -245,11 +292,9 @@ export function ContractExtensionStatus({
           extension.status === "ESCROW_FUNDED_T") &&
         !extension.landlordEscrowDepositFundedAt
       ) {
-        // Deposit amount mặc định 100,000 VND
-        const depositAmt = 100000;
         return (
           <Button
-            onClick={() => handleDeposit(extension, depositAmt)}
+            onClick={() => handleDeposit(extension)}
             variant="default"
             size="sm"
             className="w-full bg-cyan-600 hover:bg-cyan-700"
@@ -278,11 +323,8 @@ export function ContractExtensionStatus({
           </div>
         );
       }
-      if (
-        (extension.status === "AWAITING_SIGNATURES" ||
-          extension.status === "LANDLORD_SIGNED") &&
-        !extension.tenantSignedAt
-      ) {
+      // Người thuê chỉ có thể ký SAU KHI chủ nhà đã ký (status = LANDLORD_SIGNED)
+      if (extension.status === "LANDLORD_SIGNED" && !extension.tenantSignedAt) {
         return (
           <Button
             onClick={() => handleSign(extension)}
@@ -291,7 +333,7 @@ export function ContractExtensionStatus({
             className="w-full"
           >
             <FileSignature className="w-4 h-4 mr-2" />
-            Ký hợp đồng gia hạn
+            Ký hợp đồng gia hạn (Người thuê ký sau)
           </Button>
         );
       }
@@ -301,11 +343,9 @@ export function ContractExtensionStatus({
           extension.status === "ESCROW_FUNDED_L") &&
         !extension.tenantEscrowDepositFundedAt
       ) {
-        // Deposit amount mặc định 100,000 VND
-        const depositAmt = 100000;
         return (
           <Button
-            onClick={() => handleDeposit(extension, depositAmt)}
+            onClick={() => handleDeposit(extension)}
             variant="default"
             size="sm"
             className="w-full bg-cyan-600 hover:bg-cyan-700"
@@ -419,7 +459,7 @@ export function ContractExtensionStatus({
                           <p className="text-sm font-semibold">
                             Điều kiện gia hạn từ chủ nhà:
                           </p>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="text-sm">
                             <div>
                               <p className="text-muted-foreground">
                                 Giá thuê mới
@@ -428,28 +468,6 @@ export function ContractExtensionStatus({
                                 {formatCurrency(extension.newMonthlyRent)}
                               </p>
                             </div>
-                            {propertyType !== "apartment" && (
-                              <>
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Giá điện mới
-                                  </p>
-                                  <p className="font-medium text-blue-600">
-                                    {formatCurrency(
-                                      extension.newElectricityPrice
-                                    )}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Giá nước mới
-                                  </p>
-                                  <p className="font-medium text-blue-600">
-                                    {formatCurrency(extension.newWaterPrice)}
-                                  </p>
-                                </div>
-                              </>
-                            )}
                           </div>
                           {extension.responseNote && (
                             <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-lg p-3">
@@ -577,14 +595,12 @@ export function ContractExtensionStatus({
             open={landlordDialogOpen}
             onOpenChange={setLandlordDialogOpen}
             extension={selectedExtension}
-            propertyType={propertyType}
             onSuccess={fetchExtensions}
           />
           <TenantDecisionDialog
             open={tenantDialogOpen}
             onOpenChange={setTenantDialogOpen}
             extension={selectedExtension}
-            propertyType={propertyType}
             onSuccess={fetchExtensions}
           />
           <SignatureDialog
@@ -592,7 +608,10 @@ export function ContractExtensionStatus({
             onOpenChange={setSignatureDialogOpen}
             extension={selectedExtension}
             userRole={userRole}
-            onSuccess={fetchExtensions}
+            onSuccess={() => {
+              fetchExtensions();
+              fetchEscrowBalance();
+            }}
           />
           <ExtensionEscrowDepositDialog
             open={escrowDepositDialogOpen}
@@ -600,7 +619,10 @@ export function ContractExtensionStatus({
             extension={selectedExtension}
             userRole={userRole}
             depositAmount={depositAmount}
-            onSuccess={fetchExtensions}
+            onSuccess={() => {
+              fetchExtensions();
+              fetchEscrowBalance();
+            }}
           />
         </>
       )}

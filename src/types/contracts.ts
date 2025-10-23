@@ -47,8 +47,6 @@ export interface ContractExtension {
   contractId: string;
   extensionMonths: number;
   newMonthlyRent: number | null;
-  newElectricityPrice: number | null;
-  newWaterPrice: number | null;
   requestNote: string;
   responseNote: string | null;
   status:
