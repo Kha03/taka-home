@@ -95,7 +95,7 @@ export default function ProfileLayout({
     localStorage.removeItem("account_info");
     // Clear cookie
     document.cookie =
-      "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
     // Redirect to home
     window.location.href = "/";
   };

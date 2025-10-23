@@ -19,7 +19,9 @@ interface AuthContextType {
     password: string,
     phone?: string
   ) => Promise<{ success: boolean; error?: string }>;
-  setAuthFromToken: (token: string) => Promise<{ success: boolean; error?: string }>;
+  setAuthFromToken: (
+    token: string
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -38,15 +40,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (savedUser && token) {
           setUser(JSON.parse(savedUser));
           // Cookie cho middleware
-          document.cookie = `auth-token=${token}; path=/; max-age=${
+          document.cookie = `accessToken=${token}; path=/; max-age=${
             7 * 24 * 60 * 60
           }`;
         }
       } catch {
         localStorage.removeItem("user");
-        localStorage.removeItem("token");
+        localStorage.removeItem("accessToken");
         document.cookie =
-          "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+          "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
       } finally {
         setIsLoading(false);
       }
@@ -83,8 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Store token and user data
         localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("token", accessToken);
-        document.cookie = `auth-token=${accessToken}; path=/; max-age=${
+        localStorage.setItem("accessToken", accessToken);
+        document.cookie = `accessToken=${accessToken}; path=/; max-age=${
           7 * 24 * 60 * 60
         }`;
 
@@ -147,8 +149,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Store token and user data
           localStorage.setItem("user", JSON.stringify(user));
-          localStorage.setItem("token", accessToken);
-          document.cookie = `auth-token=${accessToken}; path=/; max-age=${
+          localStorage.setItem("accessToken", accessToken);
+          document.cookie = `accessToken=${accessToken}; path=/; max-age=${
             7 * 24 * 60 * 60
           }`;
 
@@ -186,9 +188,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       // Clear local storage and state
       localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      localStorage.removeItem("accessToken");
       document.cookie =
-        "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+        "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
       setUser(null);
       router.push("/signin");
     }
@@ -199,13 +201,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Không set loading = true để tránh ảnh hưởng UI khác
 
       // Decode JWT token to get user info
-      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-      
+      const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+
       // Create user object from token payload
       const user: User = {
         id: tokenPayload.sub,
         email: tokenPayload.email,
-        fullName: tokenPayload.fullName || tokenPayload.name || tokenPayload.email,
+        fullName:
+          tokenPayload.fullName || tokenPayload.name || tokenPayload.email,
         avatarUrl: tokenPayload.picture || "/assets/imgs/avatar.png",
         status: "ACTIVE",
         CCCD: "",
@@ -213,9 +216,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Store token and user data (using same keys as normal login)
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
       localStorage.setItem("accessToken", token); // For compatibility
-      document.cookie = `auth-token=${token}; path=/; max-age=${7 * 24 * 60 * 60}`;
+      document.cookie = `accessToken=${token}; path=/; max-age=${
+        7 * 24 * 60 * 60
+      }`;
 
       setUser(user);
       return { success: true };
