@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Calendar, FileText, DollarSign, CreditCard } from "lucide-react";
 import type { Invoice } from "@/lib/api/services/invoice";
+import { isPaymentOverdue } from "@/lib/utils/utils";
 
 interface InvoiceDetailDialogProps {
   isOpen: boolean;
@@ -126,7 +127,11 @@ export default function InvoiceDetailDialog({
               <span className="text-sm text-gray-700">
                 Hạn thanh toán:{" "}
                 <span className="font-medium">
-                  {formatDate(invoice.dueDate)}
+                  {formatDate(invoice.dueDate)}{" "}
+                </span>
+                <span className="text-red-400 font-bold">
+                  {isPaymentOverdue(invoice.dueDate, invoice.status) &&
+                    " (Quá hạn)"}
                 </span>
               </span>
             </div>

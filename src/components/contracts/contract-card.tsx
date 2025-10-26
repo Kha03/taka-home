@@ -35,7 +35,7 @@ import {
   FileText,
   ExternalLink,
 } from "lucide-react";
-import { cn } from "@/lib/utils/utils";
+import { cn, isPaymentOverdue } from "@/lib/utils/utils";
 import type { ContractVM } from "@/types/contracts";
 import { ContractExpiryAlert } from "./contract-expiry-alert";
 import { ContractExtensionDialog } from "./contract-extension-dialog";
@@ -742,11 +742,17 @@ export default function ContractCard({
                   </div>
                   <div>
                     <div className="font-bold text-foreground">
-                      Hóa đơn thuê nhà {mostRecentInvoice.month}
+                      Hóa đơn {mostRecentInvoice.month}
                     </div>
                     <div className="text-xs text-[#4f4f4f]">
-                      Hạn thanh toán:{" "}
-                      <strong>{mostRecentInvoice.dueDate}</strong>
+                      Hạn thanh toán:
+                      <strong> {mostRecentInvoice.dueDate}</strong>
+                      <span className="text-red-400 font-bold">
+                        {isPaymentOverdue(
+                          mostRecentInvoice.dueDate,
+                          mostRecentInvoice.status
+                        ) && " (Quá hạn)"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -820,10 +826,14 @@ export default function ContractCard({
                     </div>
                     <div>
                       <div className="font-bold text-foreground">
-                        Hóa đơn thuê nhà {invoice.month}
+                        Hóa đơn {invoice.month}
                       </div>
                       <div className="text-xs text-[#4f4f4f]">
                         Hạn thanh toán: <strong>{invoice.dueDate}</strong>
+                        <span className="text-red-400 font-bold">
+                          {isPaymentOverdue(invoice.dueDate, invoice.status) &&
+                            " (Quá hạn)"}
+                        </span>
                       </div>
                     </div>
                   </div>

@@ -134,6 +134,7 @@ export default function ContractDetailPage() {
             contractId={booking.contract.id}
             bookingStatus={booking.status}
             userRole={userRole}
+            propertyType={booking.property.type as "APARTMENT" | "BOARDING"}
           />
         )}
 

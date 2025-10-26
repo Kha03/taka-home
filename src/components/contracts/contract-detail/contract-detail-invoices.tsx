@@ -9,6 +9,7 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
+  Plus,
 } from "lucide-react";
 import { invoiceService, type Invoice } from "@/lib/api/services/invoice";
 import { paymentService } from "@/lib/api/services/payment";
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PaymentModal } from "@/components/payment/payment-modal";
 import InvoiceDetailDialog from "@/components/contracts/invoice-detail-dialog";
+import { CreateInvoiceDialog } from "@/components/contracts/create-invoice-dialog";
 import {
   Collapsible,
   CollapsibleContent,
@@ -27,12 +29,14 @@ interface ContractDetailInvoicesProps {
   contractId: string;
   bookingStatus: string;
   userRole?: string;
+  propertyType?: "APARTMENT" | "BOARDING";
 }
 
 export function ContractDetailInvoices({
   contractId,
   bookingStatus,
   userRole,
+  propertyType = "APARTMENT",
 }: ContractDetailInvoicesProps) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +48,9 @@ export function ContractDetailInvoices({
 
   // Invoice detail dialog states
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+
+  // Create invoice dialog state
+  const [showCreateInvoiceDialog, setShowCreateInvoiceDialog] = useState(false);
 
   const fetchInvoices = useCallback(async () => {
     if (bookingStatus !== "DUAL_ESCROW_FUNDED" && bookingStatus !== "ACTIVE") {
@@ -131,20 +138,43 @@ export function ContractDetailInvoices({
   // If no invoices yet
   if (invoices.length === 0) {
     return (
-      <Card className="bg-primary-foreground shadow-sm rounded-2xl border-none">
-        <CardHeader>
-          <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Hóa đơn thanh toán
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <FileText className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-            <p className="text-muted-foreground">Chưa có hóa đơn nào</p>
-          </div>
-        </CardContent>
-      </Card>
+      <>
+        <Card className="bg-primary-foreground shadow-sm rounded-2xl border-none">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Hóa đơn thanh toán
+              </CardTitle>
+              {userRole === "LANDLORD" && (
+                <Button
+                  size="sm"
+                  onClick={() => setShowCreateInvoiceDialog(true)}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Tạo hóa đơn
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <FileText className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+              <p className="text-muted-foreground">Chưa có hóa đơn nào</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Create Invoice Dialog */}
+        <CreateInvoiceDialog
+          isOpen={showCreateInvoiceDialog}
+          onClose={() => setShowCreateInvoiceDialog(false)}
+          contractId={contractId}
+          propertyType={propertyType}
+          onSuccess={fetchInvoices}
+        />
+      </>
     );
   }
 
@@ -160,6 +190,16 @@ export function ContractDetailInvoices({
               <FileText className="w-5 h-5" />
               Hóa đơn thanh toán ({invoices.length})
             </CardTitle>
+            {userRole === "LANDLORD" && (
+              <Button
+                size="sm"
+                onClick={() => setShowCreateInvoiceDialog(true)}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Tạo hóa đơn
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -181,7 +221,7 @@ export function ContractDetailInvoices({
                 </div>
                 <div>
                   <div className="font-bold text-foreground">
-                    Hóa đơn thuê nhà{" "}
+                    Hóa đơn{" "}
                     {new Date(
                       mostRecentInvoice.billingPeriod
                     ).toLocaleDateString("vi-VN", {
@@ -259,7 +299,7 @@ export function ContractDetailInvoices({
                         </div>
                         <div>
                           <div className="font-bold text-foreground">
-                            Hóa đơn thuê nhà{" "}
+                            Hóa đơn{" "}
                             {new Date(invoice.billingPeriod).toLocaleDateString(
                               "vi-VN",
                               {
@@ -367,6 +407,15 @@ export function ContractDetailInvoices({
             handlePayInvoice(invoice);
           }
         }}
+      />
+
+      {/* Create Invoice Dialog */}
+      <CreateInvoiceDialog
+        isOpen={showCreateInvoiceDialog}
+        onClose={() => setShowCreateInvoiceDialog(false)}
+        contractId={contractId}
+        propertyType={propertyType}
+        onSuccess={fetchInvoices}
       />
     </>
   );
