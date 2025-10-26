@@ -107,10 +107,62 @@ export default function NewPropertyPage() {
     return isNaN(num) ? 0 : num;
   };
 
+  // Helper function to get coordinates from VietMap API
+  const getMapLocation = async (
+    address: string,
+    ward: string,
+    province: string
+  ): Promise<string | null> => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_VIETMAP_API_KEY;
+      if (!apiKey) {
+        console.error("VietMap API key is missing");
+        return null;
+      }
+
+      // Combine address parts and encode for URL
+      const searchText = encodeURIComponent(`${address} ${ward} ${province}`);
+      const url = `https://maps.vietmap.vn/api/search?api-version=1.1&apikey=${apiKey}&text=${searchText}`;
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.error("VietMap API error:", response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      
+      // Check if we have valid coordinates
+      if (
+        data?.data?.features &&
+        data.data.features.length > 0 &&
+        data.data.features[0].geometry?.coordinates
+      ) {
+        const coords = data.data.features[0].geometry.coordinates;
+        // coordinates[0] is longitude, coordinates[1] is latitude
+        const longitude = parseFloat(coords[0].toFixed(4));
+        const latitude = parseFloat(coords[1].toFixed(4));
+        return `${latitude},${longitude}`;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error fetching map location:", error);
+      return null;
+    }
+  };
+
   // Convert form data to API format
-  const convertFormToApiData = (
+  const convertFormToApiData = async (
     formData: NewPropertyForm
-  ): PropertyCreateRequest => {
+  ): Promise<PropertyCreateRequest> => {
+    // Get map location from VietMap API
+    const mapLocation = await getMapLocation(
+      formData.street,
+      formData.ward,
+      formData.province
+    );
+
     // Base data common for both types (including legalDoc from common section)
     const baseData: PropertyCreateRequest = {
       title: formData.title.trim(),
@@ -123,6 +175,7 @@ export default function NewPropertyPage() {
       ward: formData.ward,
       address: formData.street.trim(),
       legalDoc: formData.legalDoc || undefined,
+      mapLocation: mapLocation || undefined,
       isVisible: true,
     };
 
@@ -210,7 +263,7 @@ export default function NewPropertyPage() {
 
     try {
       // Convert form data to API format
-      const apiData = convertFormToApiData(values);
+      const apiData = await convertFormToApiData(values);
 
       // Call Property Service API
       const response = await propertyService.createProperty(apiData);
