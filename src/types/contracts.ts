@@ -1,5 +1,3 @@
-import { User } from "@/lib/api";
-
 export interface ContractInvoice {
   id: number; // Số thứ tự hiển thị
   invoiceId: string; // UUID từ API để thanh toán
@@ -72,4 +70,116 @@ export interface ContractExtension {
   activatedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// Blockchain Contract History Types
+export interface ContractPenalty {
+  amount: number;
+  party: "landlord" | "tenant";
+  reason: string;
+  recordedBy: string;
+  recordedByRole: string;
+  timestamp: string;
+}
+
+export interface ContractDeposit {
+  amount: number;
+  depositTxRef: string;
+  depositedBy: string;
+  expectedDepositor: string;
+  depositedAt: string;
+}
+
+export interface ContractPayment {
+  amount: number;
+  paymentTxRef: string;
+  paidBy: string;
+  expectedPayer: string;
+  paidAt: string;
+}
+
+export interface SignatureMetadata {
+  algorithm: string;
+  source: string;
+  signatureIndex: number;
+  timestamp: string;
+  signer: {
+    role: "landlord" | "tenant";
+    userId: string;
+    name: string;
+  };
+  contract: {
+    code: string;
+    status: string;
+  };
+  fileUrl: string;
+}
+
+export interface ContractSignature {
+  metadata: SignatureMetadata;
+  signedBy: string;
+  expectedSigner?: string;
+  signedAt: string;
+  status: "SIGNED" | "PENDING";
+}
+
+export interface BlockchainExtension {
+  extensionNumber: number;
+  previousEndDate: string;
+  newEndDate: string;
+  previousRentAmount: number;
+  newRentAmount: number;
+  extensionAgreementHash: string;
+  notes: string;
+  recordedBy: string;
+  recordedByRole: "landlord" | "tenant";
+  recordedAt: string;
+  status: "ACTIVE" | "PENDING" | "CANCELLED";
+}
+
+export interface BlockchainContractValue {
+  contractId: string;
+  objectType: string;
+  landlordId: string;
+  tenantId: string;
+  landlordMSP: string;
+  tenantMSP: string;
+  landlordCertId: string;
+  tenantCertId: string;
+  landlordSignedHash: string;
+  fullySignedHash: string | null;
+  rentAmount: number;
+  depositAmount: number;
+  currency: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  signatures: {
+    landlord: ContractSignature;
+    tenant?: ContractSignature;
+  };
+  createdBy: string;
+  createdByMSP: string;
+  createdAt: string;
+  updatedAt: string;
+  activatedAt?: string;
+  deposit: {
+    landlord: ContractDeposit | null;
+    tenant: ContractDeposit | null;
+  };
+  firstPayment: ContractPayment | null;
+  penalties: ContractPenalty[];
+  currentExtensionNumber: number;
+  extensions: BlockchainExtension[];
+}
+
+export interface BlockchainContractHistoryItem {
+  txId: string;
+  timestamp: string;
+  isDelete: boolean;
+  value: BlockchainContractValue;
+}
+
+export interface BlockchainContractHistoryResponse {
+  data: BlockchainContractHistoryItem[];
 }

@@ -1,4 +1,8 @@
-import { ContractExtension, ContractExtensionRequest } from "@/types/contracts";
+import {
+  ContractExtension,
+  ContractExtensionRequest,
+  BlockchainContractHistoryResponse,
+} from "@/types/contracts";
 import { apiClient } from "../client";
 import { ApiResponse } from "../types";
 import { signingOption } from "./booking";
@@ -114,6 +118,22 @@ export class ContractService {
     return apiClient.patch<void>(
       `${this.basePath}/extensions/${extensionId}/tenant-sign`,
       { signingOption }
+    );
+  }
+
+  // Lấy lịch sử blockchain của hợp đồng
+  async getContractBlockchainHistory(
+    contractId: string,
+    orgName: string
+  ): Promise<ApiResponse<BlockchainContractHistoryResponse>> {
+    return apiClient.get<BlockchainContractHistoryResponse>(
+      `/api/blockchain/contracts/${contractId}/history`,
+      undefined,
+      {
+        headers: {
+          orgName: orgName,
+        },
+      }
     );
   }
 }

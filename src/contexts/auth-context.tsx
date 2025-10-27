@@ -81,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatarUrl: account.user.avatarUrl || "/assets/imgs/avatar.png",
           status: account.user.status,
           CCCD: account.user.CCCD || "",
+          roles: account.roles || [],
         };
 
         // Store token and user data
@@ -140,11 +141,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Transform API user to local User format
           const user: User = {
-            id: account.id,
+            id: account.user.id,
             email: account.email,
             fullName: account.user.fullName,
             avatarUrl: account.user.avatarUrl || "/assets/imgs/avatar.png",
             status: account.user.status,
+            roles: account.roles || [],
           };
 
           // Store token and user data

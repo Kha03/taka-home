@@ -354,6 +354,7 @@ export interface User {
   status: "ACTIVE" | "INACTIVE" | "BANNED";
   phone?: string;
   CCCD?: string;
+  roles?: ("TENANT" | "LANDLORD" | "ADMIN")[];
 }
 
 export interface Account {

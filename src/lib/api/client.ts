@@ -173,10 +173,14 @@ class ApiClient {
    */
   async get<T>(
     path: string,
-    params?: Record<string, unknown>
+    params?: Record<string, unknown>,
+    config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
-      const response = await this.axiosInstance.get<T>(path, { params });
+      const response = await this.axiosInstance.get<T>(path, {
+        params,
+        ...config,
+      });
       return this.transformResponse<T>(response);
     } catch (error) {
       return this.handleError(error as AxiosError);
