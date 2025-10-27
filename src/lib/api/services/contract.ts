@@ -8,10 +8,22 @@ export interface EscrowBalanceResponse {
   balanceLandlord: string;
   accountId: string;
 }
+
+export interface ExtensionFileUrl {
+  extensionId: string;
+  fileUrl: string;
+  createdAt: string;
+}
+
+export interface ContractFileUrlResponse {
+  fileUrl: string;
+  extensionFileUrls: ExtensionFileUrl[];
+}
+
 export class ContractService {
   private basePath = "/contracts";
-  async getFileUrl(id: string): Promise<ApiResponse<{ fileUrl: string }>> {
-    return apiClient.get<{ fileUrl: string }>(
+  async getFileUrl(id: string): Promise<ApiResponse<ContractFileUrlResponse>> {
+    return apiClient.get<ContractFileUrlResponse>(
       `${this.basePath}/${id}/file-url`
     );
   }

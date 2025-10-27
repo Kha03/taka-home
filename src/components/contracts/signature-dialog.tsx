@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,37 @@ export function SignatureDialog({
   >("idle");
   const [selectedSigningMethod, setSelectedSigningMethod] =
     useState<signingOption>(signingOption.VNPT);
+  const [extensionFileUrl, setExtensionFileUrl] = useState<string | null>(
+    extension.extensionContractFileUrl
+  );
+
+  // Fetch fresh file URL when dialog opens
+  useEffect(() => {
+    if (open && extension.contractId) {
+      const fetchFileUrl = async () => {
+        try {
+          const response = await contractService.getFileUrl(
+            extension.contractId
+          );
+
+          if (response.data?.extensionFileUrls) {
+            const extensionFile = response.data.extensionFileUrls.find(
+              (file) => file.extensionId === extension.id
+            );
+
+            if (extensionFile?.fileUrl) {
+              setExtensionFileUrl(extensionFile.fileUrl);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching extension file URL:", error);
+          // Keep the existing extensionContractFileUrl from extension object
+        }
+      };
+
+      void fetchFileUrl();
+    }
+  }, [open, extension.contractId, extension.id]);
 
   const handleSign = async (method: signingOption) => {
     setSigningLoading(true);
@@ -79,11 +110,47 @@ export function SignatureDialog({
     }
   };
 
-  const handleDownloadContract = () => {
-    if (extension.extensionContractFileUrl) {
-      window.open(extension.extensionContractFileUrl, "_blank");
-    } else {
+  const handleDownloadContract = async () => {
+    // Use the fetched file URL if available
+    if (extensionFileUrl) {
+      // Create a temporary link to trigger download
+      const link = document.createElement("a");
+      link.href = extensionFileUrl;
+      link.download = `hop-dong-gia-han-${extension.id.slice(0, 8)}.pdf`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    try {
+      // Fetch latest file URLs from API as fallback
+      const response = await contractService.getFileUrl(extension.contractId);
+
+      if (response.data?.extensionFileUrls) {
+        // Find the file URL for this specific extension
+        const extensionFile = response.data.extensionFileUrls.find(
+          (file) => file.extensionId === extension.id
+        );
+
+        if (extensionFile?.fileUrl) {
+          // Create a temporary link to trigger download
+          const link = document.createElement("a");
+          link.href = extensionFile.fileUrl;
+          link.download = `hop-dong-gia-han-${extension.id.slice(0, 8)}.pdf`;
+          link.target = "_blank";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          return;
+        }
+      }
+
       toast.error("Lỗi", "Không tìm thấy file hợp đồng");
+    } catch (error) {
+      console.error("Error fetching contract file:", error);
+      toast.error("Lỗi", "Không thể tải file hợp đồng");
     }
   };
 
@@ -118,47 +185,49 @@ export function SignatureDialog({
             </div>
           </div>
 
-          {/* PDF Preview */}
-          <Card className="bg-primary-foreground">
-            <CardContent>
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <FileSignature className="h-5 w-5" />
-                Xem trước hợp đồng gia hạn
-              </h3>
-              {extension.extensionContractFileUrl ? (
-                <>
-                  <div className="border rounded-lg overflow-hidden bg-gray-50">
-                    <iframe
-                      src={extension.extensionContractFileUrl}
-                      className="w-full h-[500px]"
-                      title="Hợp đồng gia hạn"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    * Vui lòng đọc kỹ toàn bộ nội dung hợp đồng gia hạn trước
-                    khi ký.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="border rounded-lg overflow-hidden bg-gray-50">
-                    <iframe
-                      src="/contract/PhuLucHopDongGiaHan.pdf"
-                      className="w-full h-[500px]"
-                      title="Mẫu hợp đồng gia hạn"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    * Đây là mẫu hợp đồng gia hạn. Hợp đồng thực tế sẽ được điền
-                    thông tin cụ thể.
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
+          {/* PDF Preview - Only show for LANDLORD */}
+          {userRole === "LANDLORD" && (
+            <Card className="bg-primary-foreground">
+              <CardContent>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <FileSignature className="h-5 w-5" />
+                  Xem trước hợp đồng gia hạn
+                </h3>
+                {extensionFileUrl ? (
+                  <>
+                    <div className="border rounded-lg overflow-hidden bg-gray-50">
+                      <iframe
+                        src={extensionFileUrl}
+                        className="w-full h-[500px]"
+                        title="Hợp đồng gia hạn"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      * Vui lòng đọc kỹ toàn bộ nội dung hợp đồng gia hạn trước
+                      khi ký.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="border rounded-lg overflow-hidden bg-gray-50">
+                      <iframe
+                        src="/contract/PhuLucHopDongGiaHan.pdf"
+                        className="w-full h-[500px]"
+                        title="Mẫu hợp đồng gia hạn"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      * Đây là mẫu hợp đồng gia hạn. Hợp đồng thực tế sẽ được
+                      điền thông tin cụ thể.
+                    </p>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Download Contract */}
-          {extension.extensionContractFileUrl && (
+          {/* Download Contract - For both roles */}
+          {extensionFileUrl && (
             <Button
               variant="outline"
               className="w-full text-primary"

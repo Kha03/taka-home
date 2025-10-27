@@ -11,12 +11,12 @@ import {
 } from "lucide-react";
 import type { Booking } from "@/lib/api/services/booking";
 import { bookingService, signingOption } from "@/lib/api/services/booking";
-import { contractService } from "@/lib/api/services/contract";
 import { paymentService, PaymentPurpose } from "@/lib/api/services/payment";
 import { toast } from "sonner";
 import { PaymentModal } from "@/components/payment/payment-modal";
 import { EscrowBalanceDetailCard } from "@/components/contracts/escrow-balance-detail-card";
 import { SigningMethodDialog } from "@/components/contracts/signing-method-dialog";
+import { ContractFileSelectorDialog } from "@/components/contracts/contract-file-selector-dialog";
 import {
   Dialog,
   DialogContent,
@@ -46,21 +46,11 @@ export function ContractDetailActions({
   );
   const [selectedSigningMethod, setSelectedSigningMethod] =
     useState<signingOption>(signingOption.VNPT);
+  const [showFileSelectorDialog, setShowFileSelectorDialog] = useState(false);
 
   const handleViewContract = async () => {
     if (!booking.contract?.id) return;
-
-    try {
-      const response = await contractService.getFileUrl(booking.contract.id);
-      if (response.data?.fileUrl) {
-        window.open(response.data.fileUrl, "_blank");
-      } else {
-        toast.error("Không tìm thấy file hợp đồng");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Không thể mở file hợp đồng");
-    }
+    setShowFileSelectorDialog(true);
   };
 
   const handleSignContract = async (method: signingOption) => {
@@ -436,6 +426,15 @@ export function ContractDetailActions({
   return (
     <>
       {renderActions()}
+
+      {/* Contract File Selector Dialog */}
+      {booking.contract?.id && (
+        <ContractFileSelectorDialog
+          open={showFileSelectorDialog}
+          onOpenChange={setShowFileSelectorDialog}
+          contractId={booking.contract.id}
+        />
+      )}
 
       {/* Payment Modal */}
       <PaymentModal
