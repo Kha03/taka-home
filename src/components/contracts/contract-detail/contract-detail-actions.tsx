@@ -477,7 +477,7 @@ export function ContractDetailActions({
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                 </div>
                 <Card className="border-blue-200 bg-blue-50">
-                  <CardContent className="pt-6">
+                  <CardContent>
                     <div className="flex gap-3">
                       <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
                       <div className="space-y-2">
@@ -500,7 +500,7 @@ export function ContractDetailActions({
             {signingStep === "success" && (
               <>
                 <Card className="border-green-200 bg-green-50">
-                  <CardContent className="pt-6">
+                  <CardContent>
                     <div className="flex gap-3">
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                       <div className="space-y-2">

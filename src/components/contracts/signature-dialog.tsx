@@ -89,7 +89,7 @@ export function SignatureDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[500px]">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Ký hợp đồng gia hạn</DialogTitle>
           <DialogDescription>
@@ -117,6 +117,45 @@ export function SignatureDialog({
               </div>
             </div>
           </div>
+
+          {/* PDF Preview */}
+          <Card className="bg-primary-foreground">
+            <CardContent>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <FileSignature className="h-5 w-5" />
+                Xem trước hợp đồng gia hạn
+              </h3>
+              {extension.extensionContractFileUrl ? (
+                <>
+                  <div className="border rounded-lg overflow-hidden bg-gray-50">
+                    <iframe
+                      src={extension.extensionContractFileUrl}
+                      className="w-full h-[500px]"
+                      title="Hợp đồng gia hạn"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    * Vui lòng đọc kỹ toàn bộ nội dung hợp đồng gia hạn trước
+                    khi ký.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="border rounded-lg overflow-hidden bg-gray-50">
+                    <iframe
+                      src="/contract/PhuLucHopDongGiaHan.pdf"
+                      className="w-full h-[500px]"
+                      title="Mẫu hợp đồng gia hạn"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    * Đây là mẫu hợp đồng gia hạn. Hợp đồng thực tế sẽ được điền
+                    thông tin cụ thể.
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Download Contract */}
           {extension.extensionContractFileUrl && (
@@ -247,7 +286,7 @@ export function SignatureDialog({
             </DialogHeader>
             <div className="py-4">
               <Card className="border-green-200 bg-green-50">
-                <CardContent className="pt-6">
+                <CardContent>
                   <div className="flex gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
                     <div className="space-y-2">

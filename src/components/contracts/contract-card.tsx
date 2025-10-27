@@ -220,7 +220,7 @@ function SigningDialog({
           {step === "success" && (
             <>
               <Card className="border-green-200 bg-green-50">
-                <CardContent className="pt-6">
+                <CardContent>
                   <div className="flex gap-3">
                     <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                     <div className="space-y-2">

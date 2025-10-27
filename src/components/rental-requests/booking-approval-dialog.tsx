@@ -95,6 +95,15 @@ export function BookingApprovalDialog({
     ? parseFloat(room?.roomType?.deposit || "0")
     : parseFloat(property.deposit || "0");
 
+  // Determine contract PDF path based on property type
+  const contractPdfPath = isBoarding
+    ? "/contract/HopDongChoThueNhaTro.pdf"
+    : "/contract/HopDongChoThueNhaNguyenCan.pdf";
+
+  const contractTitle = isBoarding
+    ? "Hợp đồng cho thuê phòng trọ"
+    : "Hợp đồng cho thuê nhà nguyên căn";
+
   // Nếu đang xử lý duyệt - hiển thị dialog loading với hướng dẫn
   if (dialogState === "approving") {
     return (
@@ -117,7 +126,7 @@ export function BookingApprovalDialog({
 
             {/* Hướng dẫn */}
             <Card className="border-blue-200 bg-blue-50">
-              <CardContent className="pt-6">
+              <CardContent>
                 <div className="flex gap-3">
                   <AlertCircle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                   <div className="space-y-2">
@@ -222,7 +231,7 @@ export function BookingApprovalDialog({
         <div className="space-y-6">
           {/* Thông tin khách thuê */}
           <Card className="bg-primary-foreground">
-            <CardContent className="pt-6">
+            <CardContent>
               <h3 className="font-semibold mb-3">Thông tin khách thuê</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -249,7 +258,7 @@ export function BookingApprovalDialog({
 
           {/* Thông tin bất động sản */}
           <Card className="bg-primary-foreground">
-            <CardContent className="pt-6">
+            <CardContent>
               <h3 className="font-semibold mb-3">Thông tin bất động sản</h3>
               <div className="space-y-3">
                 <div>
@@ -290,16 +299,16 @@ export function BookingApprovalDialog({
 
           {/* PDF Preview */}
           <Card className="bg-primary-foreground">
-            <CardContent className="pt-6">
+            <CardContent>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <FileText className="h-5 w-5" />
                 Xem trước hợp đồng
               </h3>
               <div className="border rounded-lg overflow-hidden bg-gray-50">
                 <iframe
-                  src="/contract/HopDongChoThueNhaNguyenCan.pdf"
+                  src={contractPdfPath}
                   className="w-full h-[500px]"
-                  title="Hợp đồng cho thuê nhà"
+                  title={contractTitle}
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">

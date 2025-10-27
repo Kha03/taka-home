@@ -488,7 +488,7 @@ export function CreateInvoiceDialog({
               {/* Show processed invoice data */}
               {Object.keys(processedInvoiceData).length > 0 && (
                 <Card className="bg-primary-foreground">
-                  <CardContent className="pt-6">
+                  <CardContent>
                     <h4 className="font-semibold mb-3">
                       Thông tin hóa đơn đã trích xuất:
                     </h4>
