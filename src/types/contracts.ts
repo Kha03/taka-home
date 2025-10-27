@@ -183,3 +183,46 @@ export interface BlockchainContractHistoryItem {
 export interface BlockchainContractHistoryResponse {
   data: BlockchainContractHistoryItem[];
 }
+
+// Blockchain Payment History Types
+export type PaymentStatus = "OVERDUE" | "PAID" | "SCHEDULED";
+
+export interface PaymentPenalty {
+  amount: number;
+  appliedAt: string;
+  appliedBy: string;
+  appliedByRole: string;
+  policyRef: string;
+  reason: string;
+}
+
+export interface BlockchainPaymentValue {
+  paymentId: string;
+  contractId: string;
+  amount: number;
+  paidAmount?: number;
+  status: PaymentStatus;
+  period: number;
+  dueDate: string;
+  overdueAt?: string;
+  paidAt?: string;
+  paidBy?: string;
+  expectedPayer?: string;
+  orderRef?: string;
+  objectType: string;
+  extensionNumber?: number;
+  penalties?: PaymentPenalty[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlockchainPaymentHistoryItem {
+  txId: string;
+  timestamp: string;
+  isDelete: boolean;
+  value: BlockchainPaymentValue;
+}
+
+export interface BlockchainPaymentHistoryResponse {
+  data: BlockchainPaymentValue[]; // API trả về array trực tiếp, không có wrapper txId/timestamp
+}

@@ -6,3 +6,4 @@ export { CreateInvoiceDialog } from "./create-invoice-dialog";
 export { SigningMethodDialog } from "./signing-method-dialog";
 export { ContractFileSelectorDialog } from "./contract-file-selector-dialog";
 export { BlockchainHistoryTimeline } from "./blockchain-history-timeline";
+export { BlockchainPaymentTimeline } from "./blockchain-payment-timeline";

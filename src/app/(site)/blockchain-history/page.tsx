@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { contractService } from "@/lib/api/services";
-import { BlockchainContractHistoryResponse } from "@/types/contracts";
+import {
+  BlockchainContractHistoryResponse,
+  BlockchainPaymentHistoryResponse,
+  PaymentStatus,
+} from "@/types/contracts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,158 +17,302 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Search, Loader2, User as UserIcon } from "lucide-react";
-import { BlockchainHistoryTimeline } from "@/components/contracts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Loader2, Receipt, FileText } from "lucide-react";
+import {
+  BlockchainHistoryTimeline,
+  BlockchainPaymentTimeline,
+} from "@/components/contracts";
 import { useAuth } from "@/contexts/auth-context";
-import { Badge } from "@/components/ui/badge";
+
+type OrgName = "OrgTenant" | "OrgLandlord";
 
 export default function BlockchainHistoryPage() {
   const { user } = useAuth();
+
+  // State management
   const [contractId, setContractId] = useState("");
-  const [orgName, setOrgName] = useState<"OrgTenant" | "OrgLandlord">(
-    "OrgTenant"
-  );
-  const [history, setHistory] =
+  const [paymentStatus, setPaymentStatus] =
+    useState<PaymentStatus>("SCHEDULED");
+  const [orgName, setOrgName] = useState<OrgName>("OrgTenant");
+  const [contractHistory, setContractHistory] =
     useState<BlockchainContractHistoryResponse | null>(null);
+  const [paymentHistory, setPaymentHistory] =
+    useState<BlockchainPaymentHistoryResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-detect orgName based on user role
+  // Auto-detect organization based on user role
   useEffect(() => {
-    if (user?.roles) {
-      // Ưu tiên LANDLORD nếu có cả 2 roles
-      if (user.roles.includes("LANDLORD")) {
-        setOrgName("OrgLandlord");
-      } else if (user.roles.includes("TENANT")) {
-        setOrgName("OrgTenant");
-      }
+    if (!user?.roles) return;
+
+    if (user.roles.includes("LANDLORD")) {
+      setOrgName("OrgLandlord");
+    } else if (user.roles.includes("TENANT")) {
+      setOrgName("OrgTenant");
     }
   }, [user]);
 
-  const handleSearch = async () => {
-    if (!contractId.trim()) {
+  // Contract history search handler
+  const handleSearchContract = async () => {
+    const trimmedId = contractId.trim();
+
+    if (!trimmedId) {
       setError("Vui lòng nhập ID hợp đồng");
       return;
     }
 
     setLoading(true);
     setError(null);
-    setHistory(null);
+    setContractHistory(null);
 
     try {
       const response = await contractService.getContractBlockchainHistory(
-        contractId.trim(),
+        trimmedId,
         orgName
       );
 
       if (response.code === 200 && response.data) {
-        setHistory(response.data);
+        setContractHistory(response.data);
       } else {
         setError(response.message || "Không thể tải lịch sử hợp đồng");
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Đã xảy ra lỗi khi tra cứu";
-      setError(errorMessage);
+      setError(
+        err instanceof Error ? err.message : "Đã xảy ra lỗi khi tra cứu"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // Payment history search handler
+  const handleSearchPayment = async () => {
+    if (!contractId.trim()) {
+      setError("Vui lòng tra cứu hợp đồng trước khi xem lịch thanh toán");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setPaymentHistory(null);
+
+    try {
+      const response = await contractService.getPaymentBlockchainHistory(
+        orgName,
+        paymentStatus
+      );
+
+      if (response.code === 200 && response.data) {
+        setPaymentHistory(response.data);
+      } else {
+        setError(response.message || "Không thể tải lịch thanh toán");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Đã xảy ra lỗi khi tra cứu"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasContractResults =
+    contractHistory?.data && contractHistory.data.length > 0;
+  const hasPaymentResults =
+    paymentHistory?.data && paymentHistory.data.length > 0;
+  const isContractIdValid = contractId.trim().length > 0;
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-primary text-center">
-            Tra Cứu Lịch Sử Hợp Đồng Blockchain
+        <header className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold text-primary">
+            Tra Cứu Lịch Sử Blockchain
           </h1>
-        </div>
+          <p className="text-muted-foreground">
+            Tra cứu lịch sử hợp đồng và thanh toán được lưu trữ trên blockchain
+          </p>
+        </header>
 
-        {/* Search Form */}
-        <Card className="bg-primary-foreground">
-          <CardHeader>
-            <CardTitle>Thông Tin Tra Cứu</CardTitle>
-            <CardDescription>
-              Nhập mã hợp đồng để tra cứu lịch sử trên blockchain
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contractId">Mã Hợp Đồng</Label>
-                <Input
-                  id="contractId"
-                  placeholder="VD: CT-20251025-LJU6IZ"
-                  value={contractId}
-                  onChange={(e) => setContractId(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch();
+        {/* Main Content */}
+        <Tabs defaultValue="contract" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="contract">
+              <FileText className="mr-2 h-4 w-4" />
+              Lịch Sử Hợp Đồng
+            </TabsTrigger>
+            <TabsTrigger value="payment">
+              <Receipt className="mr-2 h-4 w-4" />
+              Lịch Thanh Toán
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Contract History Tab */}
+          <TabsContent value="contract" className="space-y-4">
+            <Card className="bg-primary-foreground">
+              <CardHeader>
+                <CardTitle>Tra Cứu Hợp Đồng</CardTitle>
+                <CardDescription>
+                  Nhập mã hợp đồng để tra cứu lịch sử trên blockchain
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contractId">Mã Hợp Đồng</Label>
+                  <Input
+                    id="contractId"
+                    placeholder="VD: CT-20251025-LJU6IZ"
+                    value={contractId}
+                    onChange={(e) => setContractId(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleSearchContract()
                     }
-                  }}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="role">Vai Trò Của Bạn</Label>
-                <div className="flex items-center h-10 px-3 py-2 rounded-md border border-input bg-background">
-                  <UserIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    {orgName === "OrgLandlord" ? "Chủ Nhà" : "Người Thuê"}
-                  </span>
+                  />
                 </div>
-              </div>
-            </div>
 
-            <Button
-              onClick={handleSearch}
-              disabled={loading || !contractId.trim()}
-              className="w-full md:w-auto"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang tra cứu...
-                </>
-              ) : (
-                <>
-                  <Search className="mr-2 h-4 w-4" />
-                  Tra Cứu
-                </>
-              )}
-            </Button>
+                <Button
+                  onClick={handleSearchContract}
+                  disabled={loading || !isContractIdValid}
+                  className="w-full md:w-auto"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Đang tra cứu...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-4 w-4" />
+                      Tra Cứu
+                    </>
+                  )}
+                </Button>
 
-            {error && (
-              <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
-                {error}
-              </div>
+                {error && (
+                  <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
+                    {error}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Contract Results */}
+            {hasContractResults && (
+              <Card className="bg-primary-foreground">
+                <CardHeader>
+                  <CardTitle>Lịch Sử Hợp Đồng</CardTitle>
+                  <CardDescription>
+                    Tìm thấy {contractHistory.data.length} giao dịch trên
+                    blockchain
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <BlockchainHistoryTimeline history={contractHistory.data} />
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
-        </Card>
 
-        {/* Results */}
-        {history && history.data && history.data.length > 0 && (
-          <Card className="bg-primary-foreground">
-            <CardHeader>
-              <CardTitle>Lịch Sử Hợp Đồng</CardTitle>
-              <CardDescription>
-                Tìm thấy {history.data.length} giao dịch trên blockchain
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BlockchainHistoryTimeline history={history.data} />
-            </CardContent>
-          </Card>
-        )}
+            {contractHistory?.data && contractHistory.data.length === 0 && (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Không tìm thấy lịch sử cho hợp đồng này
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
-        {history && history.data && history.data.length === 0 && (
-          <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
-              Không tìm thấy lịch sử cho hợp đồng này
-            </CardContent>
-          </Card>
-        )}
+          {/* Payment History Tab */}
+          <TabsContent value="payment" className="space-y-4">
+            <Card className="bg-primary-foreground">
+              <CardHeader>
+                <CardTitle>Tra Cứu Thanh Toán</CardTitle>
+                <CardDescription>
+                  Lọc lịch thanh toán theo trạng thái (Yêu cầu tra cứu hợp đồng
+                  trước)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="paymentStatus">Trạng Thái</Label>
+                  <Select
+                    value={paymentStatus}
+                    onValueChange={(value) =>
+                      setPaymentStatus(value as PaymentStatus)
+                    }
+                  >
+                    <SelectTrigger id="paymentStatus">
+                      <SelectValue placeholder="Chọn trạng thái" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-primary-foreground">
+                      <SelectItem value="PAID">Đã thanh toán</SelectItem>
+                      <SelectItem value="SCHEDULED">Đã lên lịch</SelectItem>
+                      <SelectItem value="OVERDUE">Quá hạn</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button
+                  onClick={handleSearchPayment}
+                  disabled={loading || !isContractIdValid}
+                  className="w-full md:w-auto"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Đang tra cứu...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-2 h-4 w-4" />
+                      Tra Cứu
+                    </>
+                  )}
+                </Button>
+
+                {error && (
+                  <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
+                    {error}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Payment Results */}
+            {hasPaymentResults && (
+              <Card className="bg-primary-foreground">
+                <CardHeader>
+                  <CardTitle>Lịch Thanh Toán</CardTitle>
+                  <CardDescription>
+                    Lịch thanh toán của hợp đồng {contractId}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <BlockchainPaymentTimeline
+                    history={paymentHistory.data}
+                    contractId={contractId}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {paymentHistory?.data && paymentHistory.data.length === 0 && (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Không tìm thấy lịch thanh toán
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

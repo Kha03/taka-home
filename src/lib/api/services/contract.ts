@@ -2,6 +2,8 @@ import {
   ContractExtension,
   ContractExtensionRequest,
   BlockchainContractHistoryResponse,
+  BlockchainPaymentHistoryResponse,
+  PaymentStatus,
 } from "@/types/contracts";
 import { apiClient } from "../client";
 import { ApiResponse } from "../types";
@@ -129,6 +131,23 @@ export class ContractService {
     return apiClient.get<BlockchainContractHistoryResponse>(
       `/api/blockchain/contracts/${contractId}/history`,
       undefined,
+      {
+        headers: {
+          orgName: orgName,
+        },
+      }
+    );
+  }
+
+  // Lấy lịch sử thanh toán trên blockchain
+  async getPaymentBlockchainHistory(
+    orgName: string,
+    status?: PaymentStatus
+  ): Promise<ApiResponse<BlockchainPaymentHistoryResponse>> {
+    const params = status ? { status } : undefined;
+    return apiClient.get<BlockchainPaymentHistoryResponse>(
+      `/api/blockchain/payments`,
+      params,
       {
         headers: {
           orgName: orgName,
