@@ -10,12 +10,13 @@ import {
   FileText,
 } from "lucide-react";
 import type { Booking } from "@/lib/api/services/booking";
-import { bookingService } from "@/lib/api/services/booking";
+import { bookingService, signingOption } from "@/lib/api/services/booking";
 import { contractService } from "@/lib/api/services/contract";
 import { paymentService, PaymentPurpose } from "@/lib/api/services/payment";
 import { toast } from "sonner";
 import { PaymentModal } from "@/components/payment/payment-modal";
 import { EscrowBalanceDetailCard } from "@/components/contracts/escrow-balance-detail-card";
+import { SigningMethodDialog } from "@/components/contracts/signing-method-dialog";
 import {
   Dialog,
   DialogContent,
@@ -37,10 +38,14 @@ export function ContractDetailActions({
 }: ContractDetailActionsProps) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [signingMethodDialog, setSigningMethodDialog] = useState(false);
+  const [signingLoading, setSigningLoading] = useState(false);
   const [signingDialog, setSigningDialog] = useState(false);
-  const [signingStep, setSigningStep] = useState<
-    "confirm" | "signing" | "success"
-  >("confirm");
+  const [signingStep, setSigningStep] = useState<"signing" | "success">(
+    "signing"
+  );
+  const [selectedSigningMethod, setSelectedSigningMethod] =
+    useState<signingOption>(signingOption.VNPT);
 
   const handleViewContract = async () => {
     if (!booking.contract?.id) return;
@@ -58,16 +63,27 @@ export function ContractDetailActions({
     }
   };
 
-  const handleSignContract = async () => {
+  const handleSignContract = async (method: signingOption) => {
+    setSigningLoading(true);
+    setSigningMethodDialog(false);
+    setSelectedSigningMethod(method);
+
+    // Small delay to ensure dialog closes before showing next one
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     setSigningStep("signing");
+    setSigningDialog(true);
+
     try {
-      await bookingService.signContract(booking.id);
+      await bookingService.signContract(booking.id, method);
       setSigningStep("success");
     } catch (error) {
       console.error(error);
       setSigningDialog(false);
-      setSigningStep("confirm");
+      setSigningStep("signing");
       toast.error("Không thể ký hợp đồng. Vui lòng thử lại");
+    } finally {
+      setSigningLoading(false);
     }
   };
 
@@ -168,10 +184,7 @@ export function ContractDetailActions({
                       )}
                       <Button
                         size="sm"
-                        onClick={() => {
-                          setSigningStep("confirm");
-                          setSigningDialog(true);
-                        }}
+                        onClick={() => setSigningMethodDialog(true)}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Ký hợp đồng
@@ -229,10 +242,7 @@ export function ContractDetailActions({
                     )}
                     <Button
                       size="sm"
-                      onClick={() => {
-                        setSigningStep("confirm");
-                        setSigningDialog(true);
-                      }}
+                      onClick={() => setSigningMethodDialog(true)}
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Ký hợp đồng
@@ -435,57 +445,32 @@ export function ContractDetailActions({
         onPaymentSuccess={handlePaymentSuccess}
       />
 
-      {/* Signing Dialog */}
+      {/* Signing Method Dialog */}
+      <SigningMethodDialog
+        open={signingMethodDialog}
+        onOpenChange={setSigningMethodDialog}
+        onConfirm={handleSignContract}
+        loading={signingLoading}
+      />
+
+      {/* Signing Progress Dialog */}
       <Dialog open={signingDialog} onOpenChange={setSigningDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {signingStep === "confirm"
-                ? "Xác nhận ký hợp đồng"
-                : signingStep === "signing"
+              {signingStep === "signing"
                 ? "Đang xử lý yêu cầu ký..."
                 : "Ký hợp đồng thành công"}
             </DialogTitle>
             <DialogDescription>
-              {signingStep === "confirm"
-                ? "Vui lòng xác nhận để tiếp tục"
-                : signingStep === "signing"
-                ? "Vui lòng kiểm tra điện thoại"
+              {signingStep === "signing"
+                ? selectedSigningMethod === signingOption.VNPT
+                  ? "Vui lòng kiểm tra điện thoại"
+                  : "Đang xử lý yêu cầu ký"
                 : "Thông tin quan trọng"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            {signingStep === "confirm" && (
-              <>
-                <Card className="border-orange-200 bg-orange-50">
-                  <CardContent className="pt-6">
-                    <div className="flex gap-3">
-                      <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
-                      <div className="space-y-2">
-                        <p className="font-medium text-orange-900">
-                          Xác nhận ký hợp đồng
-                        </p>
-                        <p className="text-sm text-orange-800">
-                          Bạn có chắc chắn muốn ký hợp đồng này? Sau khi xác
-                          nhận, hệ thống sẽ gửi yêu cầu ký đến điện thoại của
-                          bạn.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <div className="flex justify-end gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setSigningDialog(false)}
-                    className="text-primary"
-                  >
-                    Hủy
-                  </Button>
-                  <Button onClick={handleSignContract}>Xác nhận ký</Button>
-                </div>
-              </>
-            )}
             {signingStep === "signing" && (
               <>
                 <div className="flex justify-center">
@@ -497,12 +482,14 @@ export function ContractDetailActions({
                       <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
                       <div className="space-y-2">
                         <p className="font-medium text-blue-900">
-                          Vui lòng kiểm tra điện thoại
+                          {selectedSigningMethod === signingOption.VNPT
+                            ? "Vui lòng kiểm tra điện thoại"
+                            : "Đang ký hợp đồng"}
                         </p>
                         <p className="text-sm text-blue-800">
-                          Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại
-                          của bạn. Vui lòng mở ứng dụng{" "}
-                          <strong>VNPT SmartCA</strong> để ký xác nhận.
+                          {selectedSigningMethod === signingOption.VNPT
+                            ? "Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của bạn. Vui lòng mở ứng dụng VNPT SmartCA để ký xác nhận."
+                            : "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát..."}
                         </p>
                       </div>
                     </div>
@@ -532,6 +519,7 @@ export function ContractDetailActions({
                   <Button
                     onClick={() => {
                       setSigningDialog(false);
+                      setSigningStep("signing");
                       onRefresh();
                     }}
                   >

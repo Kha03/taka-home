@@ -15,12 +15,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { FileText, Download, CheckCircle2, AlertCircle } from "lucide-react";
 import type { Booking } from "@/lib/api/services/booking";
+import { signingOption } from "@/lib/api/services/booking";
+import { SigningMethodDialog } from "@/components/contracts/signing-method-dialog";
 
 interface BookingApprovalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   booking: Booking | null;
-  onConfirmApprove: (bookingId: string) => Promise<Booking | undefined>;
+  onConfirmApprove: (
+    bookingId: string,
+    method: signingOption
+  ) => Promise<Booking | undefined>;
 }
 
 export function BookingApprovalDialog({
@@ -29,22 +34,23 @@ export function BookingApprovalDialog({
   booking,
   onConfirmApprove,
 }: BookingApprovalDialogProps) {
-  const [approving, setApproving] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+  type DialogState = "approval" | "signing-method" | "approving" | "result";
+  const [dialogState, setDialogState] = useState<DialogState>("approval");
+  const [selectedSigningMethod, setSelectedSigningMethod] =
+    useState<signingOption>(signingOption.VNPT);
   const [approvalResult, setApprovalResult] = useState<{
     contractCode?: string;
     signedPdfUrl?: string;
   } | null>(null);
 
-  const handleApprove = async () => {
+  const handleApprove = async (method: signingOption) => {
     if (!booking) return;
 
     try {
-      setApproving(true);
-      // Đóng dialog xác nhận để hiển thị dialog loading
-      onOpenChange(false);
+      setSelectedSigningMethod(method);
+      setDialogState("approving");
 
-      const updatedBooking = await onConfirmApprove(booking.id);
+      const updatedBooking = await onConfirmApprove(booking.id, method);
 
       // Sử dụng data từ response hoặc fallback sang booking ban đầu
       const contractData = updatedBooking?.contract || booking.contract;
@@ -55,18 +61,17 @@ export function BookingApprovalDialog({
         signedPdfUrl: pdfUrl,
       });
 
-      setShowResult(true);
-      setApproving(false);
+      setDialogState("result");
     } catch (error) {
       console.error("Error approving booking:", error);
-      setApproving(false);
+      setDialogState("approval");
+      onOpenChange(false);
     }
   };
 
   const handleClose = () => {
-    setShowResult(false);
+    setDialogState("approval");
     setApprovalResult(null);
-    setApproving(false);
     onOpenChange(false);
   };
 
@@ -91,13 +96,17 @@ export function BookingApprovalDialog({
     : parseFloat(property.deposit || "0");
 
   // Nếu đang xử lý duyệt - hiển thị dialog loading với hướng dẫn
-  if (approving) {
+  if (dialogState === "approving") {
     return (
       <Dialog open={true} onOpenChange={() => {}}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Đang xử lý yêu cầu duyệt...</DialogTitle>
-            <DialogDescription>Vui lòng đợi trong giây lát</DialogDescription>
+            <DialogDescription>
+              {selectedSigningMethod === signingOption.VNPT
+                ? "Vui lòng kiểm tra điện thoại"
+                : "Đang ký hợp đồng"}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -113,13 +122,14 @@ export function BookingApprovalDialog({
                   <AlertCircle className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                   <div className="space-y-2">
                     <p className="font-medium text-blue-900">
-                      Thông tin quan trọng
+                      {selectedSigningMethod === signingOption.VNPT
+                        ? "Vui lòng kiểm tra điện thoại"
+                        : "Đang ký hợp đồng"}
                     </p>
                     <p className="text-sm text-blue-800">
-                      Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của
-                      bạn. Hãy mở ứng dụng <strong>VNPT SmartCA</strong> trên
-                      điện thoại để ký xác nhận hợp đồng. Sau khi ký thành công,
-                      hệ thống sẽ tự động cập nhật trạng thái.
+                      {selectedSigningMethod === signingOption.VNPT
+                        ? "Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của bạn. Hãy mở ứng dụng VNPT SmartCA trên điện thoại để ký xác nhận hợp đồng. Sau khi ký thành công, hệ thống sẽ tự động cập nhật trạng thái."
+                        : "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát..."}
                     </p>
                   </div>
                 </div>
@@ -132,7 +142,7 @@ export function BookingApprovalDialog({
   }
 
   // Nếu đang hiển thị kết quả sau khi duyệt
-  if (showResult && approvalResult) {
+  if (dialogState === "result" && approvalResult) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="max-w-2xl">
@@ -304,30 +314,37 @@ export function BookingApprovalDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={approving}
+            disabled={dialogState !== "approval"}
             className="text-primary"
           >
             Hủy
           </Button>
           <Button
-            onClick={handleApprove}
-            disabled={approving}
+            onClick={() => setDialogState("signing-method")}
+            disabled={dialogState !== "approval"}
             className="gap-2"
           >
-            {approving ? (
-              <>
-                <span className="animate-spin">⏳</span>
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="h-4 w-4" />
-                Xác nhận duyệt
-              </>
-            )}
+            <CheckCircle2 className="h-4 w-4" />
+            Xác nhận duyệt
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Signing Method Dialog */}
+      <SigningMethodDialog
+        open={dialogState === "signing-method"}
+        onOpenChange={(open) => {
+          if (!open && dialogState === "signing-method") {
+            setDialogState("approval");
+          }
+        }}
+        onConfirm={handleApprove}
+        loading={
+          dialogState !== "approval" &&
+          dialogState !== "signing-method" &&
+          dialogState !== "result"
+        }
+      />
     </Dialog>
   );
 }

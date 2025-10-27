@@ -41,11 +41,13 @@ import { ContractExpiryAlert } from "./contract-expiry-alert";
 import { ContractExtensionDialog } from "./contract-extension-dialog";
 import { EscrowBalanceCard } from "./escrow-balance-card";
 import { ContractExtensionStatus } from "./contract-extension-status";
+import { SigningMethodDialog } from "./signing-method-dialog";
+import { signingOption } from "@/lib/api/services/booking";
 
 interface ContractCardProps {
   contract: ContractVM & {
     onViewContract?: (contractId: string) => void;
-    onSignContract?: (bookingId: string) => void;
+    onSignContract?: (bookingId: string, method: signingOption) => void;
     onDepositPayment?: (contractId: string) => void;
     onViewInvoice?: (contractId: string, invoiceId?: string) => void;
     onPayInvoice?: (invoiceId: string) => void;
@@ -129,11 +131,13 @@ function SigningDialog({
   step,
   onClose,
   onConfirm,
+  signingMethod,
 }: {
   open: boolean;
   step: "confirm" | "signing" | "success";
   onClose: () => void;
   onConfirm: () => void;
+  signingMethod: signingOption;
 }) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -150,7 +154,9 @@ function SigningDialog({
             {step === "confirm"
               ? "Vui lòng xác nhận để tiếp tục"
               : step === "signing"
-              ? "Vui lòng kiểm tra điện thoại"
+              ? signingMethod === signingOption.VNPT
+                ? "Vui lòng kiểm tra điện thoại"
+                : "Đang ký hợp đồng"
               : "Thông tin quan trọng"}
           </DialogDescription>
         </DialogHeader>
@@ -158,7 +164,7 @@ function SigningDialog({
           {step === "confirm" && (
             <>
               <Card className="border-orange-200 bg-orange-50">
-                <CardContent className="pt-6">
+                <CardContent>
                   <div className="flex gap-3">
                     <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
                     <div className="space-y-2">
@@ -191,17 +197,19 @@ function SigningDialog({
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               </div>
               <Card className="border-blue-200 bg-blue-50">
-                <CardContent className="pt-6">
+                <CardContent>
                   <div className="flex gap-3">
                     <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
                     <div className="space-y-2">
                       <p className="font-medium text-blue-900">
-                        Vui lòng kiểm tra điện thoại
+                        {signingMethod === signingOption.VNPT
+                          ? "Vui lòng kiểm tra điện thoại"
+                          : "Đang ký hợp đồng"}
                       </p>
                       <p className="text-sm text-blue-800">
-                        Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của
-                        bạn. Vui lòng mở ứng dụng <strong>VNPT SmartCA</strong>{" "}
-                        để ký xác nhận.
+                        {signingMethod === signingOption.VNPT
+                          ? "Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của bạn. Vui lòng mở ứng dụng VNPT SmartCA để ký xác nhận."
+                          : "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát..."}
                       </p>
                     </div>
                   </div>
@@ -246,9 +254,13 @@ export default function ContractCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogStep, setDialogStep] = useState<
-    "confirm" | "signing" | "success"
-  >("confirm");
+  const [signingMethodDialog, setSigningMethodDialog] = useState(false);
+  const [signingLoading, setSigningLoading] = useState(false);
+  const [dialogStep, setDialogStep] = useState<"signing" | "success">(
+    "signing"
+  );
+  const [selectedSigningMethod, setSelectedSigningMethod] =
+    useState<signingOption>(signingOption.VNPT);
   const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
 
   // Calculate days remaining until contract end
@@ -306,16 +318,27 @@ export default function ContractCard({
   const pageInvoices = remainingInvoices.slice(start, start + PAGE_SIZE);
 
   useEffect(() => setPage(1), [isExpanded, remainingInvoices.length]);
-  console.log(mostRecentInvoice?.status);
+
   const toggle = () => setIsExpanded((v) => !v);
-  const handleSign = async () => {
+  const handleSign = async (method: signingOption) => {
+    setSigningLoading(true);
+    setSigningMethodDialog(false);
+    setSelectedSigningMethod(method);
+
+    // Small delay to ensure dialog closes before showing next one
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     setDialogStep("signing");
+    setDialogOpen(true);
+
     try {
-      await contract.onSignContract?.(contract.bookingId);
+      await contract.onSignContract?.(contract.bookingId, method);
       setDialogStep("success");
     } catch {
       setDialogOpen(false);
-      setDialogStep("confirm");
+      setDialogStep("signing");
+    } finally {
+      setSigningLoading(false);
     }
   };
 
@@ -426,10 +449,7 @@ export default function ContractCard({
           </Button>
           <Button
             className="flex-1"
-            onClick={() => {
-              setDialogStep("confirm");
-              setDialogOpen(true);
-            }}
+            onClick={() => setSigningMethodDialog(true)}
           >
             <CheckCircle className="w-4 h-4 mr-2" />
             Ký hợp đồng
@@ -473,9 +493,7 @@ export default function ContractCard({
                         )}
                         <Button
                           size="sm"
-                          onClick={() =>
-                            contract.onSignContract?.(contract.bookingId)
-                          }
+                          onClick={() => setSigningMethodDialog(true)}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Ký hợp đồng
@@ -979,14 +997,24 @@ export default function ContractCard({
         }}
       />
 
+      {/* Signing Method Dialog */}
+      <SigningMethodDialog
+        open={signingMethodDialog}
+        onOpenChange={setSigningMethodDialog}
+        onConfirm={handleSign}
+        loading={signingLoading}
+      />
+
+      {/* Signing Progress Dialog */}
       <SigningDialog
         open={dialogOpen}
         step={dialogStep}
         onClose={() => {
           setDialogOpen(false);
-          setDialogStep("confirm");
+          setDialogStep("signing");
         }}
-        onConfirm={handleSign}
+        onConfirm={() => {}}
+        signingMethod={selectedSigningMethod}
       />
     </Card>
   );

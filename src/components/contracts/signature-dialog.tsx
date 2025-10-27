@@ -12,8 +12,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { contractService } from "@/lib/api/services/contract";
 import { ContractExtension } from "@/types/contracts";
-import { Loader2, FileSignature, CheckCircle2, Download } from "lucide-react";
+import {
+  FileSignature,
+  CheckCircle2,
+  Download,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { SigningMethodDialog } from "@/components/contracts/signing-method-dialog";
+import { signingOption } from "@/lib/api/services/booking";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface SignatureDialogProps {
   open: boolean;
@@ -30,25 +38,44 @@ export function SignatureDialog({
   userRole,
   onSuccess,
 }: SignatureDialogProps) {
-  const [loading, setLoading] = useState(false);
+  const [showSigningMethod, setShowSigningMethod] = useState(false);
+  const [signingLoading, setSigningLoading] = useState(false);
+  const [signingStep, setSigningStep] = useState<
+    "idle" | "signing" | "success"
+  >("idle");
+  const [selectedSigningMethod, setSelectedSigningMethod] =
+    useState<signingOption>(signingOption.VNPT);
 
-  const handleSign = async () => {
-    setLoading(true);
+  const handleSign = async (method: signingOption) => {
+    setSigningLoading(true);
+    setShowSigningMethod(false);
+    setSelectedSigningMethod(method);
+
+    // Small delay to ensure dialog closes
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    setSigningStep("signing");
+
     try {
       if (userRole === "LANDLORD") {
-        await contractService.landlordSignExtension(extension.id);
-        toast.success("Thành công", "Bạn đã ký hợp đồng gia hạn");
+        await contractService.landlordSignExtension(extension.id, method);
       } else if (userRole === "TENANT") {
-        await contractService.tenantSignExtension(extension.id);
-        toast.success("Thành công", "Bạn đã ký hợp đồng gia hạn");
+        await contractService.tenantSignExtension(extension.id, method);
       }
 
-      onOpenChange(false);
-      onSuccess();
+      setSigningStep("success");
+      toast.success("Thành công", "Bạn đã ký hợp đồng gia hạn");
+
+      setTimeout(() => {
+        onOpenChange(false);
+        setSigningStep("idle");
+        onSuccess();
+      }, 2000);
     } catch {
       toast.error("Lỗi", "Không thể ký hợp đồng. Vui lòng thử lại");
+      setSigningStep("idle");
     } finally {
-      setLoading(false);
+      setSigningLoading(false);
     }
   };
 
@@ -145,18 +172,100 @@ export function SignatureDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            disabled={loading}
+            disabled={signingStep !== "idle"}
             className="text-red-500 border-red-500"
           >
             Hủy
           </Button>
-          <Button onClick={handleSign} disabled={loading}>
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {!loading && <FileSignature className="w-4 h-4 mr-2" />}
+          <Button
+            onClick={() => setShowSigningMethod(true)}
+            disabled={signingStep !== "idle"}
+          >
+            <FileSignature className="w-4 h-4 mr-2" />
             Ký hợp đồng
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Signing Method Dialog */}
+      <SigningMethodDialog
+        open={showSigningMethod}
+        onOpenChange={setShowSigningMethod}
+        onConfirm={handleSign}
+        loading={signingLoading}
+      />
+
+      {/* Signing Progress Dialog */}
+      {signingStep === "signing" && (
+        <Dialog open={true} onOpenChange={() => {}}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Đang xử lý yêu cầu ký...</DialogTitle>
+              <DialogDescription>
+                {selectedSigningMethod === signingOption.VNPT
+                  ? "Vui lòng kiểm tra điện thoại"
+                  : "Đang ký hợp đồng"}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+              <Card className="border-blue-200 bg-blue-50">
+                <CardContent>
+                  <div className="flex gap-3">
+                    <AlertCircle className="h-5 w-5 text-blue-500 mt-0.5" />
+                    <div className="space-y-2">
+                      <p className="font-medium text-blue-900">
+                        {selectedSigningMethod === signingOption.VNPT
+                          ? "Vui lòng kiểm tra điện thoại"
+                          : "Đang ký hợp đồng"}
+                      </p>
+                      <p className="text-sm text-blue-800">
+                        {selectedSigningMethod === signingOption.VNPT
+                          ? "Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của bạn. Vui lòng mở ứng dụng VNPT SmartCA để ký xác nhận."
+                          : "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát..."}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Success Dialog */}
+      {signingStep === "success" && (
+        <Dialog open={true} onOpenChange={() => {}}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                Ký thành công!
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <Card className="border-green-200 bg-green-50">
+                <CardContent className="pt-6">
+                  <div className="flex gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                    <div className="space-y-2">
+                      <p className="font-medium text-green-900">
+                        Đã ký hợp đồng thành công!
+                      </p>
+                      <p className="text-sm text-green-800">
+                        Hợp đồng gia hạn đã được ký. Hệ thống sẽ tự động cập
+                        nhật trạng thái.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 }

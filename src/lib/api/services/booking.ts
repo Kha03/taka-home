@@ -177,7 +177,10 @@ export interface Booking {
   createdAt: string;
   updatedAt: string;
 }
-
+export enum signingOption {
+  VNPT = "VNPT",
+  SELF_CA = "SELF_CA",
+}
 /**
  * Booking Service Class
  */
@@ -226,8 +229,13 @@ export class BookingService {
    * Chủ nhà phê duyệt booking
    * PATCH /bookings/:id/approve
    */
-  async approveBooking(id: string): Promise<ApiResponse<Booking>> {
-    return apiClient.post<Booking>(`${this.basePath}/${id}/approve`);
+  async approveBooking(
+    id: string,
+    signingOption: signingOption
+  ): Promise<ApiResponse<Booking>> {
+    return apiClient.post<Booking>(`${this.basePath}/${id}/approve`, {
+      signingOption,
+    });
   }
 
   /**
@@ -238,8 +246,13 @@ export class BookingService {
     return apiClient.post<Booking>(`${this.basePath}/${id}/reject`);
   }
   // người thuê kí hợp đồng booking
-  async signContract(id: string): Promise<ApiResponse<Booking>> {
-    return apiClient.post<Booking>(`${this.basePath}/${id}/sign`);
+  async signContract(
+    id: string,
+    signingOption: signingOption
+  ): Promise<ApiResponse<Booking>> {
+    return apiClient.post<Booking>(`${this.basePath}/${id}/sign`, {
+      signingOption,
+    });
   }
   //Bàn giao phòng
   async handover(id: string): Promise<ApiResponse<Booking>> {

@@ -1,7 +1,11 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { bookingService, type Booking } from "@/lib/api/services/booking";
+import {
+  bookingService,
+  type Booking,
+  signingOption,
+} from "@/lib/api/services/booking";
 import { contractService } from "@/lib/api/services/contract";
 import { invoiceService, type Invoice } from "@/lib/api/services/invoice";
 import {
@@ -170,9 +174,9 @@ export function useContracts() {
         }
       },
 
-      signContract: async (bookingId: string) => {
+      signContract: async (bookingId: string, method: signingOption) => {
         try {
-          await bookingService.signContract(bookingId);
+          await bookingService.signContract(bookingId, method);
           toast.success("Yêu cầu ký hợp đồng đã được thực hiện thành công");
           await refresh();
         } catch (e) {

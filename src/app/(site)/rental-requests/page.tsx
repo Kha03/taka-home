@@ -21,7 +21,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { bookingService, type Booking } from "@/lib/api/services/booking";
+import {
+  bookingService,
+  type Booking,
+  signingOption,
+} from "@/lib/api/services/booking";
 import { toast } from "sonner";
 import { BookingApprovalDialog } from "@/components/rental-requests/booking-approval-dialog";
 
@@ -80,9 +84,12 @@ export default function RentalRequestsPage() {
   };
 
   // Xử lý duyệt booking
-  const handleApproveBooking = async (bookingId: string) => {
+  const handleApproveBooking = async (
+    bookingId: string,
+    method: signingOption
+  ) => {
     try {
-      const response = await bookingService.approveBooking(bookingId);
+      const response = await bookingService.approveBooking(bookingId, method);
 
       if (response.data) {
         toast.success(

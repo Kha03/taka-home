@@ -1,6 +1,7 @@
 import { ContractExtension, ContractExtensionRequest } from "@/types/contracts";
 import { apiClient } from "../client";
 import { ApiResponse } from "../types";
+import { signingOption } from "./booking";
 
 export interface EscrowBalanceResponse {
   balanceTenant: string;
@@ -42,7 +43,6 @@ export class ContractService {
     );
   }
   //Phản hồi yêu cầu gia hạn hợp đồng (dành cho chủ nhà)
-  //nếu type là apartment thì không cần newElectricityPrice, newWaterPrice
   async respondToContractExtensionRequest(
     extensionId: string,
     {
@@ -85,15 +85,23 @@ export class ContractService {
     );
   }
   // Chủ nhà ký hợp đồng gia hạn
-  async landlordSignExtension(extensionId: string): Promise<ApiResponse<void>> {
+  async landlordSignExtension(
+    extensionId: string,
+    signingOption: signingOption
+  ): Promise<ApiResponse<void>> {
     return apiClient.patch<void>(
-      `${this.basePath}/extensions/${extensionId}/landlord-sign`
+      `${this.basePath}/extensions/${extensionId}/landlord-sign`,
+      { signingOption }
     );
   }
   // Người thuê ký hợp đồng gia hạn
-  async tenantSignExtension(extensionId: string): Promise<ApiResponse<void>> {
+  async tenantSignExtension(
+    extensionId: string,
+    signingOption: signingOption
+  ): Promise<ApiResponse<void>> {
     return apiClient.patch<void>(
-      `${this.basePath}/extensions/${extensionId}/tenant-sign`
+      `${this.basePath}/extensions/${extensionId}/tenant-sign`,
+      { signingOption }
     );
   }
 }
