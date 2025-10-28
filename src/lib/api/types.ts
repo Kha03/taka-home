@@ -410,3 +410,10 @@ export interface NotificationResponse {
   status: "PENDING" | "COMPLETED";
   createdAt: string;
 }
+
+// ========== Statistics Types ==========
+export interface LandlordStatistics {
+  totalProperties: number;
+  totalBooking: number;
+  yearsOfParticipation: string;
+}

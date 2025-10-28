@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Phone, Star, Send, MessageCircleMore } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { LandlordAndTenant } from "@/lib/api";
 import { chatService } from "@/lib/api/services/chat";
 import { bookingService } from "@/lib/api/services/booking";
+import { statisticsService } from "@/lib/api/services";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -60,8 +61,45 @@ export function PropertySidebar({
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
 
+  // State cho landlord statistics
+  const [landlordStats, setLandlordStats] = useState({
+    totalProperties: propertyCount,
+    totalBooking: contractCount,
+    yearsOfParticipation: yearsActive.toString(),
+  });
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
+
+  // Fetch landlord statistics khi component mount
+  useEffect(() => {
+    const fetchLandlordStats = async () => {
+      if (!landlord?.id) return;
+
+      try {
+        setIsLoadingStats(true);
+        const response = await statisticsService.getLandlordStatistics(
+          landlord.id
+        );
+
+        if (response.data) {
+          setLandlordStats({
+            totalProperties: response.data.totalProperties,
+            totalBooking: response.data.totalBooking,
+            yearsOfParticipation: response.data.yearsOfParticipation,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching landlord statistics:", error);
+        // Giữ nguyên giá trị mặc định nếu có lỗi
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchLandlordStats();
+  }, [landlord?.id]);
 
   const handleStartChat = async () => {
     // Kiểm tra đăng nhập
@@ -275,18 +313,26 @@ export function PropertySidebar({
           <div className="grid grid-cols-3 gap-4 border-dashed p-5 border rounded-[12px] border-[#ccc]">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <span className="text-2xl font-bold text-primary">
-                  {propertyCount}
-                </span>
+                {isLoadingStats ? (
+                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded"></div>
+                ) : (
+                  <span className="text-2xl font-bold text-primary">
+                    {landlordStats.totalProperties}
+                  </span>
+                )}
                 <img src={"/assets/icons/house-icon.svg"} alt="Property Icon" />
               </div>
               <div className="text-xs text-primary">Bất động sản</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <span className="text-2xl font-bold text-primary">
-                  {contractCount}
-                </span>
+                {isLoadingStats ? (
+                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded"></div>
+                ) : (
+                  <span className="text-2xl font-bold text-primary">
+                    {landlordStats.totalBooking}
+                  </span>
+                )}
                 <img
                   src={"/assets/icons/contract-icon.svg"}
                   alt="Contract Icon"
@@ -296,9 +342,13 @@ export function PropertySidebar({
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
-                <span className="text-2xl font-bold text-primary">
-                  {yearsActive}
-                </span>
+                {isLoadingStats ? (
+                  <div className="h-8 w-12 bg-neutral-200 animate-pulse rounded"></div>
+                ) : (
+                  <span className="text-2xl font-bold text-primary">
+                    {landlordStats.yearsOfParticipation}
+                  </span>
+                )}
                 <img src={"/assets/icons/calendar-icon.svg"} alt="Year Icon" />
               </div>
               <div className="text-xs text-primary">Năm tham gia</div>
