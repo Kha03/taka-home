@@ -17,7 +17,8 @@ interface AuthContextType {
     name: string,
     email: string,
     password: string,
-    phone?: string
+    phone?: string,
+    role?: "TENANT" | "LANDLORD"
   ) => Promise<{ success: boolean; error?: string }>;
   setAuthFromToken: (
     token: string
@@ -118,7 +119,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     name: string,
     email: string,
     password: string,
-    phone?: string
+    phone?: string,
+    role: "TENANT" | "LANDLORD" = "TENANT"
   ) => {
     try {
       setIsLoading(true);
@@ -129,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
         fullName: name,
         phone,
-        roles: ["TENANT"], // Default role
+        roles: role, // Send role as string, not array
       });
 
       if (response.code === 200) {

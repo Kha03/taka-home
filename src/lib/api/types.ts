@@ -377,7 +377,7 @@ export interface RegisterRequest {
   password: string;
   fullName?: string;
   phone?: string;
-  roles?: ("TENANT" | "LANDLORD")[];
+  roles?: "TENANT" | "LANDLORD";
 }
 
 export interface AuthResponse {

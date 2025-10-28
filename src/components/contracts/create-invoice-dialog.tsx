@@ -31,6 +31,7 @@ import {
 import { getApiErrorMessage } from "@/lib/utils/error-handler";
 import { Upload, X, Plus, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
+import { formatCurrency } from "@/lib/api";
 
 interface CreateInvoiceDialogProps {
   isOpen: boolean;
@@ -127,12 +128,14 @@ export function CreateInvoiceDialog({
         } else if (name.includes("receiver_name")) {
           processed.receiverName = data.value;
         } else if (name.includes("total_amount")) {
-          const amount = parseFloat(data.value.replace(/[^\d.]/g, ""));
+          // Remove all non-digit characters (including dots, commas) then parse
+          const amount = parseFloat(data.value.replace(/[^\d]/g, ""));
           if (!isNaN(amount)) {
             processed.totalAmount = Math.round(amount); // Convert to integer
           }
         } else if (name.includes("net_amount")) {
-          const amount = parseFloat(data.value.replace(/[^\d.]/g, ""));
+          // Remove all non-digit characters (including dots, commas) then parse
+          const amount = parseFloat(data.value.replace(/[^\d]/g, ""));
           if (!isNaN(amount)) {
             processed.netAmount = Math.round(amount); // Convert to integer
           }
@@ -549,11 +552,11 @@ export function CreateInvoiceDialog({
                             Tổng tiền:
                           </span>
                           <span className="text-sm font-semibold text-green-600">
-                            {(
+                            {formatCurrency(
                               processedInvoiceData.totalAmount ||
-                              processedInvoiceData.netAmount
-                            )?.toLocaleString("vi-VN")}{" "}
-                            VND
+                                processedInvoiceData.netAmount ||
+                                0
+                            )}
                           </span>
                         </div>
                       )}

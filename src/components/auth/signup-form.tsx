@@ -7,8 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PasswordInput } from "@/components/ui/passwordinput";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/contexts/auth-context";
-import { handleGoogleAuth, isGoogleOAuthConfigured } from "@/lib/auth/google-oauth";
+import {
+  handleGoogleAuth,
+  isGoogleOAuthConfigured,
+} from "@/lib/auth/google-oauth";
 
 export function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -17,6 +21,7 @@ export function SignUpForm() {
     phone: "",
     password: "",
     confirmPassword: "",
+    role: "TENANT" as "TENANT" | "LANDLORD",
   });
   const [error, setError] = useState("");
   const { register, isLoading } = useAuth();
@@ -25,6 +30,10 @@ export function SignUpForm() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     // Clear error when user types
     if (error) setError("");
+  };
+
+  const handleRoleChange = (value: string) => {
+    setFormData({ ...formData, role: value as "TENANT" | "LANDLORD" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +55,8 @@ export function SignUpForm() {
       formData.fullName,
       formData.email,
       formData.password,
-      formData.phone
+      formData.phone,
+      formData.role
     );
     if (!result.success && result.error) {
       setError(result.error);
@@ -79,6 +89,36 @@ export function SignUpForm() {
             className="h-9"
           />
         </div>
+
+        {/* Role Selection */}
+        <div className="space-y-2 sm:col-span-2">
+          <Label className="text-sm">Bạn muốn đăng ký với vai trò</Label>
+          <RadioGroup
+            value={formData.role}
+            onValueChange={handleRoleChange}
+            className="flex gap-4"
+          >
+            <div className="flex items-center space-x-2 flex-1">
+              <RadioGroupItem value="TENANT" id="tenant" />
+              <Label
+                htmlFor="tenant"
+                className="font-normal cursor-pointer flex-1"
+              >
+                <div className="text-sm font-medium">Người thuê</div>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2 flex-1">
+              <RadioGroupItem value="LANDLORD" id="landlord" />
+              <Label
+                htmlFor="landlord"
+                className="font-normal cursor-pointer flex-1"
+              >
+                <div className="text-sm font-medium">Chủ nhà</div>
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="email" className="text-sm">
             Email
@@ -167,7 +207,7 @@ export function SignUpForm() {
           type="button"
           className="w-full text-primary text-xs h-8"
           size="sm"
-          onClick={() => handleGoogleAuth('signup')}
+          onClick={() => handleGoogleAuth("signup")}
           disabled={!isGoogleOAuthConfigured()}
         >
           <svg className="mr-1.5 h-4 w-4" viewBox="0 0 24 24" aria-hidden>
