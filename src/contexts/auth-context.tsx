@@ -214,6 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         avatarUrl: tokenPayload.picture || "/assets/imgs/avatar.png",
         status: "ACTIVE",
         CCCD: "",
+        roles: tokenPayload.roles || [], // Lấy roles từ token
       };
 
       // Store token and user data (using same keys as normal login)

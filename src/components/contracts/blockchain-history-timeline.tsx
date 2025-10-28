@@ -326,6 +326,19 @@ export function BlockchainHistoryTimeline({
                             </p>
                           </div>
                         </div>
+                        {ext.extensionAgreementHash && (
+                          <div className="mt-2 p-2 bg-muted/50 rounded border border-muted">
+                            <div className="flex items-center gap-2 mb-1">
+                              <FileSignature className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs font-medium text-muted-foreground">
+                                Hash Hợp Đồng Gia Hạn
+                              </span>
+                            </div>
+                            <p className="text-xs font-mono break-all text-muted-foreground">
+                              {ext.extensionAgreementHash}
+                            </p>
+                          </div>
+                        )}
                         {ext.notes && (
                           <p className="text-xs text-muted-foreground mt-2">
                             Ghi chú: {ext.notes}
