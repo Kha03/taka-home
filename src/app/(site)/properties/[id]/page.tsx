@@ -90,7 +90,6 @@ export default function PropertyDetailPage() {
       current: true,
     },
   ];
-
   return (
     <div className="min-h-screen bg-[#FFF7E9]">
       {/* Header with Search */}

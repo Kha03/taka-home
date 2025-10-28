@@ -37,7 +37,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
         furnishing: property.furnishing || "Không có thông tin",
         category: "Phòng trọ",
         roomTypeName: property.name,
-        roomCount: property.rooms?.filter((r) => r.isVisible).length || 0,
+        roomCount: property.rooms?.filter((r) => !r.isVisible).length || 0,
         electricityPrice: Number(propertyInfo?.electricityPricePerKwh) || 0,
         waterPrice: Number(propertyInfo?.waterPricePerM3) || 0,
         updatedAt: property.updatedAt,

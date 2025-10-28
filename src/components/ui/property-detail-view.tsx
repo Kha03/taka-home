@@ -388,6 +388,11 @@ export function PropertyDetailView({
             propertyId={propertyId}
             propertyType={type === "boarding" ? "boarding" : "apartment"}
             roomsData={roomsData}
+            isRented={
+              type === "apartment" &&
+              !isRoomTypeDetail(property) &&
+              property.isVisible === true
+            }
           />
         </div>
       </div>

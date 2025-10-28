@@ -38,6 +38,7 @@ interface PropertySidebarProps {
   propertyId: string; // ID của property (apartment hoặc boarding)
   propertyType: "apartment" | "boarding"; // Type của property
   roomsData?: Array<{ id: string; name: string }>; // Danh sách rooms với ID cho boarding
+  isRented?: boolean; // Check if apartment is currently rented (isVisible = true)
 }
 
 export function PropertySidebar({
@@ -50,6 +51,7 @@ export function PropertySidebar({
   propertyId,
   propertyType,
   roomsData = [],
+  isRented = false,
 }: PropertySidebarProps) {
   const [selectedUnit, setSelectedUnit] = useState<string>("");
   const [reviewText, setReviewText] = useState("");
@@ -361,11 +363,20 @@ export function PropertySidebar({
             <Button
               className="w-33 bg-secondary hover:bg-secondary/90"
               onClick={handleCreateBooking}
-              disabled={isCreatingBooking}
+              disabled={isCreatingBooking || isRented}
             >
               <Send className="h-4 w-4 mr-2" />
               {isCreatingBooking ? "Đang gửi..." : "Yêu cầu thuê"}
             </Button>
+
+            {/* Thông báo khi đang cho thuê */}
+            {isRented && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                <p className="text-sm text-yellow-700 font-medium">
+                  Đang cho thuê, hãy quay lại sau
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

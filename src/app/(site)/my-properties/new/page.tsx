@@ -131,7 +131,7 @@ export default function NewPropertyPage() {
       }
 
       const data = await response.json();
-      
+
       // Check if we have valid coordinates
       if (
         data?.data?.features &&
@@ -176,7 +176,7 @@ export default function NewPropertyPage() {
       address: formData.street.trim(),
       legalDoc: formData.legalDoc || undefined,
       mapLocation: mapLocation || undefined,
-      isVisible: true,
+      isVisible: false,
     };
 
     // For apartment - add apartment-specific fields
