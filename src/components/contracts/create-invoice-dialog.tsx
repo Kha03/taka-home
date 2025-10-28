@@ -28,6 +28,7 @@ import {
   type CreateInvoiceRequest,
   type CreateUtilityBillRequest,
 } from "@/lib/api/services/invoice";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
 import { Upload, X, Plus, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 
@@ -335,7 +336,11 @@ export function CreateInvoiceDialog({
         handleClose();
       } catch (error) {
         console.error("Error creating invoice:", error);
-        toast.error("Không thể tạo hóa đơn. Vui lòng thử lại");
+        const errorMessage = getApiErrorMessage(
+          error,
+          "Không thể tạo hóa đơn. Vui lòng thử lại"
+        );
+        toast.error(errorMessage);
       } finally {
         setIsSubmitting(false);
       }
@@ -358,7 +363,11 @@ export function CreateInvoiceDialog({
         handleClose();
       } catch (error) {
         console.error("Error creating utility bill:", error);
-        toast.error("Không thể tạo hóa đơn. Vui lòng thử lại");
+        const errorMessage = getApiErrorMessage(
+          error,
+          "Không thể tạo hóa đơn. Vui lòng thử lại"
+        );
+        toast.error(errorMessage);
       } finally {
         setIsSubmitting(false);
       }
