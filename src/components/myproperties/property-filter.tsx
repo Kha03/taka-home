@@ -70,12 +70,9 @@ export default function PropertyFilter({
         </SelectTrigger>
         <SelectContent className="bg-primary-foreground">
           <SelectItem value="all">Tất cả</SelectItem>
-          <SelectItem value="chung-cu">Chung cư</SelectItem>
-          <SelectItem value="nha-rieng">Nhà riêng</SelectItem>
-          <SelectItem value="nha-mat-tien">Nhà mặt tiền</SelectItem>
-          <SelectItem value="biet-thu">Biệt thự</SelectItem>
-          <SelectItem value="van-phong">Văn phòng</SelectItem>
-          <SelectItem value="mat-bang">Mặt bằng</SelectItem>
+          <SelectItem value="APARTMENT">Chung cư</SelectItem>
+          <SelectItem value="HOUSING">Nhà riêng</SelectItem>
+          <SelectItem value="BOARDING">Phòng trọ</SelectItem>
         </SelectContent>
       </Select>
 

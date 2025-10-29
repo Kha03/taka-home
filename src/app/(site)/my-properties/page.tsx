@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import StatusTab from "@/components/ui/status-tab";
 import PropertyViewTab from "@/components/myproperties/property-view-tab";
 import PropertyFilter from "@/components/myproperties/property-filter";
 import { PropertyRoom } from "@/components/myproperties/PropertyRoom";
 import { PropertyUnit } from "@/components/myproperties/PropertyUnit";
-import {
-  mockPropertyRooms,
-  mockPropertyUnits,
-} from "@/components/myproperties/mock-data";
+import { PropertyDetailModal } from "@/components/myproperties/PropertyDetailModal";
 import {
   Pagination,
   PaginationContent,
@@ -18,6 +15,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { propertyService } from "@/lib/api/services/property";
+import type { Property } from "@/lib/api/types";
+import { PropertyRoomProps } from "@/components/myproperties/PropertyRoom";
+import { PropertyUnitProps } from "@/components/myproperties/PropertyUnit";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function MyPropertiesPage() {
   const [activeTab, setActiveTab] = useState("all");
@@ -26,28 +28,297 @@ export default function MyPropertiesPage() {
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null
+  );
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  const propertyTabs = [
-    { id: "all", label: "Tất cả", count: 15 },
-    { id: "rented", label: "Đang cho thuê", count: 8 },
-    { id: "empty", label: "Trống", count: 7 },
-  ];
+  // Map từ room/property ID đến property gốc để hiển thị modal
+  const propertyIdMap = useMemo(() => {
+    const map = new Map<string, string>();
+
+    properties.forEach((property) => {
+      // Lưu chính property ID
+      map.set(property.id, property.id);
+
+      // Nếu là BOARDING, lưu mapping từ room ID về property ID
+      if (property.type === "BOARDING" && property.rooms) {
+        property.rooms.forEach((room) => {
+          if (room.id) {
+            map.set(room.id, property.id);
+          }
+          // Backup mapping bằng combined ID
+          map.set(`${property.id}-${room.name}`, property.id);
+        });
+      }
+    });
+
+    return map;
+  }, [properties]);
+
+  // Handler khi click vào property/room để xem chi tiết
+  const handlePropertyClick = (roomOrPropertyId: string) => {
+    const propertyId = propertyIdMap.get(roomOrPropertyId);
+    if (propertyId) {
+      const property = properties.find((p) => p.id === propertyId);
+      if (property) {
+        setSelectedProperty(property);
+        setDetailModalOpen(true);
+      }
+    }
+  };
+
+  // Fetch properties from API
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const response = await propertyService.getMyProperties();
+      if (response.data) {
+        setProperties(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  // Convert API Property to PropertyRoomProps for Room View
+  // For APARTMENT: hiển thị toàn bộ căn hộ như 1 property
+  // For BOARDING: mỗi room sẽ là 1 PropertyRoom riêng với thông tin từ nested roomType
+  const convertToPropertyRooms = (property: Property): PropertyRoomProps[] => {
+    // Nếu là APARTMENT, trả về 1 item duy nhất
+    if (property.type === "APARTMENT") {
+      return [
+        {
+          id: property.id,
+          title: property.title,
+          image: property.heroImage || "/assets/imgs/house-item.png",
+          status: property.isVisible ? "Đang cho thuê" : "Trống",
+          roomCode: property.unit || property.id.slice(0, 6).toUpperCase(),
+          isRented: property.isVisible || false,
+          bedrooms: property.bedrooms || 0,
+          bathrooms: property.bathrooms || 0,
+          area: property.area || 0,
+          address: `${property.address}, ${property.ward}, ${property.province}`,
+          furnitureStatus: property.furnishing || "Không rõ",
+          category: "Chung cư",
+          price: property.price || 0,
+          currency: "VND",
+        },
+      ];
+    }
+
+    // Nếu là BOARDING, tạo 1 PropertyRoom cho mỗi room
+    // Room có nested roomType với đầy đủ thông tin
+    if (property.type === "BOARDING" && property.rooms) {
+      const rooms: PropertyRoomProps[] = property.rooms.map((room) => ({
+        id: room.id || `${property.id}-${room.name}`,
+        title: `${property.title} - ${room.name}`,
+        image:
+          room.roomType?.heroImage ||
+          property.heroImage ||
+          "/assets/imgs/house-item.png",
+        status: room.isVisible ? "Đang cho thuê" : "Trống",
+        roomCode: room.name,
+        roomType: room.roomType?.name, // Hiển thị loại phòng (VD: "Loại 1", "Loại 2")
+        isRented: room.isVisible || false,
+        bedrooms: room.roomType?.bedrooms || 0,
+        bathrooms: room.roomType?.bathrooms || 0,
+        area: room.roomType?.area || 0,
+        address: `${property.address}, ${property.ward}, ${property.province}`,
+        furnitureStatus: room.roomType?.furnishing || "Không rõ",
+        category: "Nhà trọ",
+        price: room.roomType?.price || 0,
+        currency: "VND",
+      }));
+
+      return rooms;
+    }
+
+    // Fallback cho các trường hợp khác
+    return [
+      {
+        id: property.id,
+        title: property.title,
+        image: property.heroImage || "/assets/imgs/house-item.png",
+        status: property.isVisible ? "Đang cho thuê" : "Trống",
+        roomCode: property.id.slice(0, 6).toUpperCase(),
+        isRented: property.isVisible || false,
+        bedrooms: property.bedrooms || 0,
+        bathrooms: property.bathrooms || 0,
+        area: property.area || 0,
+        address: `${property.address}, ${property.ward}, ${property.province}`,
+        furnitureStatus: property.furnishing || "Không rõ",
+        category: "Khác",
+        price: property.price || 0,
+        currency: "VND",
+      },
+    ];
+  };
+
+  // Convert API Property to PropertyUnitProps for Unit View (for BOARDING type)
+  const convertToPropertyUnit = (property: Property): PropertyUnitProps => {
+    // Calculate rented and empty counts based on rooms
+    const rentedCount =
+      property.rooms?.filter((room) => room.isVisible).length || 0;
+    const emptyCount =
+      property.rooms?.filter((room) => !room.isVisible).length || 0;
+
+    // Calculate monthly income based on rented rooms
+    // Mỗi room có roomType với price, cộng dồn giá của các phòng đã thuê
+    const monthlyIncome =
+      property.rooms?.reduce((total, room) => {
+        if (room.isVisible && room.roomType) {
+          return total + (room.roomType.price || 0);
+        }
+        return total;
+      }, 0) || 0;
+
+    // Group rooms by roomType and floor
+    // Nhóm các room theo roomType.id và floor
+    const roomTypeMap = new Map<
+      string,
+      {
+        name: string;
+        bedrooms: number;
+        bathrooms: number;
+        area: number;
+        furniture: string;
+        images: string[];
+        price: number;
+        floors: Map<number, typeof property.rooms>;
+      }
+    >();
+
+    property.rooms?.forEach((room) => {
+      if (!room.roomType) return;
+
+      const roomTypeId = room.roomType.id || room.roomType.name;
+
+      // Khởi tạo roomType nếu chưa có
+      if (!roomTypeMap.has(roomTypeId)) {
+        roomTypeMap.set(roomTypeId, {
+          name: room.roomType.name,
+          bedrooms: room.roomType.bedrooms,
+          bathrooms: room.roomType.bathrooms,
+          area: room.roomType.area,
+          furniture: room.roomType.furnishing || "Không",
+          images: room.roomType.images || ["/assets/imgs/house-item.png"],
+          price: room.roomType.price,
+          floors: new Map(),
+        });
+      }
+
+      const roomTypeData = roomTypeMap.get(roomTypeId)!;
+
+      // Thêm room vào floor tương ứng
+      if (!roomTypeData.floors.has(room.floor)) {
+        roomTypeData.floors.set(room.floor, []);
+      }
+      roomTypeData.floors.get(room.floor)?.push(room);
+    });
+
+    // Convert Map to array
+    const roomTypes = Array.from(roomTypeMap.values()).map((roomTypeData) => ({
+      name: roomTypeData.name,
+      bedrooms: roomTypeData.bedrooms,
+      bathrooms: roomTypeData.bathrooms,
+      area: roomTypeData.area,
+      furniture: roomTypeData.furniture,
+      images: roomTypeData.images,
+      price: roomTypeData.price,
+      floors: Array.from(roomTypeData.floors.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([floorNum, rooms]) => ({
+          floor: `Tầng ${floorNum}`,
+          units: (rooms || []).map((room) => ({
+            code: room.name,
+            status: (room.isVisible ? "rented" : "empty") as "rented" | "empty",
+          })),
+        })),
+    }));
+
+    return {
+      title: property.title,
+      address: `${property.address}, ${property.ward}, ${property.province}`,
+      mainImage: property.heroImage || "/assets/imgs/house-item.png",
+      rentedCount,
+      emptyCount,
+      monthlyIncome,
+      currency: "VND",
+      roomTypes,
+    };
+  };
+
+  const propertyTabs = useMemo(() => {
+    // Đếm tổng số phòng cho BOARDING, tổng số properties cho APARTMENT
+    let totalAll = 0;
+    let totalRented = 0;
+    let totalEmpty = 0;
+
+    properties.forEach((property) => {
+      if (property.type === "BOARDING" && property.rooms) {
+        // Đếm từng room trực tiếp từ property.rooms
+        const roomsCount = property.rooms.length;
+        const rentedRooms = property.rooms.filter(
+          (room) => room.isVisible
+        ).length;
+        const emptyRooms = roomsCount - rentedRooms;
+
+        totalAll += roomsCount;
+        totalRented += rentedRooms;
+        totalEmpty += emptyRooms;
+      } else {
+        // APARTMENT: đếm property
+        totalAll += 1;
+        if (property.isVisible) {
+          totalRented += 1;
+        } else {
+          totalEmpty += 1;
+        }
+      }
+    });
+
+    return [
+      { id: "all", label: "Tất cả", count: totalAll },
+      { id: "rented", label: "Đang cho thuê", count: totalRented },
+      { id: "empty", label: "Trống", count: totalEmpty },
+    ];
+  }, [properties]);
 
   const PAGE_SIZE = 4;
 
   // Filter properties based on tab and search
   const filteredRooms = useMemo(() => {
-    let list = mockPropertyRooms;
+    let list = properties;
 
     // Filter by search query
     const q = searchQuery.trim().toLowerCase();
     if (q) {
-      list = list.filter(
-        (p) =>
+      list = list.filter((p) => {
+        // Tìm trong title, id, unit
+        if (
           p.title.toLowerCase().includes(q) ||
           p.id.toLowerCase().includes(q) ||
-          p.roomCode?.toLowerCase().includes(q)
-      );
+          p.unit?.toLowerCase().includes(q)
+        ) {
+          return true;
+        }
+
+        // Nếu là BOARDING, tìm trong tên các rooms
+        if (p.type === "BOARDING" && p.rooms) {
+          return p.rooms.some((room) => room.name.toLowerCase().includes(q));
+        }
+
+        return false;
+      });
     }
 
     // Filter by location
@@ -59,25 +330,30 @@ export default function MyPropertiesPage() {
 
     // Filter by property type
     if (propertyType && propertyType !== "all") {
-      list = list.filter((p) =>
-        p.category.toLowerCase().includes(propertyType.replace("-", " "))
-      );
+      list = list.filter((p) => p.type === propertyType);
     }
 
-    // Filter by tab status
+    // Convert properties to rooms array
+    let allRooms: PropertyRoomProps[] = [];
+    list.forEach((property) => {
+      const rooms = convertToPropertyRooms(property);
+      allRooms = allRooms.concat(rooms);
+    });
+
+    // Filter by tab status (isVisible)
     if (activeTab === "rented") {
-      return list.filter((p) => p.status === "Đang cho thuê");
+      return allRooms.filter((room) => room.isRented === true);
     }
     if (activeTab === "empty") {
-      return list.filter((p) => p.status === "Trống");
+      return allRooms.filter((room) => room.isRented === false);
     }
 
-    return list;
-  }, [activeTab, searchQuery, location, propertyType]);
+    return allRooms;
+  }, [activeTab, searchQuery, location, propertyType, properties]);
 
-  // For unit view, we don't filter by individual room status
+  // For unit view (BOARDING properties)
   const filteredUnits = useMemo(() => {
-    let list = mockPropertyUnits;
+    let list = properties.filter((p) => p.type === "BOARDING");
 
     // Filter by search query
     const q = searchQuery.trim().toLowerCase();
@@ -85,11 +361,7 @@ export default function MyPropertiesPage() {
       list = list.filter(
         (p) =>
           p.title.toLowerCase().includes(q) ||
-          p.roomTypes.some((rt) =>
-            rt.floors.some((floor) =>
-              floor.units.some((unit) => unit.code.toLowerCase().includes(q))
-            )
-          )
+          p.rooms?.some((room) => room.name.toLowerCase().includes(q))
       );
     }
 
@@ -100,8 +372,8 @@ export default function MyPropertiesPage() {
       );
     }
 
-    return list;
-  }, [searchQuery, location]);
+    return list.map(convertToPropertyUnit);
+  }, [searchQuery, location, properties]);
 
   // Get current data based on view
   const currentData = activeView === "room" ? filteredRooms : filteredUnits;
@@ -149,21 +421,41 @@ export default function MyPropertiesPage() {
 
         {/* Properties List */}
         <div className="space-y-3">
-          {activeView === "room"
-            ? // Room View
-              (paginatedData as typeof mockPropertyRooms).map((property) => (
-                <PropertyRoom
-                  key={property.id}
-                  {...property}
-                  showRentalStatus={false}
-                />
-              ))
-            : // Unit View
-              (paginatedData as typeof mockPropertyUnits).map(
-                (property, index) => <PropertyUnit key={index} {...property} />
-              )}
+          {loading ? (
+            <LoadingSpinner text="Đang tải dữ liệu" />
+          ) : activeView === "room" ? (
+            // Room View
+            (paginatedData as PropertyRoomProps[]).map((property) => (
+              <div
+                key={property.id}
+                onClick={() => handlePropertyClick(property.id)}
+                className="cursor-pointer transition-transform hover:scale-[1.01]"
+              >
+                <PropertyRoom {...property} showRentalStatus={false} />
+              </div>
+            ))
+          ) : (
+            // Unit View
+            (paginatedData as PropertyUnitProps[]).map((property, index) => {
+              // Tìm property gốc từ title để lấy ID
+              const originalProperty = properties.find(
+                (p) => p.title === property.title
+              );
+              return (
+                <div
+                  key={index}
+                  onClick={() =>
+                    originalProperty && handlePropertyClick(originalProperty.id)
+                  }
+                  className="cursor-pointer transition-transform hover:scale-[1.01]"
+                >
+                  <PropertyUnit {...property} />
+                </div>
+              );
+            })
+          )}
 
-          {paginatedData.length === 0 && (
+          {!loading && paginatedData.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
                 Không tìm thấy bất động sản nào
@@ -222,6 +514,14 @@ export default function MyPropertiesPage() {
           </Pagination>
         )}
       </div>
+
+      {/* Property Detail Modal */}
+      <PropertyDetailModal
+        property={selectedProperty}
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        onUpdate={fetchProperties}
+      />
     </div>
   );
 }

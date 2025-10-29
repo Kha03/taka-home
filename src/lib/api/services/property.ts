@@ -54,6 +54,33 @@ export class PropertyService {
   }
 
   /**
+   * Cập nhật apartment (PATCH)
+   */
+  async updateApartment(
+    id: string,
+    data: {
+      title?: string;
+      description?: string;
+      province?: string;
+      ward?: string;
+      address?: string;
+      block?: string;
+      unit?: string;
+      area?: number;
+      bedrooms?: number;
+      bathrooms?: number;
+      price?: number;
+      deposit?: number;
+      furnishing?: string;
+    }
+  ): Promise<ApiResponse<Property>> {
+    return await apiClient.patch<Property>(
+      `${this.basePath}/apartment/${id}`,
+      data
+    );
+  }
+
+  /**
    * Xóa property
    */
   async deleteProperty(id: string): Promise<ApiResponse<void>> {
@@ -63,13 +90,8 @@ export class PropertyService {
   /**
    * Lấy properties của user hiện tại
    */
-  async getMyProperties(
-    params?: Omit<FilterPropertyQuery, "ownerId">
-  ): Promise<ApiResponse<Property[]>> {
-    return await apiClient.get<Property[]>(
-      `${this.basePath}/my-properties`,
-      params as Record<string, unknown>
-    );
+  async getMyProperties(): Promise<ApiResponse<Property[]>> {
+    return await apiClient.get<Property[]>(`${this.basePath}/me`);
   }
 
   /**
