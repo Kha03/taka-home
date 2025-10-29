@@ -58,23 +58,23 @@ export function EditApartmentDialog({
 
   // Reset form khi property thay đổi
   useEffect(() => {
-    if (property) {
-      setFormData({
-        title: property.title || "",
-        description: property.description || "",
-        province: property.province || "",
-        ward: property.ward || "",
-        address: property.address || "",
-        block: property.block || "",
-        unit: property.unit || "",
-        area: property.area || 0,
-        bedrooms: property.bedrooms || 0,
-        bathrooms: property.bathrooms || 0,
-        price: property.price || 0,
-        deposit: property.deposit || 0,
-        furnishing: property.furnishing || "",
-      });
-    }
+    if (!property) return;
+
+    setFormData({
+      title: property.title || "",
+      description: property.description || "",
+      province: property.province || "",
+      ward: property.ward || "",
+      address: property.address || "",
+      block: property.block || "",
+      unit: property.unit || "",
+      area: property.area || 0,
+      bedrooms: property.bedrooms || 0,
+      bathrooms: property.bathrooms || 0,
+      price: property.price || 0,
+      deposit: property.deposit || 0,
+      furnishing: property.furnishing || "",
+    });
   }, [property]);
 
   const handleSubmit = async (e: React.FormEvent) => {

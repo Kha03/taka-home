@@ -212,6 +212,31 @@ export interface PropertyUpdateRequest extends Partial<PropertyCreateRequest> {
   id: string;
 }
 
+// ========== Room Move Types ==========
+// Chuyển room sang RoomType có sẵn
+export interface MoveRoomToExistingTypeRequest {
+  targetRoomTypeId: string;
+  createNewRoomType?: false;
+}
+
+// Tạo RoomType mới và chuyển Room vào đó
+export interface MoveRoomToNewTypeRequest {
+  createNewRoomType: true;
+  newRoomTypeName: string;
+  newRoomTypeDescription?: string;
+  newRoomTypeBedrooms: number;
+  newRoomTypeBathrooms: number;
+  newRoomTypeArea: number;
+  newRoomTypePrice: number;
+  newRoomTypeDeposit: number;
+  newRoomTypeFurnishing: "Đầy đủ" | "Cơ bản" | "Trống";
+}
+
+// Union type cho cả 2 trường hợp
+export type MoveRoomRequest =
+  | MoveRoomToExistingTypeRequest
+  | MoveRoomToNewTypeRequest;
+
 export interface FilterPropertyQuery {
   // === khớp tên với FilterPropertyDto ===
   fromPrice?: number; // Giá từ (VND)

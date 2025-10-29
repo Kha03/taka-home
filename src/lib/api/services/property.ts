@@ -10,6 +10,8 @@ import type {
   Property,
   PropertyCreateRequest,
   RoomTypeDetail,
+  MoveRoomRequest,
+  PropertyRoom,
 } from "../types";
 
 export class PropertyService {
@@ -144,11 +146,33 @@ export class PropertyService {
   }
 
   /**
-   * Lấy chi tiết RoomType theo ID (cho BOARDING)
+   * Lấy chi tiết một room type theo ID
    */
   async getRoomTypeById(id: string): Promise<ApiResponse<RoomTypeDetail>> {
     return await apiClient.get<RoomTypeDetail>(
       `${this.basePath}/roomtype/${id}`
+    );
+  }
+
+  /**
+   * Chuyển room sang room type khác
+   * Chỉ được phép khi room chưa cho thuê (isVisible = false)
+   *
+   * Hỗ trợ 2 chế độ:
+   * 1. Chuyển vào RoomType có sẵn: truyền targetRoomTypeId
+   * 2. Tạo RoomType mới và chuyển Room vào: set createNewRoomType=true và truyền thông tin RoomType mới
+   *
+   * @param roomId - ID của room cần chuyển
+   * @param data - Thông tin RoomType đích hoặc thông tin RoomType mới
+   * @returns Promise<ApiResponse<PropertyRoom>> - Room sau khi chuyển
+   */
+  async moveRoom(
+    roomId: string,
+    data: MoveRoomRequest
+  ): Promise<ApiResponse<PropertyRoom>> {
+    return await apiClient.patch<PropertyRoom>(
+      `${this.basePath}/rooms/${roomId}/move`,
+      data
     );
   }
 }

@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { EditApartmentDialog } from "./EditApartmentDialog";
+import { MoveRoomDialog } from "./MoveRoomDialog";
 import {
   MapPin,
   Bed,
@@ -27,8 +28,9 @@ import {
   Zap,
   Droplet,
   Edit,
+  MoveRight,
 } from "lucide-react";
-import type { Property } from "@/lib/api/types";
+import type { Property, PropertyRoom } from "@/lib/api/types";
 
 interface PropertyDetailModalProps {
   property: Property | null;
@@ -45,6 +47,9 @@ export function PropertyDetailModal({
 }: PropertyDetailModalProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [moveRoomDialogOpen, setMoveRoomDialogOpen] = useState(false);
+  const [selectedRoomToMove, setSelectedRoomToMove] =
+    useState<PropertyRoom | null>(null);
 
   if (!property) {
     return (
@@ -104,51 +109,62 @@ export function PropertyDetailModal({
       return total;
     }, 0) || 0;
 
-  // Group rooms by roomType
-  const roomTypeMap = new Map<
-    string,
-    {
-      name: string;
-      bedrooms: number;
-      bathrooms: number;
-      area: number;
-      furniture: string;
-      images: string[];
-      price: number;
-      deposit: number;
-      description: string;
-      rooms: typeof property.rooms;
-    }
-  >();
+  // Group rooms by roomType for BOARDING properties
+  const roomTypes = (() => {
+    if (!property.rooms) return [];
 
-  property.rooms?.forEach((room) => {
-    if (!room.roomType) return;
+    const roomTypeMap = new Map<
+      string,
+      {
+        name: string;
+        bedrooms: number;
+        bathrooms: number;
+        area: number;
+        furniture: string;
+        images: string[];
+        price: number;
+        deposit: number;
+        description: string;
+        rooms: PropertyRoom[];
+      }
+    >();
 
-    const roomTypeId = room.roomType.id || room.roomType.name;
+    property.rooms.forEach((room) => {
+      if (!room.roomType) return;
 
-    if (!roomTypeMap.has(roomTypeId)) {
-      roomTypeMap.set(roomTypeId, {
-        name: room.roomType.name,
-        bedrooms: room.roomType.bedrooms,
-        bathrooms: room.roomType.bathrooms,
-        area: room.roomType.area,
-        furniture: room.roomType.furnishing || "Không",
-        images: room.roomType.images || [],
-        price: room.roomType.price,
-        deposit: room.roomType.deposit || 0,
-        description: room.roomType.description || "",
-        rooms: [],
-      });
-    }
+      const roomTypeId = room.roomType.id || room.roomType.name;
 
-    const roomTypeData = roomTypeMap.get(roomTypeId)!;
-    if (!roomTypeData.rooms) {
-      roomTypeData.rooms = [];
-    }
-    roomTypeData.rooms.push(room);
-  });
+      if (!roomTypeMap.has(roomTypeId)) {
+        roomTypeMap.set(roomTypeId, {
+          name: room.roomType.name,
+          bedrooms: room.roomType.bedrooms,
+          bathrooms: room.roomType.bathrooms,
+          area: room.roomType.area,
+          furniture: room.roomType.furnishing || "Không",
+          images: room.roomType.images || [],
+          price: room.roomType.price,
+          deposit: room.roomType.deposit || 0,
+          description: room.roomType.description || "",
+          rooms: [],
+        });
+      }
 
-  const roomTypes = Array.from(roomTypeMap.values());
+      roomTypeMap.get(roomTypeId)!.rooms.push(room);
+    });
+
+    return Array.from(roomTypeMap.values());
+  })();
+
+  // Extract unique roomTypes for MoveRoomDialog
+  const uniqueRoomTypes = property.rooms
+    ? Array.from(
+        new Map(
+          property.rooms
+            .filter((room) => room.roomType?.id)
+            .map((room) => [room.roomType!.id, room.roomType!])
+        ).values()
+      )
+    : [];
 
   const typeBadge = (
     <Badge
@@ -589,11 +605,11 @@ export function PropertyDetailModal({
                               <p className="text-sm text-muted-foreground mb-2">
                                 Danh sách phòng ({roomsInType.length})
                               </p>
-                              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
                                 {roomsInType.map((room: any, idx: number) => (
                                   <div
                                     key={room.id || idx}
-                                    className={`rounded-md px-3 py-2 border text-center ${
+                                    className={`rounded-lg p-2 border ${
                                       room.isVisible
                                         ? "bg-green-50 border-green-300"
                                         : "bg-white border-[#DCBB87]/30"
@@ -611,17 +627,31 @@ export function PropertyDetailModal({
                                     <p className="text-xs text-muted-foreground">
                                       Tầng {room.floor}
                                     </p>
-                                    <p className="text-xs mt-1">
+                                    <div className="mt-2 pt-2 border-t border-current/10">
                                       {room.isVisible ? (
-                                        <span className="text-green-600 font-medium">
+                                        <span className="text-xs text-green-600 font-medium">
                                           ✓ Đã thuê
                                         </span>
                                       ) : (
-                                        <span className="text-gray-500">
-                                          Trống
-                                        </span>
+                                        <div className="space-y-1">
+                                          <span className="text-xs text-gray-500 block">
+                                            Trống
+                                          </span>
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => {
+                                              setSelectedRoomToMove(room);
+                                              setMoveRoomDialogOpen(true);
+                                            }}
+                                            className="w-full h-7 text-xs border-[#DCBB87] text-[#DCBB87] hover:bg-[#DCBB87] hover:text-white"
+                                          >
+                                            <MoveRight className="w-3 h-3 mr-1" />
+                                            Chuyển
+                                          </Button>
+                                        </div>
                                       )}
-                                    </p>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -680,6 +710,20 @@ export function PropertyDetailModal({
           onOpenChange(false);
         }}
       />
+
+      {/* Move Room Dialog */}
+      {isBoarding && (
+        <MoveRoomDialog
+          room={selectedRoomToMove}
+          availableRoomTypes={uniqueRoomTypes}
+          open={moveRoomDialogOpen}
+          onOpenChange={setMoveRoomDialogOpen}
+          onSuccess={() => {
+            onUpdate?.();
+            setMoveRoomDialogOpen(false);
+          }}
+        />
+      )}
     </Dialog>
   );
 }
