@@ -801,15 +801,24 @@ export default function ContractCard({
                       <span>Đã thanh toán</span>
                     </div>
                   ) : mostRecentInvoice.status === "PENDING" ? (
-                    <Button
-                      size="sm"
-                      className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
-                      onClick={() =>
-                        contract.onPayInvoice?.(mostRecentInvoice.invoiceId)
-                      }
-                    >
-                      Thanh toán
-                    </Button>
+                    userRole === "TENANT" ? (
+                      <Button
+                        size="sm"
+                        className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
+                        onClick={() =>
+                          contract.onPayInvoice?.(mostRecentInvoice.invoiceId)
+                        }
+                      >
+                        Thanh toán
+                      </Button>
+                    ) : (
+                      <div className="flex items-center gap-2 text-xs text-foreground">
+                        <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
+                          <AlertCircle className="h-3 w-3 text-white" />
+                        </div>
+                        <span>Chờ thanh toán</span>
+                      </div>
+                    )
                   ) : (
                     <div className="flex items-center gap-2 text-xs text-foreground">
                       <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
@@ -882,15 +891,24 @@ export default function ContractCard({
                         <span>Đã thanh toán</span>
                       </div>
                     ) : invoice.status === "PENDING" ? (
-                      <Button
-                        size="sm"
-                        className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
-                        onClick={() =>
-                          contract.onPayInvoice?.(invoice.invoiceId)
-                        }
-                      >
-                        Thanh toán
-                      </Button>
+                      userRole === "TENANT" ? (
+                        <Button
+                          size="sm"
+                          className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
+                          onClick={() =>
+                            contract.onPayInvoice?.(invoice.invoiceId)
+                          }
+                        >
+                          Thanh toán
+                        </Button>
+                      ) : (
+                        <div className="flex items-center gap-2 text-xs text-foreground">
+                          <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
+                            <AlertCircle className="h-3 w-3 text-white" />
+                          </div>
+                          <span>Chờ thanh toán</span>
+                        </div>
+                      )
                     ) : (
                       <div className="flex items-center gap-2 text-xs text-foreground">
                         <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">

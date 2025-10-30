@@ -6,4 +6,3 @@ export { PropertyRoomBadge } from "./property-room-badge";
 export { PropertyDetailModal } from "./PropertyDetailModal";
 export { EditApartmentDialog } from "./EditApartmentDialog";
 export { MoveRoomDialog } from "./MoveRoomDialog";
-export { mockPropertyRooms, mockPropertyUnits } from "./mock-data";
