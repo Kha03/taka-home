@@ -233,9 +233,11 @@ export class BookingService {
     id: string,
     signingOption: signingOption
   ): Promise<ApiResponse<Booking>> {
-    return apiClient.post<Booking>(`${this.basePath}/${id}/approve`, {
-      signingOption,
-    });
+    return apiClient.post<Booking>(
+      `${this.basePath}/${id}/approve`,
+      { signingOption },
+      { timeout: 300000 } // 5 minutes for digital signature
+    );
   }
 
   /**
@@ -250,9 +252,11 @@ export class BookingService {
     id: string,
     signingOption: signingOption
   ): Promise<ApiResponse<Booking>> {
-    return apiClient.post<Booking>(`${this.basePath}/${id}/sign`, {
-      signingOption,
-    });
+    return apiClient.post<Booking>(
+      `${this.basePath}/${id}/sign`,
+      { signingOption },
+      { timeout: 300000 } // 5 minutes for digital signature
+    );
   }
   //Bàn giao phòng
   async handover(id: string): Promise<ApiResponse<Booking>> {

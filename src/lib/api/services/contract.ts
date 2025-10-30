@@ -109,7 +109,8 @@ export class ContractService {
   ): Promise<ApiResponse<void>> {
     return apiClient.patch<void>(
       `${this.basePath}/extensions/${extensionId}/landlord-sign`,
-      { signingOption }
+      { signingOption },
+      { timeout: 300000 } // 5 minutes for digital signature
     );
   }
   // Người thuê ký hợp đồng gia hạn
@@ -119,7 +120,8 @@ export class ContractService {
   ): Promise<ApiResponse<void>> {
     return apiClient.patch<void>(
       `${this.basePath}/extensions/${extensionId}/tenant-sign`,
-      { signingOption }
+      { signingOption },
+      { timeout: 300000 } // 5 minutes for digital signature
     );
   }
 
