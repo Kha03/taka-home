@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Building, Clock, MapPin } from "lucide-react";
+import { Building, Clock, MapPin, Zap, Droplet } from "lucide-react";
 import { PropertyDetails } from "./PropertyDetails";
 import type { Property, RoomTypeDetail } from "@/lib/api/types";
 
@@ -241,6 +241,66 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Utilities Section for BOARDING */}
+      {isRoomTypeDetail(property) &&
+        ((data.electricityPrice && data.electricityPrice > 0) ||
+          (data.waterPrice && data.waterPrice > 0)) && (
+          <Card className="shadow-none bg-background p-0 border-0 mt-4">
+            <CardContent className="relative p-0">
+              <div className="relative rounded-2xl border border-dashed border-neutral-300 overflow-hidden">
+                <div className="grid grid-cols-2 gap-0">
+                  {/* Vạch chia dọc giữa */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                  >
+                    <div className="absolute top-4 bottom-4 left-1/2 -translate-x-0.5 border-l border-dashed border-neutral-300" />
+                  </div>
+
+                  {/* Giá điện */}
+                  {data.electricityPrice && data.electricityPrice > 0 && (
+                    <div className="p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-7 h-7 shrink-0 bg-yellow-100 rounded-full grid place-items-center">
+                          <Zap className="h-4 w-4 text-yellow-600" />
+                        </div>
+                        <div className="leading-tight">
+                          <div className="text-xs font-bold text-muted-foreground">
+                            Giá điện
+                          </div>
+                          <div className="font-bold text-sm text-foreground">
+                            {data.electricityPrice.toLocaleString("vi-VN")}{" "}
+                            ₫/kWh
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Giá nước */}
+                  {data.waterPrice && data.waterPrice > 0 && (
+                    <div className="p-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-7 h-7 shrink-0 bg-blue-100 rounded-full grid place-items-center">
+                          <Droplet className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div className="leading-tight">
+                          <div className="text-xs font-bold text-muted-foreground">
+                            Giá nước
+                          </div>
+                          <div className="font-bold text-sm text-foreground">
+                            {data.waterPrice.toLocaleString("vi-VN")} ₫/m³
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
     </div>
   );
 }
