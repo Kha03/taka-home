@@ -100,9 +100,9 @@ export default function MyPropertiesPage() {
           id: property.id,
           title: property.title,
           image: property.heroImage || "/assets/imgs/house-item.png",
-          status: property.isVisible ? "Đang cho thuê" : "Trống",
+          status: property.isVisible ? "Trống" : "Đang cho thuê",
           roomCode: property.unit || property.id.slice(0, 6).toUpperCase(),
-          isRented: property.isVisible || false,
+          isRented: !property.isVisible,
           bedrooms: property.bedrooms || 0,
           bathrooms: property.bathrooms || 0,
           area: property.area || 0,
@@ -125,10 +125,10 @@ export default function MyPropertiesPage() {
           room.roomType?.heroImage ||
           property.heroImage ||
           "/assets/imgs/house-item.png",
-        status: room.isVisible ? "Đang cho thuê" : "Trống",
+        status: room.isVisible ? "Trống" : "Đang cho thuê",
         roomCode: room.name,
         roomType: room.roomType?.name, // Hiển thị loại phòng (VD: "Loại 1", "Loại 2")
-        isRented: room.isVisible || false,
+        isRented: !room.isVisible,
         bedrooms: room.roomType?.bedrooms || 0,
         bathrooms: room.roomType?.bathrooms || 0,
         area: room.roomType?.area || 0,
@@ -148,9 +148,9 @@ export default function MyPropertiesPage() {
         id: property.id,
         title: property.title,
         image: property.heroImage || "/assets/imgs/house-item.png",
-        status: property.isVisible ? "Đang cho thuê" : "Trống",
+        status: property.isVisible ? "Trống" : "Đang cho thuê",
         roomCode: property.id.slice(0, 6).toUpperCase(),
-        isRented: property.isVisible || false,
+        isRented: !property.isVisible,
         bedrooms: property.bedrooms || 0,
         bathrooms: property.bathrooms || 0,
         area: property.area || 0,
@@ -167,15 +167,15 @@ export default function MyPropertiesPage() {
   const convertToPropertyUnit = (property: Property): PropertyUnitProps => {
     // Calculate rented and empty counts based on rooms
     const rentedCount =
-      property.rooms?.filter((room) => room.isVisible).length || 0;
-    const emptyCount =
       property.rooms?.filter((room) => !room.isVisible).length || 0;
+    const emptyCount =
+      property.rooms?.filter((room) => room.isVisible).length || 0;
 
     // Calculate monthly income based on rented rooms
     // Mỗi room có roomType với price, cộng dồn giá của các phòng đã thuê
     const monthlyIncome =
       property.rooms?.reduce((total, room) => {
-        if (room.isVisible && room.roomType) {
+        if (!room.isVisible && room.roomType) {
           return total + (room.roomType.price || 0);
         }
         return total;
@@ -240,7 +240,7 @@ export default function MyPropertiesPage() {
           floor: `Tầng ${floorNum}`,
           units: (rooms || []).map((room) => ({
             code: room.name,
-            status: (room.isVisible ? "rented" : "empty") as "rented" | "empty",
+            status: (room.isVisible ? "empty" : "rented") as "empty" | "rented",
           })),
         })),
     }));
@@ -268,7 +268,7 @@ export default function MyPropertiesPage() {
         // Đếm từng room trực tiếp từ property.rooms
         const roomsCount = property.rooms.length;
         const rentedRooms = property.rooms.filter(
-          (room) => room.isVisible
+          (room) => !room.isVisible
         ).length;
         const emptyRooms = roomsCount - rentedRooms;
 
@@ -278,7 +278,7 @@ export default function MyPropertiesPage() {
       } else {
         // APARTMENT: đếm property
         totalAll += 1;
-        if (property.isVisible) {
+        if (!property.isVisible) {
           totalRented += 1;
         } else {
           totalEmpty += 1;

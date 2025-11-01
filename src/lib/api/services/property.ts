@@ -156,7 +156,7 @@ export class PropertyService {
 
   /**
    * Chuyển room sang room type khác
-   * Chỉ được phép khi room chưa cho thuê (isVisible = false)
+   * Chỉ được phép khi room chưa cho thuê (isVisible = true)
    *
    * Hỗ trợ 2 chế độ:
    * 1. Chuyển vào RoomType có sẵn: truyền targetRoomTypeId

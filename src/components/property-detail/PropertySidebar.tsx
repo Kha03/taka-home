@@ -39,7 +39,7 @@ interface PropertySidebarProps {
   propertyId: string; // ID của property (apartment hoặc boarding)
   propertyType: "apartment" | "boarding"; // Type của property
   roomsData?: Array<{ id: string; name: string }>; // Danh sách rooms với ID cho boarding
-  isRented?: boolean; // Check if apartment is currently rented (isVisible = true)
+  isRented?: boolean; // Check if apartment is currently rented (isVisible = false, isVisible = true means available)
 }
 
 export function PropertySidebar({

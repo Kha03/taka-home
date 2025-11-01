@@ -97,13 +97,13 @@ export function PropertyDetailModal({
 
   // Calculate stats for BOARDING
   const rentedCount =
-    property.rooms?.filter((room) => room.isVisible).length || 0;
+    property.rooms?.filter((room) => !room.isVisible).length || 0;
   const totalRooms = property.rooms?.length || 0;
   const emptyCount = totalRooms - rentedCount;
 
   const monthlyIncome =
     property.rooms?.reduce((total, room) => {
-      if (room.isVisible && room.roomType) {
+      if (!room.isVisible && room.roomType) {
         return total + (room.roomType.price || 0);
       }
       return total;
@@ -182,12 +182,12 @@ export function PropertyDetailModal({
   const statusBadge = (
     <Badge
       className={`${
-        property.isVisible
+        !property.isVisible
           ? "bg-green-100 text-green-700"
           : "bg-gray-100 text-gray-700"
       } border-none pointer-events-none`}
     >
-      {property.isVisible ? "Đang cho thuê" : "Trống"}
+      {property.isVisible ? "Trống" : "Đang cho thuê"}
     </Badge>
   );
 
@@ -279,7 +279,7 @@ export function PropertyDetailModal({
                     </div>
 
                     {/* Nút Edit chỉ hiện với APARTMENT và chưa cho thuê */}
-                    {!isBoarding && !property.isVisible && (
+                    {!isBoarding && property.isVisible && (
                       <Button
                         onClick={() => setEditDialogOpen(true)}
                         variant="outline"
@@ -476,7 +476,7 @@ export function PropertyDetailModal({
                     {roomTypes.map((roomType, index) => {
                       const roomsInType = roomType.rooms || [];
                       const rentedInType = roomsInType.filter(
-                        (r: any) => r.isVisible
+                        (r: any) => !r.isVisible
                       ).length;
 
                       return (
@@ -610,14 +610,14 @@ export function PropertyDetailModal({
                                   <div
                                     key={room.id || idx}
                                     className={`rounded-lg p-2 border ${
-                                      room.isVisible
+                                      !room.isVisible
                                         ? "bg-green-50 border-green-300"
                                         : "bg-white border-[#DCBB87]/30"
                                     }`}
                                   >
                                     <p
                                       className={`text-sm font-medium truncate ${
-                                        room.isVisible
+                                        !room.isVisible
                                           ? "text-green-700"
                                           : "text-primary"
                                       }`}
@@ -628,7 +628,7 @@ export function PropertyDetailModal({
                                       Tầng {room.floor}
                                     </p>
                                     <div className="mt-2 pt-2 border-t border-current/10">
-                                      {room.isVisible ? (
+                                      {!room.isVisible ? (
                                         <span className="text-xs text-green-600 font-medium">
                                           ✓ Đã thuê
                                         </span>

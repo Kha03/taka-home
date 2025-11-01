@@ -100,7 +100,7 @@ export function PropertyDetailView({
     if (isRoomTypeDetail(property)) {
       // For BOARDING: get visible room names
       return property.rooms
-        .filter((room) => !room.isVisible)
+        .filter((room) => room.isVisible)
         .map((room) => room.name);
     }
     // For APARTMENT: return unit if available
@@ -145,7 +145,7 @@ export function PropertyDetailView({
   const getRoomsData = () => {
     if (isRoomTypeDetail(property)) {
       return property.rooms
-        .filter((room) => !room.isVisible)
+        .filter((room) => room.isVisible)
         .map((room) => ({
           id: room.id,
           name: room.name,
@@ -391,7 +391,7 @@ export function PropertyDetailView({
             isRented={
               type === "apartment" &&
               !isRoomTypeDetail(property) &&
-              property.isVisible === true
+              property.isVisible === false
             }
           />
         </div>

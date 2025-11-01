@@ -176,7 +176,7 @@ export default function NewPropertyPage() {
       address: formData.street.trim(),
       legalDoc: formData.legalDoc || undefined,
       mapLocation: mapLocation || undefined,
-      isVisible: false,
+      isVisible: true,
     };
 
     // For apartment - add apartment-specific fields
