@@ -32,7 +32,9 @@ export function ChatbotMessage({
     const rooms: PropertyRoom[] = [];
 
     // Check if content has property links
-    const hasPropertyLinks = text.includes("http://localhost:3001/properties/");
+    const hasPropertyLinks = text.includes(
+      "https://taka-home-ten.vercel.app/properties/"
+    );
     if (!hasPropertyLinks) return rooms;
 
     // Split by double newline to get individual room blocks
@@ -56,7 +58,7 @@ export function ChatbotMessage({
         // Extract link
         else if (line.startsWith("**Link:**")) {
           const urlMatch = line.match(
-            /http:\/\/localhost:3001\/properties\/[^\s]+/
+            /https:\/\/taka-home-ten\.vercel\.app\/properties\/[^\s]+/
           );
           if (urlMatch) link = urlMatch[0];
         }
@@ -131,7 +133,12 @@ export function ChatbotMessage({
                       ))}
                     </div>
                     <Link
-                      href={room.link.split(/localhost:\d+/).pop() || "/"}
+                      href={
+                        room.link.replace(
+                          "https://taka-home-ten.vercel.app",
+                          ""
+                        ) || "/"
+                      }
                       className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
                     >
                       <ExternalLink className="w-3 h-3" />
@@ -172,15 +179,24 @@ export function ChatbotMessage({
                   }) => {
                     if (!href) return <span>{children}</span>;
 
-                    // Check if it's an internal link (starts with / or localhost)
+                    // Check if it's an internal link (starts with / or localhost or vercel domain)
                     const isInternal =
-                      href.startsWith("/") || href.includes("localhost");
+                      href.startsWith("/") ||
+                      href.includes("localhost") ||
+                      href.includes("taka-home-ten.vercel.app");
 
                     if (isInternal) {
-                      // Extract path after localhost:port or use as is
-                      const path = href.includes("localhost")
-                        ? href.split(/localhost:\d+/).pop() || "/"
-                        : href;
+                      // Extract path after domain or use as is
+                      let path = href;
+                      if (href.includes("localhost")) {
+                        path = href.split(/localhost:\d+/).pop() || "/";
+                      } else if (href.includes("taka-home-ten.vercel.app")) {
+                        path =
+                          href.replace(
+                            "https://taka-home-ten.vercel.app",
+                            ""
+                          ) || "/";
+                      }
 
                       return (
                         <Link
