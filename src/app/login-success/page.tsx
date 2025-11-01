@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
-export default function LoginSuccessPage() {
+function LoginSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setAuthFromToken } = useAuth();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Đang xử lý đăng nhập...');
-  const [userInfo, setUserInfo] = useState<{name?: string, email?: string} | null>(null);
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
+  const [message, setMessage] = useState("Đang xử lý đăng nhập...");
+  const [userInfo, setUserInfo] = useState<{
+    name?: string;
+    email?: string;
+  } | null>(null);
   const hasRun = useRef(false); // Sử dụng useRef thay vì state
 
   useEffect(() => {
@@ -23,55 +29,69 @@ export default function LoginSuccessPage() {
 
     const handleOAuthCallback = async () => {
       try {
-        const token = searchParams.get('token');
-        const authStatus = searchParams.get('status');
+        const token = searchParams.get("token");
+        const authStatus = searchParams.get("status");
 
         if (!token) {
-          setStatus('error');
-          setMessage('Không tìm thấy token xác thực');
+          setStatus("error");
+          setMessage("Không tìm thấy token xác thực");
           return;
         }
 
         // Decode JWT to get user info for display
         try {
-          const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
           setUserInfo({
-            name: tokenPayload.fullName || tokenPayload.name || tokenPayload.email?.split('@')[0],
-            email: tokenPayload.email
+            name:
+              tokenPayload.fullName ||
+              tokenPayload.name ||
+              tokenPayload.email?.split("@")[0],
+            email: tokenPayload.email,
           });
         } catch (e) {
-            console.error('Failed to decode token for user info:', e);
+          console.error("Failed to decode token for user info:", e);
         }
 
         // Gọi function từ AuthContext để xử lý token
         const result = await setAuthFromToken(token);
-        
+
         if (result.success) {
-          setStatus('success');
-          setMessage(`Đăng nhập thành công! ${authStatus === 'new' ? 'Chào mừng bạn đến với TAKA Home!' : 'Chào mừng bạn trở lại!'}`);
-          
+          setStatus("success");
+          setMessage(
+            `Đăng nhập thành công! ${
+              authStatus === "new"
+                ? "Chào mừng bạn đến với TAKA Home!"
+                : "Chào mừng bạn trở lại!"
+            }`
+          );
+
           // Show success toast chỉ một lần
           toast.success(
-            'Đăng nhập thành công!', 
-            authStatus === 'new' ? 'Chào mừng bạn đến với TAKA Home!' : 'Chào mừng bạn trở lại!'
+            "Đăng nhập thành công!",
+            authStatus === "new"
+              ? "Chào mừng bạn đến với TAKA Home!"
+              : "Chào mừng bạn trở lại!"
           );
-          
+
           // Redirect sau 2 giây
           setTimeout(() => {
-            const from = localStorage.getItem('oauth_redirect_url') || '/';
-            localStorage.removeItem('oauth_redirect_url');
+            const from = localStorage.getItem("oauth_redirect_url") || "/";
+            localStorage.removeItem("oauth_redirect_url");
             router.push(from);
           }, 2000);
         } else {
-          setStatus('error');
-          setMessage(result.error || 'Có lỗi xảy ra khi đăng nhập');
-          toast.error('Đăng nhập thất bại', result.error || 'Có lỗi xảy ra khi đăng nhập');
+          setStatus("error");
+          setMessage(result.error || "Có lỗi xảy ra khi đăng nhập");
+          toast.error(
+            "Đăng nhập thất bại",
+            result.error || "Có lỗi xảy ra khi đăng nhập"
+          );
         }
       } catch (error) {
-        console.error('OAuth callback error:', error);
-        setStatus('error');
-        setMessage('Có lỗi xảy ra khi xử lý đăng nhập');
-        toast.error('Lỗi xử lý đăng nhập', 'Có lỗi xảy ra khi xử lý đăng nhập');
+        console.error("OAuth callback error:", error);
+        setStatus("error");
+        setMessage("Có lỗi xảy ra khi xử lý đăng nhập");
+        toast.error("Lỗi xử lý đăng nhập", "Có lỗi xảy ra khi xử lý đăng nhập");
       }
     };
 
@@ -80,11 +100,11 @@ export default function LoginSuccessPage() {
   }, []); // Chỉ chạy một lần khi component mount
 
   const handleRetry = () => {
-    router.push('/signin');
+    router.push("/signin");
   };
 
   const handleGoHome = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
@@ -92,49 +112,46 @@ export default function LoginSuccessPage() {
       <Card className="w-full max-w-md bg-[#FFF7E9] border-0 shadow-md">
         <CardContent className="p-8 text-center">
           <div className="mb-6">
-            {status === 'loading' && (
+            {status === "loading" && (
               <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
             )}
-            {status === 'success' && (
+            {status === "success" && (
               <CheckCircle className="h-12 w-12 text-green-600 mx-auto" />
             )}
-            {status === 'error' && (
+            {status === "error" && (
               <XCircle className="h-12 w-12 text-red-600 mx-auto" />
             )}
           </div>
 
           <h1 className="text-xl font-semibold mb-2">
-            {status === 'loading' && 'Đang xử lý...'}
-            {status === 'success' && 'Đăng nhập thành công!'}
-            {status === 'error' && 'Đăng nhập thất bại'}
+            {status === "loading" && "Đang xử lý..."}
+            {status === "success" && "Đăng nhập thành công!"}
+            {status === "error" && "Đăng nhập thất bại"}
           </h1>
 
-          <p className="text-gray-600 mb-6">
-            {message}
-          </p>
+          <p className="text-gray-600 mb-6">{message}</p>
 
-          {status === 'success' && userInfo && (
+          {status === "success" && userInfo && (
             <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
               <p className="text-sm text-green-800">
                 <strong>Xin chào {userInfo.name}!</strong>
               </p>
               {userInfo.email && (
-                <p className="text-xs text-green-600 mt-1">
-                  {userInfo.email}
-                </p>
+                <p className="text-xs text-green-600 mt-1">{userInfo.email}</p>
               )}
             </div>
           )}
 
-          {status === 'success' && (
+          {status === "success" && (
             <div className="space-y-3">
               <p className="text-sm text-gray-500">
                 Bạn sẽ được chuyển hướng trong giây lát...
               </p>
               <button
                 onClick={() => {
-                  const from = localStorage.getItem('oauth_redirect_url') || '/';
-                  localStorage.removeItem('oauth_redirect_url');
+                  const from =
+                    localStorage.getItem("oauth_redirect_url") || "/";
+                  localStorage.removeItem("oauth_redirect_url");
                   router.push(from);
                 }}
                 className="w-full bg-accent/90 text-white py-2 px-4 rounded-md hover:bg-accent/70 transition-colors"
@@ -144,7 +161,7 @@ export default function LoginSuccessPage() {
             </div>
           )}
 
-          {status === 'error' && (
+          {status === "error" && (
             <div className="space-y-3">
               <button
                 onClick={handleRetry}
@@ -163,5 +180,23 @@ export default function LoginSuccessPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+          <Card className="w-full max-w-md bg-[#FFF7E9] border-0 shadow-md">
+            <CardContent className="p-8 text-center">
+              <LoadingSpinner size="lg" text="Đang xử lý đăng nhập..." />
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <LoginSuccessContent />
+    </Suspense>
   );
 }
