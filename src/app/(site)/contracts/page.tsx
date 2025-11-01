@@ -253,7 +253,8 @@ export default function ContractsPage() {
                   onSignContract: actions.signContract,
                   onDepositPayment: handleDepositPayment,
                   onViewInvoice: handleViewInvoice,
-                  onPayInvoice: handleInvoicePayment,
+                  onPayInvoice:
+                    userRole === "TENANT" ? handleInvoicePayment : undefined,
                   onHandover: actions.handover,
                 }}
                 userRole={userRole}
@@ -325,7 +326,9 @@ export default function ContractsPage() {
           isOpen={showInvoiceDialog}
           onClose={() => setShowInvoiceDialog(false)}
           invoice={selectedInvoice}
-          onPayInvoice={handleInvoicePayment}
+          onPayInvoice={
+            userRole === "TENANT" ? handleInvoicePayment : undefined
+          }
         />
       </div>
     </div>

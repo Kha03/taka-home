@@ -257,13 +257,22 @@ export function ContractDetailInvoices({
                     <span>Đã thanh toán</span>
                   </div>
                 ) : mostRecentInvoice.status === "PENDING" ? (
-                  <Button
-                    size="sm"
-                    className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
-                    onClick={() => handlePayInvoice(mostRecentInvoice)}
-                  >
-                    Thanh toán
-                  </Button>
+                  userRole === "TENANT" ? (
+                    <Button
+                      size="sm"
+                      className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
+                      onClick={() => handlePayInvoice(mostRecentInvoice)}
+                    >
+                      Thanh toán
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-orange-600">
+                      <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
+                        <AlertCircle className="h-3 w-3 text-white" />
+                      </div>
+                      <span>Chờ thanh toán</span>
+                    </div>
+                  )
                 ) : (
                   <div className="flex items-center gap-2 text-xs text-foreground">
                     <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
@@ -336,13 +345,22 @@ export function ContractDetailInvoices({
                             <span>Đã thanh toán</span>
                           </div>
                         ) : invoice.status === "PENDING" ? (
-                          <Button
-                            size="sm"
-                            className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
-                            onClick={() => handlePayInvoice(invoice)}
-                          >
-                            Thanh toán
-                          </Button>
+                          userRole === "TENANT" ? (
+                            <Button
+                              size="sm"
+                              className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
+                              onClick={() => handlePayInvoice(invoice)}
+                            >
+                              Thanh toán
+                            </Button>
+                          ) : (
+                            <div className="flex items-center gap-2 text-xs text-orange-600">
+                              <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
+                                <AlertCircle className="h-3 w-3 text-white" />
+                              </div>
+                              <span>Chờ thanh toán</span>
+                            </div>
+                          )
                         ) : (
                           <div className="flex items-center gap-2 text-xs text-foreground">
                             <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
@@ -401,12 +419,16 @@ export function ContractDetailInvoices({
         isOpen={showInvoiceDialog}
         onClose={() => setShowInvoiceDialog(false)}
         invoice={selectedInvoice}
-        onPayInvoice={(invoiceId: string) => {
-          const invoice = invoices.find((inv) => inv.id === invoiceId);
-          if (invoice) {
-            handlePayInvoice(invoice);
-          }
-        }}
+        onPayInvoice={
+          userRole === "TENANT"
+            ? (invoiceId: string) => {
+                const invoice = invoices.find((inv) => inv.id === invoiceId);
+                if (invoice) {
+                  handlePayInvoice(invoice);
+                }
+              }
+            : undefined
+        }
       />
 
       {/* Create Invoice Dialog */}
