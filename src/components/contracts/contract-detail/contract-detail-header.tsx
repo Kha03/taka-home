@@ -72,9 +72,47 @@ function getStatusConfig(status: Booking["status"], userRole: string) {
     case "REJECTED":
       return {
         bg: "bg-[#FA0000]/10",
-        icon: <CheckCircle className="w-8 h-8 text-red-600" />,
+        icon: <AlertCircle className="w-8 h-8 text-red-600" />,
         text: "Đã từ chối",
         description: "Yêu cầu thuê đã bị từ chối",
+      };
+    case "ESCROW_FUNDED_L":
+      return {
+        bg: "bg-[#9333EA]/20",
+        icon: <AlertCircle className="w-8 h-8 text-purple-600" />,
+        text: userRole === "TENANT" ? "Chờ đặt cọc" : "Chờ người thuê",
+        description:
+          userRole === "TENANT"
+            ? "Đến lượt bạn đặt cọc"
+            : "Đang chờ người thuê đặt cọc",
+      };
+    case "TERMINATED":
+      return {
+        bg: "bg-[#6B7280]/20",
+        icon: <AlertCircle className="w-8 h-8 text-gray-600" />,
+        text: "Đã kết thúc",
+        description: "Hợp đồng đã hết hiệu lực",
+      };
+    case "CANCELLED":
+      return {
+        bg: "bg-[#EF4444]/20",
+        icon: <AlertCircle className="w-8 h-8 text-red-600" />,
+        text: "Đã hủy",
+        description: "Hợp đồng đã bị hủy",
+      };
+    case "SETTLEMENT_PENDING":
+      return {
+        bg: "bg-[#F59E0B]/20",
+        icon: <AlertCircle className="w-8 h-8 text-amber-600" />,
+        text: "Chờ thanh toán",
+        description: "Đang chờ thanh toán cuối kỳ",
+      };
+    case "SETTLED":
+      return {
+        bg: "bg-[#10B981]/20",
+        icon: <CheckCircle className="w-8 h-8 text-emerald-600" />,
+        text: "Đã thanh toán",
+        description: "Đã hoàn tất thanh toán",
       };
     default:
       return {

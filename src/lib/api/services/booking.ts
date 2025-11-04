@@ -131,6 +131,7 @@ export type BookingStatus =
   | "ACTIVE" // Đang hoạt động
   | "SETTLEMENT_PENDING" // Chờ thanh toán
   | "SETTLED" // Đã thanh toán
+  | "TERMINATED" // Hợp đồng đã kết thúc
   | "CANCELLED"; // Đã hủy
 
 export type BookingCondition =
