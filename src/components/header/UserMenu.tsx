@@ -64,10 +64,7 @@ export function UserMenu() {
               <p className="text-xs leading-none text-muted-foreground">
                 {user.email}
               </p>
-              {/* Hiển thị role */}
-              <p className="text-xs leading-none text-muted-foreground mt-1">
-                {user.roles?.join(", ")}
-              </p>
+
               <WalletBalance variant="compact" className="mt-2" />
             </div>
           </DropdownMenuLabel>

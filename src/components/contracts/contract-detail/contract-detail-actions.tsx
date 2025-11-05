@@ -8,6 +8,8 @@ import {
   AlertCircle,
   Calendar,
   FileText,
+  Copy,
+  Check,
 } from "lucide-react";
 import type { Booking } from "@/lib/api/services/booking";
 import { bookingService, signingOption } from "@/lib/api/services/booking";
@@ -47,10 +49,29 @@ export function ContractDetailActions({
   const [selectedSigningMethod, setSelectedSigningMethod] =
     useState<signingOption>(signingOption.VNPT);
   const [showFileSelectorDialog, setShowFileSelectorDialog] = useState(false);
+  const [copiedContractCode, setCopiedContractCode] = useState(false);
 
   const handleViewContract = async () => {
     if (!booking.contract?.id) return;
     setShowFileSelectorDialog(true);
+  };
+
+  const handleCopyContractCode = async () => {
+    if (!booking.contract?.contractCode) return;
+
+    try {
+      await navigator.clipboard.writeText(booking.contract.contractCode);
+      setCopiedContractCode(true);
+      toast.success("Đã sao chép mã hợp đồng");
+
+      // Reset icon after 2 seconds
+      setTimeout(() => {
+        setCopiedContractCode(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy:", error);
+      toast.error("Không thể sao chép mã hợp đồng");
+    }
   };
 
   const handleSignContract = async (method: signingOption) => {
@@ -373,6 +394,9 @@ export function ContractDetailActions({
 
       case "ACTIVE":
       case "DUAL_ESCROW_FUNDED":
+      case "TERMINATED":
+      case "SETTLED":
+      case "CANCELLED":
         const { property, room } = booking;
         const requiredDeposit = room
           ? parseFloat(room.roomType.deposit)
@@ -390,31 +414,59 @@ export function ContractDetailActions({
                         <p className="font-semibold text-foreground">
                           Hợp đồng thuê nhà
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          Xem chi tiết hợp đồng của bạn
-                        </p>
+                        {booking.contract.contractCode && (
+                          <p className="text-sm text-muted-foreground">
+                            Mã:{" "}
+                            <span className="font-mono font-medium text-foreground">
+                              {booking.contract.contractCode}
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      onClick={handleViewContract}
-                      className="text-primary"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Xem hợp đồng
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {booking.contract.contractCode && (
+                        <Button
+                          size="sm"
+                          onClick={handleCopyContractCode}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          {copiedContractCode ? (
+                            <>
+                              <Check className="w-4 h-4 mr-1" />
+                              Đã sao chép
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-4 h-4 mr-1" />
+                              Sao chép
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        onClick={handleViewContract}
+                        className="text-primary"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Xem hợp đồng
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             )}
-            {booking.contract?.id && (
-              <EscrowBalanceDetailCard
-                contractId={booking.contract.id}
-                requiredDeposit={requiredDeposit}
-                userRole={userRole}
-                onRefresh={onRefresh}
-              />
-            )}
+            {booking.contract?.id &&
+              booking.status !== "CANCELLED" &&
+              booking.status !== "TERMINATED" && (
+                <EscrowBalanceDetailCard
+                  contractId={booking.contract.id}
+                  requiredDeposit={requiredDeposit}
+                  userRole={userRole}
+                  onRefresh={onRefresh}
+                />
+              )}
           </div>
         );
 

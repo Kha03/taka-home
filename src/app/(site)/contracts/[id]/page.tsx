@@ -139,18 +139,23 @@ export default function ContractDetailPage() {
         )}
 
         {/* Contract Extensions */}
-        {booking.contract && booking.status === "ACTIVE" && (
-          <ContractDetailExtensions
-            contractId={booking.contract.id}
-            userRole={userRole}
-            endDate={booking.contract.endDate}
-            requiredDeposit={
-              booking.room
-                ? parseFloat(booking.room.roomType.deposit)
-                : parseFloat(booking.property.deposit || "0")
-            }
-          />
-        )}
+        {booking.contract &&
+          (booking.status === "ACTIVE" ||
+            booking.status === "TERMINATED" ||
+            booking.status === "SETTLED" ||
+            booking.status === "SETTLEMENT_PENDING" ||
+            booking.status === "CANCELLED") && (
+            <ContractDetailExtensions
+              contractId={booking.contract.id}
+              userRole={userRole}
+              endDate={booking.contract.endDate}
+              requiredDeposit={
+                booking.room
+                  ? parseFloat(booking.room.roomType.deposit)
+                  : parseFloat(booking.property.deposit || "0")
+              }
+            />
+          )}
       </div>
     </div>
   );

@@ -53,7 +53,16 @@ export function ContractDetailInvoices({
   const [showCreateInvoiceDialog, setShowCreateInvoiceDialog] = useState(false);
 
   const fetchInvoices = useCallback(async () => {
-    if (bookingStatus !== "DUAL_ESCROW_FUNDED" && bookingStatus !== "ACTIVE") {
+    const allowedStatuses = [
+      "DUAL_ESCROW_FUNDED",
+      "ACTIVE",
+      "TERMINATED",
+      "SETTLED",
+      "SETTLEMENT_PENDING",
+      "CANCELLED",
+    ];
+
+    if (!allowedStatuses.includes(bookingStatus)) {
       setLoading(false);
       return;
     }
@@ -130,10 +139,22 @@ export function ContractDetailInvoices({
     );
   }
 
-  // If contract is not active yet
-  if (bookingStatus !== "DUAL_ESCROW_FUNDED" && bookingStatus !== "ACTIVE") {
+  const allowedStatuses = [
+    "DUAL_ESCROW_FUNDED",
+    "ACTIVE",
+    "TERMINATED",
+    "SETTLED",
+    "SETTLEMENT_PENDING",
+    "CANCELLED",
+  ];
+
+  if (!allowedStatuses.includes(bookingStatus)) {
     return null;
   }
+
+  // Disable actions for cancelled or terminated contracts (view only)
+  const isActionsAllowed =
+    bookingStatus !== "CANCELLED" && bookingStatus !== "TERMINATED";
 
   // If no invoices yet
   if (invoices.length === 0) {
@@ -146,7 +167,7 @@ export function ContractDetailInvoices({
                 <FileText className="w-5 h-5" />
                 Hóa đơn thanh toán
               </CardTitle>
-              {userRole === "LANDLORD" && (
+              {userRole === "LANDLORD" && isActionsAllowed && (
                 <Button
                   size="sm"
                   onClick={() => setShowCreateInvoiceDialog(true)}
@@ -190,7 +211,7 @@ export function ContractDetailInvoices({
               <FileText className="w-5 h-5" />
               Hóa đơn thanh toán ({invoices.length})
             </CardTitle>
-            {userRole === "LANDLORD" && (
+            {userRole === "LANDLORD" && isActionsAllowed && (
               <Button
                 size="sm"
                 onClick={() => setShowCreateInvoiceDialog(true)}
@@ -257,7 +278,7 @@ export function ContractDetailInvoices({
                     <span>Đã thanh toán</span>
                   </div>
                 ) : mostRecentInvoice.status === "PENDING" ? (
-                  userRole === "TENANT" ? (
+                  userRole === "TENANT" && isActionsAllowed ? (
                     <Button
                       size="sm"
                       className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
@@ -345,7 +366,7 @@ export function ContractDetailInvoices({
                             <span>Đã thanh toán</span>
                           </div>
                         ) : invoice.status === "PENDING" ? (
-                          userRole === "TENANT" ? (
+                          userRole === "TENANT" && isActionsAllowed ? (
                             <Button
                               size="sm"
                               className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
@@ -420,7 +441,7 @@ export function ContractDetailInvoices({
         onClose={() => setShowInvoiceDialog(false)}
         invoice={selectedInvoice}
         onPayInvoice={
-          userRole === "TENANT"
+          userRole === "TENANT" && isActionsAllowed
             ? (invoiceId: string) => {
                 const invoice = invoices.find((inv) => inv.id === invoiceId);
                 if (invoice) {
