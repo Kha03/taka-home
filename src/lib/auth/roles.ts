@@ -23,6 +23,11 @@ export const ROUTE_PERMISSIONS: Record<
   }
 > = {
   // Admin only routes
+  "/admin": {
+    allowedRoles: [ROLES.ADMIN],
+    requireAuth: true,
+    redirectTo: "/access-denied",
+  },
   "/property-approval": {
     allowedRoles: [ROLES.ADMIN],
     requireAuth: true,

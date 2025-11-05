@@ -4,7 +4,11 @@
  */
 
 import { apiClient } from "../client";
-import type { ApiResponse, LandlordStatistics } from "../types";
+import type {
+  ApiResponse,
+  LandlordStatistics,
+  StatisticsOverview,
+} from "../types";
 
 export class StatisticsService {
   private basePath = "/statistics";
@@ -18,6 +22,13 @@ export class StatisticsService {
     return await apiClient.get<LandlordStatistics>(
       `${this.basePath}/landlord/${landlordId}`
     );
+  }
+
+  /**
+   * Lấy thống kê tổng quan của hệ thống
+   */
+  async getOverview(): Promise<ApiResponse<StatisticsOverview>> {
+    return await apiClient.get<StatisticsOverview>(`${this.basePath}/overview`);
   }
 }
 
