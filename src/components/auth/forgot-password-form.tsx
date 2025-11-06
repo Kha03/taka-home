@@ -172,8 +172,53 @@ export function ForgotPasswordForm() {
         setIsLoading(false);
       }
     } else {
-      // TODO: Handle email recovery
-      setError("Tính năng khôi phục qua email đang được phát triển");
+      // Handle email recovery
+      if (!email.trim()) {
+        setError("Vui lòng nhập email");
+        return;
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        setError("Email không hợp lệ");
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const response = await authService.forgotPassword(email.trim());
+
+        if (response.code !== 200) {
+          throw new Error(response.message);
+        }
+
+        setSuccess(
+          "✅ Email khôi phục mật khẩu đã được gửi!\n\n" +
+          "Vui lòng kiểm tra hộp thư (và cả thư mục Spam) để nhận link đặt lại mật khẩu.\n\n" +
+          "Link có hiệu lực trong 1 giờ."
+        );
+
+        // Reset form sau 5 giây
+        setTimeout(() => {
+          setStep("select-method");
+          setEmail("");
+          setSuccess("");
+        }, 5000);
+      } catch (err: unknown) {
+        const error = err as { message?: string; status?: number };
+
+        if (error.status === 404) {
+          setError("Không tìm thấy tài khoản với email này");
+        } else if (error.status === 400) {
+          setError("Email không hợp lệ");
+        } else {
+          setError(error.message || "Không thể gửi email khôi phục. Vui lòng thử lại");
+        }
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -288,13 +333,13 @@ export function ForgotPasswordForm() {
       <div id="recaptcha-container"></div>
 
       {error && (
-        <div className="p-2.5 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+        <div className="p-2.5 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md whitespace-pre-line">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="p-2.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
+        <div className="p-2.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md whitespace-pre-line">
           {success}
         </div>
       )}
@@ -326,9 +371,9 @@ export function ForgotPasswordForm() {
                 </div>
               </Card>
 
-              <Card className="p-4 cursor-pointer bg-white hover:border-primary transition-colors opacity-50">
+              <Card className="p-4 cursor-pointer bg-white hover:border-primary transition-colors">
                 <div className="flex items-center space-x-3">
-                  <RadioGroupItem value="email" id="email" disabled />
+                  <RadioGroupItem value="email" id="email" />
                   <Label
                     htmlFor="email"
                     className="flex items-center cursor-pointer flex-1"
@@ -337,7 +382,7 @@ export function ForgotPasswordForm() {
                     <div>
                       <div className="font-medium">Email</div>
                       <div className="text-xs text-muted-foreground">
-                        Nhận link khôi phục qua email (Sắp ra mắt)
+                        Nhận link khôi phục qua email
                       </div>
                     </div>
                   </Label>
