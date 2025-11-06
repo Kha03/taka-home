@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,18 +34,68 @@ export function ForgotPasswordForm() {
     useState<ConfirmationResult | null>(null);
   const [recaptchaVerifier, setRecaptchaVerifier] =
     useState<RecaptchaVerifier | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
-  // Initialize RecaptchaVerifier
+  // Cleanup RecaptchaVerifier on unmount
+  useEffect(() => {
+    return () => {
+      if (recaptchaVerifier) {
+        recaptchaVerifier.clear();
+      }
+    };
+  }, [recaptchaVerifier]);
+
+  // Clear rate limit state when component mounts
+  useEffect(() => {
+    // Clear any existing recaptcha widgets
+    const container = document.getElementById("recaptcha-container");
+    if (container) {
+      container.innerHTML = "";
+    }
+  }, []);
+
+  // Countdown timer for resend OTP
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => {
+        setResendCooldown(resendCooldown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  // Initialize RecaptchaVerifier with explicit site key
   const initRecaptcha = () => {
     if (!recaptchaVerifier) {
-      const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-        size: "invisible",
-        callback: () => {
-          // reCAPTCHA solved
-        },
-      });
-      setRecaptchaVerifier(verifier);
-      return verifier;
+      try {
+        // Get reCAPTCHA site key from environment
+        const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+
+        if (!siteKey) {
+          console.error("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set");
+          throw new Error("reCAPTCHA site key is not configured");
+        }
+
+        const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "invisible",
+          callback: () => {
+          },
+          "expired-callback": () => {
+            setError("reCAPTCHA đã hết hạn. Vui lòng thử lại");
+          },
+          "error-callback": (error: Error) => {
+            console.error("reCAPTCHA error:", error);
+            setError("Lỗi xác thực reCAPTCHA. Vui lòng thử lại");
+          },
+        });
+
+        setRecaptchaVerifier(verifier);
+        return verifier;
+      } catch (error) {
+        console.error("Error initializing RecaptchaVerifier:", error);
+        setError("Không thể khởi tạo reCAPTCHA. Vui lòng tải lại trang");
+        return null;
+      }
     }
     return recaptchaVerifier;
   };
@@ -76,20 +126,40 @@ export function ForgotPasswordForm() {
 
       try {
         const verifier = initRecaptcha();
+
+        if (!verifier) {
+          throw new Error("Failed to initialize reCAPTCHA");
+        }
+
         const confirmation = await signInWithPhoneNumber(
           auth,
           formattedPhone,
           verifier
         );
+
         setConfirmationResult(confirmation);
         setSuccess("Mã OTP đã được gửi đến số điện thoại của bạn");
         setStep("verify-otp");
+
+        // Set cooldown for resend (60 seconds)
+        setResendCooldown(60);
       } catch (err: unknown) {
-        console.error("Error sending OTP:", err);
-        
+        console.error("❌ Error sending OTP:", err);
+
         // Handle specific Firebase errors
         const error = err as { code?: string; message?: string };
-        if (error.code === "auth/invalid-phone-number") {
+
+        if (error.code === "auth/invalid-app-credential") {
+          setError("Lỗi xác thực reCAPTCHA!");
+        } else if (error.code === "auth/too-many-requests") {
+          setError(
+            "Đã gửi quá nhiều OTP! Vui lòng thử lại sau."
+          );
+        } else if (error.code === "auth/billing-not-enabled") {
+          setError(
+            "Cần nâng cấp Firebase lên Blaze Plan và enable Identity Platform API"
+          );
+        } else if (error.code === "auth/invalid-phone-number") {
           setError("Số điện thoại không hợp lệ");
         } else if (error.code === "auth/too-many-requests") {
           setError("Quá nhiều yêu cầu. Vui lòng thử lại sau");
@@ -142,7 +212,7 @@ export function ForgotPasswordForm() {
     try {
       // Verify OTP
       const userCredential = await confirmationResult.confirm(otp);
-      
+
       // Get idToken
       const idToken = await userCredential.user.getIdToken();
 
@@ -153,22 +223,25 @@ export function ForgotPasswordForm() {
           newPassword,
         });
 
-
         if (response.code !== 200) {
           setError(response.message || "Không thể đổi mật khẩu");
           return;
         }
 
         setSuccess("Đổi mật khẩu thành công! Đang chuyển hướng...");
-        
+
         // Redirect to signin page after 2 seconds
         setTimeout(() => {
           window.location.href = "/signin";
         }, 2000);
       } catch (apiError: unknown) {
         // Handle API errors từ apiClient
-        const error = apiError as { message?: string; status?: number; code?: string };
-        
+        const error = apiError as {
+          message?: string;
+          status?: number;
+          code?: string;
+        };
+
         if (error.status === 401) {
           setError("Token không hợp lệ hoặc đã hết hạn");
         } else if (error.status === 404) {
@@ -177,10 +250,9 @@ export function ForgotPasswordForm() {
           setError(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại");
         }
       }
-
     } catch (err: unknown) {
       console.error("Error verifying OTP:", err);
-      
+
       // Handle Firebase errors
       const error = err as { code?: string; message?: string };
       if (error.code === "auth/invalid-verification-code") {
