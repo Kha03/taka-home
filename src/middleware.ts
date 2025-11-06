@@ -58,6 +58,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Admin routes - highest priority
+    "/admin",
+    "/admin/:path*",
     // Specific routes to protect
     "/my-properties",
     "/my-properties/:path*",

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/utils";
 import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/contexts/auth-context";
+import { isTenant } from "@/lib/auth/roles";
 
 export function MainMenu() {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export function MainMenu() {
     {
       label: "Hợp đồng của tôi",
       href: "/contracts",
-      show: isAuthenticated, // Cả Tenant và Landlord đều có thể xem
+      show: isLandlord || isTenant, // Cả Tenant và Landlord đều có thể xem
     },
     {
       label: "Bất động sản của tôi",
@@ -32,9 +33,10 @@ export function MainMenu() {
       href: "/rental-requests",
       show: isLandlord, // Chỉ Landlord
     },
+
     {
-      label: "Duyệt bất động sản",
-      href: "/property-approval",
+      label: "Quản lý & Thống kê",
+      href: "/admin/statistics",
       show: isAdmin, // Chỉ Admin
     },
   ];

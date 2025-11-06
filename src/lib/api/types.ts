@@ -442,3 +442,13 @@ export interface LandlordStatistics {
   totalBooking: number;
   yearsOfParticipation: string;
 }
+
+export interface StatisticsOverview {
+  totalProperties: number;
+  totalRooms: number;
+  propertiesForRent: number;
+  roomsForRent: number;
+  newPropertiesThisMonth: number;
+  newRoomsThisMonth: number;
+  totalUsers: number;
+}

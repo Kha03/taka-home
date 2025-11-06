@@ -176,7 +176,7 @@ export default function MapLocation({ mapLocation }: MapLocationProps) {
         </div>
         <div 
           ref={mapContainer}
-          className="w-full h-[160px] rounded-lg overflow-hidden relative bg-gray-200"
+          className="w-full h-[400px] rounded-lg overflow-hidden relative bg-gray-200"
         />
       </CardContent>
     </Card>
