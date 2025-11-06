@@ -110,10 +110,20 @@ export class AuthService {
   }
 
   /**
-   * Reset mật khẩu với token
+   * Reset mật khẩu với token (Email recovery)
    */
-  async resetPassword(data: {
+  async resetPasswordWithEmail(data: {
     token: string;
+    newPassword: string;
+  }): Promise<ApiResponse<{ message: string }>> {
+    return apiClient.post<{ message: string }>("/auth/reset-password-email", data);
+  }
+
+  /**
+   * Reset mật khẩu với Firebase idToken (Phone Authentication)
+   */
+  async resetPasswordWithPhone(data: {
+    idToken: string;
     newPassword: string;
   }): Promise<ApiResponse<void>> {
     return apiClient.post<void>("/auth/reset-password", data);
