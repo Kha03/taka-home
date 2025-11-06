@@ -120,6 +120,16 @@ export class AuthService {
   }
 
   /**
+   * Reset mật khẩu với Firebase idToken (Phone Authentication)
+   */
+  async resetPasswordWithPhone(data: {
+    idToken: string;
+    newPassword: string;
+  }): Promise<ApiResponse<void>> {
+    return apiClient.post<void>("/auth/reset-password", data);
+  }
+
+  /**
    * Refresh token (chưa implement ở backend)
    */
   async refreshToken(

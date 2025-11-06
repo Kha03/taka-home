@@ -13,6 +13,7 @@ import {
   ConfirmationResult,
 } from "firebase/auth";
 import { auth } from "@/lib/auth/firebase";
+import { authService } from "@/lib/api/services/auth";
 import { Phone, Mail, ArrowLeft } from "lucide-react";
 
 type RecoveryMethod = "phone" | "email";
@@ -146,33 +147,41 @@ export function ForgotPasswordForm() {
       const idToken = await userCredential.user.getIdToken();
 
       // Send idToken and newPassword to backend to reset password
-      const response = await fetch("/api/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      try {
+        const response = await authService.resetPasswordWithPhone({
           idToken,
           newPassword,
-        }),
-      });
+        });
 
-      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to reset password");
+        if (response.code !== 200) {
+          setError(response.message || "Không thể đổi mật khẩu");
+          return;
+        }
+
+        setSuccess("Đổi mật khẩu thành công! Đang chuyển hướng...");
+        
+        // Redirect to signin page after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/signin";
+        }, 2000);
+      } catch (apiError: unknown) {
+        // Handle API errors từ apiClient
+        const error = apiError as { message?: string; status?: number; code?: string };
+        
+        if (error.status === 401) {
+          setError("Token không hợp lệ hoặc đã hết hạn");
+        } else if (error.status === 404) {
+          setError("Không tìm thấy tài khoản với số điện thoại này");
+        } else {
+          setError(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại");
+        }
       }
-
-      setSuccess("Đổi mật khẩu thành công! Đang chuyển hướng...");
-      
-      // Redirect to signin page after 2 seconds
-      setTimeout(() => {
-        window.location.href = "/signin";
-      }, 2000);
 
     } catch (err: unknown) {
       console.error("Error verifying OTP:", err);
       
+      // Handle Firebase errors
       const error = err as { code?: string; message?: string };
       if (error.code === "auth/invalid-verification-code") {
         setError("Mã OTP không chính xác");
@@ -349,7 +358,7 @@ export function ForgotPasswordForm() {
             <Input
               id="otp-input"
               type="text"
-              placeholder="123456"
+              placeholder="******"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               maxLength={6}

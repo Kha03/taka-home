@@ -7,7 +7,7 @@
  * Get API base URL based on environment
  */
 export function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api";
+  return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
 }
 
 /**
