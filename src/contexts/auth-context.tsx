@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authService.login({ email, password });
 
       if (response.code === 200 && response.data) {
-        const { accessToken, account } = response.data;
+        const { accessToken, refreshToken, account } = response.data;
 
         // Transform API user to local User format
         const user: User = {
@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Store token and user data
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
         document.cookie = `accessToken=${accessToken}; path=/; max-age=${
           7 * 24 * 60 * 60
         }`;
@@ -139,7 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const loginResponse = await authService.login({ email, password });
 
         if (loginResponse.code === 200 && loginResponse.data) {
-          const { accessToken, account } = loginResponse.data;
+          const { accessToken, refreshToken, account } = loginResponse.data;
 
           // Transform API user to local User format
           const user: User = {
@@ -154,6 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Store token and user data
           localStorage.setItem("user", JSON.stringify(user));
           localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
           document.cookie = `accessToken=${accessToken}; path=/; max-age=${
             7 * 24 * 60 * 60
           }`;
@@ -184,7 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      // Call logout API if available
+      // Call logout API trước (kèm accessToken trong header)
       await authService.logout();
     } catch (error) {
       console.error("Logout API error:", error);
@@ -193,6 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear local storage and state
       localStorage.removeItem("user");
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       document.cookie =
         "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
       setUser(null);

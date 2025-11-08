@@ -21,6 +21,11 @@ export interface ApiError {
 
 class ApiClient {
   private axiosInstance: AxiosInstance;
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: (value?: unknown) => void;
+    reject: (reason?: unknown) => void;
+  }> = [];
 
   constructor(baseURL: string = API_CONFIG.BASE_URL) {
     this.axiosInstance = axios.create({
@@ -32,6 +37,18 @@ class ApiClient {
     });
 
     this.setupInterceptors();
+  }
+
+  private processQueue(error: unknown, token: string | null = null) {
+    this.failedQueue.forEach((prom) => {
+      if (error) {
+        prom.reject(error);
+      } else {
+        prom.resolve(token);
+      }
+    });
+
+    this.failedQueue = [];
   }
 
   /**
@@ -78,18 +95,110 @@ class ApiClient {
         console.log(`✅ API Response: ${response.status}`, response.data);
         return response;
       },
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
+        const originalRequest = error.config as AxiosRequestConfig & {
+          _retry?: boolean;
+        };
+
         console.error(
           `❌ API Error: ${error.response?.status}`,
           error.response?.data
         );
 
-        // Handle 401 Unauthorized
-        if (error.response?.status === 401) {
-          if (typeof window !== "undefined") {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("user");
-            window.location.href = "/signin";
+        // Handle 401 Unauthorized - Phân biệt token expired vs no permission
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          const errorData = error.response.data as {
+            message?: string;
+            error?: string;
+            statusCode?: number;
+          };
+
+          // Kiểm tra xem có phải lỗi token expired không
+          const isTokenExpired = errorData?.message === "Token expired";
+
+          // Nếu không phải token expired, báo lỗi ngay (no permission)
+          if (!isTokenExpired) {
+            console.error("❌ Access Denied - Unauthorized");
+            return Promise.reject(error);
+          }
+
+          // Nếu là token expired, thực hiện refresh token
+          if (this.isRefreshing) {
+            // Nếu đang refresh, đợi refresh xong rồi retry
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            })
+              .then((token) => {
+                if (originalRequest.headers) {
+                  originalRequest.headers.Authorization = `Bearer ${token}`;
+                }
+                return this.axiosInstance(originalRequest);
+              })
+              .catch((err) => {
+                return Promise.reject(err);
+              });
+          }
+
+          originalRequest._retry = true;
+          this.isRefreshing = true;
+
+          try {
+            const refreshToken =
+              typeof window !== "undefined"
+                ? localStorage.getItem("refreshToken")
+                : null;
+
+            if (!refreshToken) {
+              throw new Error("No refresh token available");
+            }
+
+            // Gọi API refresh token
+            const response = await this.axiosInstance.post<{
+              code: number;
+              data: { accessToken: string; refreshToken: string };
+            }>("/auth/refresh", {
+              refreshToken,
+            });
+
+            if (response.data.code === 200 && response.data.data?.accessToken) {
+              const { accessToken, refreshToken: newRefreshToken } =
+                response.data.data;
+
+              // Lưu token mới
+              if (typeof window !== "undefined") {
+                localStorage.setItem("accessToken", accessToken);
+                if (newRefreshToken) {
+                  localStorage.setItem("refreshToken", newRefreshToken);
+                }
+              }
+
+              // Cập nhật token trong axios instance
+              this.setAuthToken(accessToken);
+
+              // Process queue
+              this.processQueue(null, accessToken);
+
+              // Retry request ban đầu với token mới
+              if (originalRequest.headers) {
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+              }
+              return this.axiosInstance(originalRequest);
+            }
+          } catch (refreshError) {
+            this.processQueue(refreshError, null);
+
+            // Refresh token hết hạn, chuyển về trang login
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              localStorage.removeItem("user");
+              localStorage.removeItem("account_info");
+              window.location.href = "/signin";
+            }
+
+            return Promise.reject(refreshError);
+          } finally {
+            this.isRefreshing = false;
           }
         }
 

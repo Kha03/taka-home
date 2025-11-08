@@ -27,6 +27,10 @@ export class AuthService {
       // Lưu token và account info vào localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", response.data.accessToken);
+        // Lưu refreshToken
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
         localStorage.setItem(
           "account_info",
           JSON.stringify(response.data.account)
@@ -55,12 +59,14 @@ export class AuthService {
    */
   async logout(): Promise<ApiResponse<void>> {
     try {
+      // Gọi API logout trước (kèm accessToken trong header)
       const response = await apiClient.post<void>("/auth/logout");
 
       // Xóa token khỏi client và localStorage
       apiClient.removeAuthToken();
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("account_info");
       }
 
@@ -70,6 +76,7 @@ export class AuthService {
       apiClient.removeAuthToken();
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("account_info");
       }
       throw error;
@@ -130,7 +137,7 @@ export class AuthService {
   }
 
   /**
-   * Refresh token (chưa implement ở backend)
+   * Refresh token
    */
   async refreshToken(
     refreshToken?: string
@@ -138,7 +145,7 @@ export class AuthService {
     const token =
       refreshToken ||
       (typeof window !== "undefined"
-        ? localStorage.getItem("refresh_token")
+        ? localStorage.getItem("refreshToken")
         : null);
 
     if (!token) {
@@ -149,11 +156,14 @@ export class AuthService {
       refreshToken: token,
     });
 
-    // Cập nhật token mới
+    // Cập nhật cả accessToken và refreshToken mới
     if (response.code === 200 && response.data?.accessToken) {
       apiClient.setAuthToken(response.data.accessToken);
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", response.data.accessToken);
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
         localStorage.setItem(
           "account_info",
           JSON.stringify(response.data.account)
