@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Firebase configuration and initialization
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
@@ -21,6 +22,9 @@ if (typeof window !== "undefined") {
   
   // Set language to Vietnamese
   auth.languageCode = 'vi';
+  
+  // ENABLE TEST MODE - chỉ dùng test phone numbers
+  (auth as any).settings.appVerificationDisabledForTesting = true;
 }
 
 export { app, auth };
