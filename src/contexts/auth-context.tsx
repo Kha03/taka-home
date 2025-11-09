@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/services/auth";
 import { User } from "@/lib/api";
+import { setCookie, deleteCookie } from "@/lib/utils/cookie-utils";
+import { useAuthSync } from "@/hooks/use-auth-sync";
 
 interface AuthContextType {
   user: User | null;
@@ -33,6 +35,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // Sync tokens to cookies when refresh token happens automatically
+  useAuthSync();
+
   useEffect(() => {
     const checkAuth = () => {
       try {
@@ -40,16 +45,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = localStorage.getItem("accessToken");
         if (savedUser && token) {
           setUser(JSON.parse(savedUser));
-          // Cookie cho middleware
-          document.cookie = `accessToken=${token}; path=/; max-age=${
-            7 * 24 * 60 * 60
-          }`;
+          // Lưu cookie cho middleware với cookie-utils
+          setCookie("accessToken", token, {
+            expires: 7,
+            path: "/",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+          });
         }
       } catch {
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
-        document.cookie =
-          "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+        deleteCookie("accessToken", { path: "/" });
       } finally {
         setIsLoading(false);
       }
@@ -89,9 +96,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
-        document.cookie = `accessToken=${accessToken}; path=/; max-age=${
-          7 * 24 * 60 * 60
-        }`;
+        
+        // Lưu tokens vào cookies
+        setCookie("accessToken", accessToken, {
+          expires: 1, // 1 day
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+        });
+        
+        setCookie("refreshToken", refreshToken, {
+          expires: 7, // 7 days
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+        });
 
         setUser(user);
         afterAuthRedirect();
@@ -156,9 +175,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("user", JSON.stringify(user));
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
-          document.cookie = `accessToken=${accessToken}; path=/; max-age=${
-            7 * 24 * 60 * 60
-          }`;
+          
+          // Lưu tokens vào cookies
+          setCookie("accessToken", accessToken, {
+            expires: 1, // 1 day
+            path: "/",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+          });
+          
+          setCookie("refreshToken", refreshToken, {
+            expires: 7, // 7 days
+            path: "/",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+          });
 
           setUser(user);
           afterAuthRedirect();
@@ -196,8 +227,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("user");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
-      document.cookie =
-        "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+      
+      // Xóa cookies
+      deleteCookie("accessToken", { path: "/" });
+      deleteCookie("refreshToken", { path: "/" });
+      
       setUser(null);
       router.push("/signin");
     }
@@ -225,9 +259,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Store token and user data (using same keys as normal login)
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("accessToken", token); // For compatibility
-      document.cookie = `accessToken=${token}; path=/; max-age=${
-        7 * 24 * 60 * 60
-      }`;
+      
+      // Lưu token vào cookie
+      setCookie("accessToken", token, {
+        expires: 7,
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
 
       setUser(user);
       return { success: true };

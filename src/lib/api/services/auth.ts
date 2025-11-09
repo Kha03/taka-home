@@ -24,17 +24,19 @@ export class AuthService {
     // Tự động set token vào client nếu login thành công
     if (response.code === 200 && response.data?.accessToken) {
       apiClient.setAuthToken(response.data.accessToken);
-      // Lưu token và account info vào localStorage
+      
+      // Lưu token vào localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", response.data.accessToken);
-        // Lưu refreshToken
-        if (response.data.refreshToken) {
-          localStorage.setItem("refreshToken", response.data.refreshToken);
-        }
         localStorage.setItem(
           "account_info",
           JSON.stringify(response.data.account)
         );
+
+        // Lưu refreshToken vào localStorage
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
       }
     }
 
@@ -156,18 +158,21 @@ export class AuthService {
       refreshToken: token,
     });
 
-    // Cập nhật cả accessToken và refreshToken mới
+    // Cập nhật cả accessToken và refreshToken mới vào localStorage
     if (response.code === 200 && response.data?.accessToken) {
       apiClient.setAuthToken(response.data.accessToken);
+      
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", response.data.accessToken);
-        if (response.data.refreshToken) {
-          localStorage.setItem("refreshToken", response.data.refreshToken);
-        }
         localStorage.setItem(
           "account_info",
           JSON.stringify(response.data.account)
         );
+
+        // Cập nhật refreshToken nếu có
+        if (response.data.refreshToken) {
+          localStorage.setItem("refreshToken", response.data.refreshToken);
+        }
       }
     }
 
@@ -186,6 +191,38 @@ export class AuthService {
    */
   async resendVerificationEmail(): Promise<ApiResponse<void>> {
     return apiClient.post<void>("/auth/resend-verification");
+  }
+
+  /**
+   * Upload ảnh CCCD để xác thực tài khoản
+   */
+  async recognizeCCCD(imageFile: File): Promise<ApiResponse<{
+    id: string;           // Số CCCD
+    name: string;         // Họ và tên
+    dob: string;          // Date of birth - Ngày sinh
+    sex: string;          // Giới tính
+    home: string;         // Quê quán
+    address: string;      // Địa chỉ thường trú
+    doe: string;          // Date of expiry - Ngày hết hạn
+    poi: string;          // Place of issue - Nơi cấp
+  }>> {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+
+    return apiClient.post<{
+      id: string;
+      name: string;
+      dob: string;
+      sex: string;
+      home: string;
+      address: string;
+      doe: string;
+      poi: string;
+    }>("/users/recognize-cccd", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   }
 
   /**
