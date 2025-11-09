@@ -11,6 +11,7 @@ import { ContractDetailInfo } from "@/components/contracts/contract-detail/contr
 import { ContractDetailActions } from "@/components/contracts/contract-detail/contract-detail-actions";
 import { ContractDetailInvoices } from "@/components/contracts/contract-detail/contract-detail-invoices";
 import { ContractDetailExtensions } from "@/components/contracts/contract-detail";
+import { ContractTerminationSection } from "@/components/contracts";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function ContractDetailPage() {
@@ -21,6 +22,7 @@ export default function ContractDetailPage() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string>("TENANT");
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   useEffect(() => {
     const fetchBookingDetail = async () => {
@@ -28,14 +30,15 @@ export default function ContractDetailPage() {
         setLoading(true);
 
         // Get user role from localStorage
-        const savedUser = localStorage.getItem("account_info");
+        const savedUser = localStorage.getItem("user");
         if (savedUser) {
           const userData = JSON.parse(savedUser);
           const roles = userData.roles || [];
-          setUserRole(roles[0] || "TENANT");
-        }
+          const userId = userData.id || "";
 
-        // Fetch booking detail
+          setUserRole(roles[0] || "TENANT");
+          setCurrentUserId(userId);
+        } // Fetch booking detail
         const response = await bookingService.getBookingById(bookingId);
         if (response.data) {
           setBooking(response.data);
@@ -156,6 +159,17 @@ export default function ContractDetailPage() {
               }
             />
           )}
+
+        {/* Contract Termination */}
+        {booking.contract && booking.status === "ACTIVE" && (
+          <ContractTerminationSection
+            contractId={booking.contract.id}
+            contractEndDate={booking.contract.endDate}
+            currentUserId={currentUserId}
+            currentUserRole={userRole === "LANDLORD" ? "LANDLORD" : "TENANT"}
+            contractStatus={booking.status}
+          />
+        )}
       </div>
     </div>
   );

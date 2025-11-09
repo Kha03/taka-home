@@ -4,6 +4,9 @@ import {
   BlockchainContractHistoryResponse,
   BlockchainPaymentHistoryResponse,
   PaymentStatus,
+  ContractTerminationRequest,
+  ContractTermination,
+  ContractTerminationResponse,
 } from "@/types/contracts";
 import { apiClient } from "../client";
 import { ApiResponse } from "../types";
@@ -155,6 +158,38 @@ export class ContractService {
           orgName: orgName,
         },
       }
+    );
+  }
+
+  // ===== Contract Termination Methods =====
+
+  // Gửi yêu cầu hủy hợp đồng trước hạn
+  async createTerminationRequest(
+    request: ContractTerminationRequest
+  ): Promise<ApiResponse<ContractTermination>> {
+    return apiClient.post<ContractTermination>(
+      `${this.basePath}/termination-requests`,
+      request
+    );
+  }
+
+  // Lấy danh sách yêu cầu hủy hợp đồng theo contractId
+  async getTerminationRequestsByContractId(
+    contractId: string
+  ): Promise<ApiResponse<ContractTermination[]>> {
+    return apiClient.get<ContractTermination[]>(
+      `${this.basePath}/termination-requests/contract/${contractId}`
+    );
+  }
+
+  // Phản hồi yêu cầu hủy hợp đồng (chấp nhận hoặc từ chối)
+  async respondToTerminationRequest(
+    requestId: string,
+    response: ContractTerminationResponse
+  ): Promise<ApiResponse<ContractTermination>> {
+    return apiClient.patch<ContractTermination>(
+      `${this.basePath}/termination-requests/${requestId}/respond`,
+      response
     );
   }
 }
