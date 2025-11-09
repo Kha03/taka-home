@@ -39,6 +39,7 @@ interface CreateInvoiceDialogProps {
   contractId: string;
   propertyType: "APARTMENT" | "BOARDING";
   onSuccess?: () => void;
+  isLiquidation?: boolean;
 }
 
 const SERVICE_TYPE_LABELS: Record<ServiceTypeEnum, string> = {
@@ -48,6 +49,7 @@ const SERVICE_TYPE_LABELS: Record<ServiceTypeEnum, string> = {
   [ServiceTypeEnum.INTERNET]: "Tiền internet",
   [ServiceTypeEnum.CLEANING]: "Tiền vệ sinh",
   [ServiceTypeEnum.SECURITY]: "Tiền bảo vệ",
+  [ServiceTypeEnum.DAMAGE_COMPENSATION]: "Bồi thường thiệt hại",
   [ServiceTypeEnum.OTHER]: "Khác",
 };
 
@@ -57,6 +59,7 @@ export function CreateInvoiceDialog({
   contractId,
   propertyType,
   onSuccess,
+  isLiquidation = false,
 }: CreateInvoiceDialogProps) {
   // Common states
   const [dueDate, setDueDate] = useState("");
@@ -82,7 +85,9 @@ export function CreateInvoiceDialog({
   // Boarding states (manual service selection)
   const [services, setServices] = useState<ServiceItem[]>([
     {
-      serviceType: ServiceTypeEnum.CLEANING,
+      serviceType: isLiquidation
+        ? ServiceTypeEnum.DAMAGE_COMPENSATION
+        : ServiceTypeEnum.CLEANING,
       amount: 0,
       description: "",
     },
@@ -386,7 +391,9 @@ export function CreateInvoiceDialog({
     setIsInvoiceItemsEditable(true);
     setServices([
       {
-        serviceType: ServiceTypeEnum.CLEANING,
+        serviceType: isLiquidation
+          ? ServiceTypeEnum.DAMAGE_COMPENSATION
+          : ServiceTypeEnum.CLEANING,
         amount: 0,
         description: "",
       },
@@ -399,7 +406,9 @@ export function CreateInvoiceDialog({
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {propertyType === "APARTMENT"
+            {isLiquidation
+              ? "Tạo hóa đơn thanh lý"
+              : propertyType === "APARTMENT"
               ? "Tạo hóa đơn căn hộ"
               : "Tạo hóa đơn phòng trọ"}
           </DialogTitle>
@@ -608,7 +617,7 @@ export function CreateInvoiceDialog({
                           disabled={!isInvoiceItemsEditable}
                         />
                       </div>
-                      <div className="w-32">
+                      <div className="w-40">
                         <Select
                           value={item.serviceType}
                           onValueChange={(value) =>
@@ -620,13 +629,20 @@ export function CreateInvoiceDialog({
                           }
                           disabled={!isInvoiceItemsEditable}
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Loại dịch vụ" />
+                          <SelectTrigger className="truncate">
+                            <SelectValue
+                              placeholder="Loại dịch vụ"
+                              className="truncate"
+                            />
                           </SelectTrigger>
                           <SelectContent className="bg-primary-foreground">
                             {Object.entries(SERVICE_TYPE_LABELS).map(
                               ([value, label]) => (
-                                <SelectItem key={value} value={value}>
+                                <SelectItem
+                                  key={value}
+                                  value={value}
+                                  className="truncate"
+                                >
                                   {label}
                                 </SelectItem>
                               )
@@ -704,13 +720,17 @@ export function CreateInvoiceDialog({
                               )
                             }
                           >
-                            <SelectTrigger>
-                              <SelectValue />
+                            <SelectTrigger className="truncate">
+                              <SelectValue className="truncate" />
                             </SelectTrigger>
                             <SelectContent className="bg-primary-foreground">
                               {Object.entries(SERVICE_TYPE_LABELS).map(
                                 ([key, label]) => (
-                                  <SelectItem key={key} value={key}>
+                                  <SelectItem
+                                    key={key}
+                                    value={key}
+                                    className="truncate"
+                                  >
                                     {label}
                                   </SelectItem>
                                 )

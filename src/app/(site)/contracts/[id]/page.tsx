@@ -11,6 +11,7 @@ import { ContractDetailInfo } from "@/components/contracts/contract-detail/contr
 import { ContractDetailActions } from "@/components/contracts/contract-detail/contract-detail-actions";
 import { ContractDetailInvoices } from "@/components/contracts/contract-detail/contract-detail-invoices";
 import { ContractDetailExtensions } from "@/components/contracts/contract-detail";
+import { ContractLiquidationAlert } from "@/components/contracts/contract-detail";
 import { ContractTerminationSection } from "@/components/contracts";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -123,6 +124,17 @@ export default function ContractDetailPage() {
 
         {/* Contract Information */}
         <ContractDetailInfo booking={booking} />
+
+        {/* Liquidation Alert - Show in last 7 days of contract for landlord */}
+        {booking.contract && booking.status === "ACTIVE" && (
+          <ContractLiquidationAlert
+            contractId={booking.contract.id}
+            contractEndDate={booking.contract.endDate}
+            propertyType={booking.property.type as "APARTMENT" | "BOARDING"}
+            userRole={userRole}
+            onInvoiceCreated={handleRefresh}
+          />
+        )}
 
         {/* Contract Actions */}
         <ContractDetailActions

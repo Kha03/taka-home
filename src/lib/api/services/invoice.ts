@@ -71,6 +71,7 @@ export enum ServiceTypeEnum {
   INTERNET = "INTERNET", // Tiền internet
   CLEANING = "CLEANING", // Tiền vệ sinh
   SECURITY = "SECURITY", // Tiền bảo vệ
+  DAMAGE_COMPENSATION = "DAMAGE_COMPENSATION", // Bồi thường thiệt hại
   OTHER = "OTHER", // Khác
 }
 
