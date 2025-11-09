@@ -164,12 +164,19 @@ class ApiClient {
               const { accessToken, refreshToken: newRefreshToken } =
                 response.data.data;
 
-              // Lưu token mới
+              // Lưu token mới vào localStorage
               if (typeof window !== "undefined") {
                 localStorage.setItem("accessToken", accessToken);
                 if (newRefreshToken) {
                   localStorage.setItem("refreshToken", newRefreshToken);
                 }
+
+                // Dispatch custom event để sync cookies
+                window.dispatchEvent(
+                  new CustomEvent("auth-token-updated", {
+                    detail: { accessToken, refreshToken: newRefreshToken },
+                  })
+                );
               }
 
               // Cập nhật token trong axios instance

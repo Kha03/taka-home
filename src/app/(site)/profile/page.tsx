@@ -11,15 +11,17 @@ import {
   Camera,
   Mail,
   Phone,
-  MapPin,
   Calendar,
   CreditCard,
   Save,
   Loader2,
+  Upload,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getAccountFromStorage } from "@/lib/utils/auth-utils";
 import type { Account } from "@/lib/api/types";
+import { authService } from "@/lib/api/services/auth";
 
 interface ProfileFormData {
   fullName: string;
@@ -33,6 +35,7 @@ interface ProfileFormData {
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingCCCD, setIsUploadingCCCD] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
   const [formData, setFormData] = useState<ProfileFormData>({
     fullName: "",
@@ -71,7 +74,7 @@ export default function ProfilePage() {
     };
 
     loadProfile();
-  }, [toast]);
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -136,6 +139,63 @@ export default function ProfilePage() {
       toast.error("Lỗi", "Không thể cập nhật thông tin");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleCCCDUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Lỗi", "Kích thước ảnh không được vượt quá 10MB");
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Lỗi", "Vui lòng chọn file ảnh");
+      return;
+    }
+
+    setIsUploadingCCCD(true);
+    try {
+      // Gọi API recognize CCCD
+      const response = await authService.recognizeCCCD(file);
+
+      if (response.code === 200 && response.data) {
+        const { id, name, dob, address } = response.data;
+
+        // Chỉ cập nhật isVerified trong localStorage và state
+        if (account) {
+          const updatedAccount = {
+            ...account,
+            isVerified: true,
+          };
+          localStorage.setItem("account_info", JSON.stringify(updatedAccount));
+          setAccount(updatedAccount);
+        }
+
+        // Hiển thị thông báo với thông tin nhận dạng được
+        toast.success(
+          "Xác thực CCCD thành công!",
+          `Thông tin nhận dạng:\n• Số CCCD: ${id}\n• Họ tên: ${name}\n• Ngày sinh: ${dob}\n• Địa chỉ: ${address}`
+        );
+      } else {
+        throw new Error(response.message || "Upload failed");
+      }
+    } catch (error) {
+      console.error("CCCD upload error:", error);
+      toast.error(
+        "Lỗi",
+        error instanceof Error
+          ? error.message
+          : "Không thể xác thực CCCD. Vui lòng thử lại."
+      );
+    } finally {
+      setIsUploadingCCCD(false);
+      // Reset input
+      e.target.value = "";
     }
   };
 
@@ -272,9 +332,44 @@ export default function ProfilePage() {
                   placeholder="001234567890"
                   className="pl-10"
                   value={formData.cccd}
-                  onChange={handleInputChange}
+                  disabled
                 />
               </div>
+              {!account?.isVerified && (
+                <div className="mt-2">
+                  <label
+                    htmlFor="cccd-upload"
+                    className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
+                      isUploadingCCCD
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : "bg-[#DCBB87] text-white hover:bg-[#B8935A]"
+                    }`}
+                  >
+                    {isUploadingCCCD ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        Upload ảnh CCCD để xác thực
+                      </>
+                    )}
+                  </label>
+                  <input
+                    id="cccd-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCCCDUpload}
+                    disabled={isUploadingCCCD}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Upload ảnh mặt trước CCCD để xác thực tài khoản
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Bio */}
@@ -316,12 +411,24 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-green-600" />
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    account?.isVerified ? "bg-green-100" : "bg-yellow-100"
+                  }`}
+                >
+                  {account?.isVerified ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <CreditCard className="w-5 h-5 text-yellow-600" />
+                  )}
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Trạng thái xác thực</p>
-                  <p className="font-semibold text-green-600">
+                  <p
+                    className={`font-semibold ${
+                      account?.isVerified ? "text-green-600" : "text-yellow-600"
+                    }`}
+                  >
                     {account?.isVerified ? "Đã xác thực" : "Chưa xác thực"}
                   </p>
                 </div>
