@@ -72,6 +72,48 @@ export interface ContractExtension {
   updatedAt: string;
 }
 
+// Contract Termination Types
+export interface ContractTerminationRequest {
+  contractId: string;
+  requestedEndMonth: string; // Format: "YYYY-MM"
+  reason: string;
+}
+
+export interface UserInfo {
+  id: string;
+  email: string;
+  phone: string;
+  fullName: string;
+  isVerified: boolean;
+  avatarUrl: string;
+  status: string;
+  CCCD: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContractTermination {
+  id: string;
+  contractId: string;
+  requestedBy: UserInfo;
+  requestedById: string;
+  requestedByRole: "LANDLORD" | "TENANT";
+  reason: string;
+  requestedEndMonth: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  approvedById: string | null;
+  approvedBy: UserInfo | null;
+  respondedAt: string | null;
+  responseNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContractTerminationResponse {
+  status: "APPROVED" | "REJECTED";
+  responseNote: string;
+}
+
 // Blockchain Contract History Types
 export interface ContractPenalty {
   amount: number;
