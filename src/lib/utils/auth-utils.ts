@@ -12,7 +12,11 @@ export function getAccountFromStorage(): Account | null {
 
   try {
     const accountInfo = localStorage.getItem("account_info");
-    if (!accountInfo) return null;
+    
+    // Check if value is valid before parsing
+    if (!accountInfo || accountInfo === "undefined" || accountInfo === "null") {
+      return null;
+    }
 
     return JSON.parse(accountInfo) as Account;
   } catch (error) {
@@ -52,5 +56,4 @@ export function clearAuthFromStorage(): void {
   if (typeof window === "undefined") return;
 
   localStorage.removeItem("accessToken");
-  localStorage.removeItem("account_info");
 }

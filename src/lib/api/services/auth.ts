@@ -69,7 +69,6 @@ export class AuthService {
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        localStorage.removeItem("account_info");
       }
 
       return response;
@@ -79,17 +78,9 @@ export class AuthService {
       if (typeof window !== "undefined") {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        localStorage.removeItem("account_info");
       }
       throw error;
     }
-  }
-
-  /**
-   * Lấy thông tin account hiện tại
-   */
-  async getCurrentUser(): Promise<ApiResponse<Account>> {
-    return apiClient.get<Account>("/auth/me");
   }
 
   /**
@@ -164,10 +155,14 @@ export class AuthService {
       
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem(
-          "account_info",
-          JSON.stringify(response.data.account)
-        );
+        
+        // Lưu account_info nếu API trả về
+        if (response.data.account) {
+          localStorage.setItem(
+            "account_info",
+            JSON.stringify(response.data.account)
+          );
+        }
 
         // Cập nhật refreshToken nếu có
         if (response.data.refreshToken) {
