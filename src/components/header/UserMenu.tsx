@@ -17,8 +17,18 @@ import { LogOut, User, Plus, History, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export function UserMenu() {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
   const { isLandlord, isAdmin } = useRole();
+
+  // Show loading skeleton while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="h-9 w-20 bg-gray-200 animate-pulse rounded" />
+        <div className="h-9 w-20 bg-gray-200 animate-pulse rounded" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !user) {
     return (

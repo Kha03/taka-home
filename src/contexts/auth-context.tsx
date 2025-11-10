@@ -4,8 +4,23 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/services/auth";
 import { User } from "@/lib/api";
-import { setCookie, deleteCookie } from "@/lib/utils/cookie-utils";
+import { setCookie, deleteCookie, getCookie } from "@/lib/utils/cookie-utils";
 import { useAuthSync } from "@/hooks/use-auth-sync";
+
+/**
+ * Check if JWT token is expired
+ */
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp) return true;
+    
+    // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
 
 interface AuthContextType {
   user: User | null;
@@ -39,28 +54,139 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useAuthSync();
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
         const savedUser = localStorage.getItem("user");
         const token = localStorage.getItem("accessToken");
-        if (savedUser && token) {
-          setUser(JSON.parse(savedUser));
-          // Lưu cookie cho middleware với cookie-utils
-          setCookie("accessToken", token, {
-            expires: 7,
-            path: "/",
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-          });
+        const refreshToken = localStorage.getItem("refreshToken");
+        
+        // If no localStorage but has cookies, try to get from cookies
+        if (!token && !refreshToken) {
+          const cookieToken = getCookie("accessToken");
+          const cookieRefreshToken = getCookie("refreshToken");
+          
+          if (cookieToken || cookieRefreshToken) {
+            if (cookieToken) {
+              localStorage.setItem("accessToken", cookieToken);
+            }
+            if (cookieRefreshToken) {
+              localStorage.setItem("refreshToken", cookieRefreshToken);
+            }
+            
+            // If we have token, try to decode and get user info
+            if (cookieToken && !isTokenExpired(cookieToken)) {
+              try {
+                const payload = JSON.parse(atob(cookieToken.split(".")[1]));
+                const user: User = {
+                  id: payload.sub,
+                  email: payload.email,
+                  fullName: payload.fullName || payload.name || payload.email,
+                  avatarUrl: "/assets/imgs/avatar.png",
+                  status: "ACTIVE",
+                  CCCD: "",
+                  roles: payload.roles || [],
+                };
+                
+                localStorage.setItem("user", JSON.stringify(user));
+                setUser(user);
+                return;
+              } catch (error) {
+                console.error("Failed to decode token from cookie:", error);
+              }
+            }
+          }
         }
-      } catch {
+        
+        if (savedUser && token) {
+          // Check if token is expired
+          const isExpired = isTokenExpired(token);
+          
+          if (isExpired && refreshToken) {
+            // Token expired but we have refresh token, try to refresh
+            try {
+              const response = await authService.refreshToken(refreshToken);
+              
+              if (response.code === 200 && response.data) {
+                const { accessToken, refreshToken: newRefreshToken } = response.data;
+                
+                // Update tokens in localStorage
+                localStorage.setItem("accessToken", accessToken);
+                if (newRefreshToken) {
+                  localStorage.setItem("refreshToken", newRefreshToken);
+                }
+                
+                // Update cookies
+                setCookie("accessToken", accessToken, {
+                  expires: 1,
+                  path: "/",
+                  secure: process.env.NODE_ENV === "production",
+                  sameSite: "lax",
+                });
+                
+                if (newRefreshToken) {
+                  setCookie("refreshToken", newRefreshToken, {
+                    expires: 7,
+                    path: "/",
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                  });
+                }
+                
+                // Keep existing user data (already in localStorage)
+                const userObj = JSON.parse(savedUser);
+                setUser(userObj);
+              } else {
+                throw new Error("Refresh token failed");
+              }
+            } catch (error) {
+              // Refresh failed, clear all auth data
+              console.error("Failed to refresh token on init:", error);
+              localStorage.removeItem("user");
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              deleteCookie("accessToken", { path: "/" });
+              deleteCookie("refreshToken", { path: "/" });
+              setUser(null);
+            }
+          } else if (!isExpired) {
+            // Token is still valid, use it
+            setUser(JSON.parse(savedUser));
+            
+            // Sync cookies
+            setCookie("accessToken", token, {
+              expires: 1,
+              path: "/",
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "lax",
+            });
+            
+            if (refreshToken) {
+              setCookie("refreshToken", refreshToken, {
+                expires: 7,
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+              });
+            }
+          } else {
+            // Token expired and no refresh token
+            localStorage.removeItem("user");
+            localStorage.removeItem("accessToken");
+            deleteCookie("accessToken", { path: "/" });
+          }
+        }
+      } catch (error) {
+        console.error("Error checking auth:", error);
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         deleteCookie("accessToken", { path: "/" });
+        deleteCookie("refreshToken", { path: "/" });
       } finally {
         setIsLoading(false);
       }
     };
+    
     checkAuth();
   }, []);
 

@@ -18,19 +18,44 @@ function getUserRolesFromToken(token: string): UserRole[] | undefined {
   }
 }
 
+/**
+ * Check if token is expired
+ */
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp) return true;
+    
+    // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true; // If can't decode, consider it expired
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const token = request.cookies.get("accessToken")?.value;
-  const isAuthed = !!token;
+  
+  // Check if token exists and is valid (not expired)
+  const isValidToken = token && !isTokenExpired(token);
+  const isAuthed = !!isValidToken;
 
-  // Get user roles from token
-  const userRoles = token ? getUserRolesFromToken(token) : undefined;
+  // Get user roles from valid token only
+  const userRoles = isValidToken ? getUserRolesFromToken(token) : undefined;
 
   // Check route permission
   const permission = hasRoutePermission(pathname, userRoles);
 
   // If route requires authentication and user is not authenticated
   if (permission.requireAuth && !isAuthed) {
+    // If token exists but expired, let the request go through
+    // The client-side interceptor will handle refresh token automatically
+    if (token && isTokenExpired(token)) {
+      return NextResponse.next();
+    }
+    
+    // No token at all, redirect to signin
     const url = new URL("/signin", request.url);
     url.searchParams.set(
       REDIRECT_PARAM,
@@ -45,7 +70,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
-  // Auth pages - redirect if already authenticated
+  // Auth pages - redirect if already authenticated with VALID token
   if (authRoots.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     if (isAuthed) {
       const from = searchParams.get(REDIRECT_PARAM) || "/";
