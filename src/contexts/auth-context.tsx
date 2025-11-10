@@ -76,20 +76,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // If we have token, try to decode and get user info
             if (cookieToken && !isTokenExpired(cookieToken)) {
               try {
-                const payload = JSON.parse(atob(cookieToken.split(".")[1]));
-                const user: User = {
-                  id: payload.sub,
-                  email: payload.email,
-                  fullName: payload.fullName || payload.name || payload.email,
-                  avatarUrl: "/assets/imgs/avatar.png",
-                  status: "ACTIVE",
-                  CCCD: "",
-                  roles: payload.roles || [],
-                };
+                // First, try to get account_info from localStorage
+                const accountInfoStr = localStorage.getItem("account_info");
                 
-                localStorage.setItem("user", JSON.stringify(user));
-                setUser(user);
-                return;
+                if (accountInfoStr) {
+                  // Use account_info if available (has full user data)
+                  const accountInfo = JSON.parse(accountInfoStr);
+                  const user: User = {
+                    id: accountInfo.user.id,
+                    email: accountInfo.email,
+                    fullName: accountInfo.user.fullName,
+                    avatarUrl: accountInfo.user.avatarUrl || "/assets/imgs/avatar.png",
+                    status: accountInfo.user.status,
+                    CCCD: accountInfo.user.CCCD || "",
+                    roles: accountInfo.roles || [],
+                  };
+                  
+                  localStorage.setItem("user", JSON.stringify(user));
+                  setUser(user);
+                  return;
+                } else {
+                  // Fallback: decode from JWT token if no account_info
+                  const payload = JSON.parse(atob(cookieToken.split(".")[1]));
+                  const user: User = {
+                    id: payload.sub,
+                    email: payload.email,
+                    fullName: payload.fullName || payload.name || payload.email,
+                    avatarUrl: "/assets/imgs/avatar.png",
+                    status: "ACTIVE",
+                    CCCD: "",
+                    roles: payload.roles || [],
+                  };
+                  
+                  localStorage.setItem("user", JSON.stringify(user));
+                  setUser(user);
+                  return;
+                }
               } catch (error) {
                 console.error("Failed to decode token from cookie:", error);
               }
@@ -223,6 +245,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
         
+        // Store full account info for profile and other pages
+        localStorage.setItem("account_info", JSON.stringify(account));
+        
         // Lưu tokens vào cookies
         setCookie("accessToken", accessToken, {
           expires: 1, // 1 day
@@ -301,6 +326,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("user", JSON.stringify(user));
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
+          
+          // Store full account info for profile and other pages
+          localStorage.setItem("account_info", JSON.stringify(account));
           
           // Lưu tokens vào cookies
           setCookie("accessToken", accessToken, {

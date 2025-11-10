@@ -155,20 +155,51 @@ class ApiClient {
             // Gọi API refresh token
             const response = await this.axiosInstance.post<{
               code: number;
-              data: { accessToken: string; refreshToken: string };
+              data: {
+                accessToken: string;
+                refreshToken: string;
+                account: {
+                  id: string;
+                  email: string;
+                  roles: string[];
+                  isVerified: boolean;
+                  user: {
+                    id: string;
+                    fullName: string;
+                    avatarUrl?: string;
+                    status: string;
+                    CCCD?: string;
+                    phone?: string;
+                  };
+                  createdAt: string;
+                  updatedAt: string;
+                };
+              };
             }>("/auth/refresh", {
               refreshToken,
             });
 
             if (response.data.code === 200 && response.data.data?.accessToken) {
-              const { accessToken, refreshToken: newRefreshToken } =
-                response.data.data;
+              const {
+                accessToken,
+                refreshToken: newRefreshToken,
+                account,
+              } = response.data.data;
 
               // Lưu token mới vào localStorage
               if (typeof window !== "undefined") {
                 localStorage.setItem("accessToken", accessToken);
                 if (newRefreshToken) {
                   localStorage.setItem("refreshToken", newRefreshToken);
+                }
+                
+                // Lưu account_info nếu có từ response
+                if (account) {
+                  localStorage.setItem("account_info", JSON.stringify(account));
+                } else {
+                  // Nếu không có account trong response, giữ nguyên account_info cũ
+                  // Không xóa để tránh mất dữ liệu user
+                  console.warn("Refresh token response không có account info, giữ nguyên account_info cũ");
                 }
 
                 // Dispatch custom event để sync cookies
@@ -199,7 +230,6 @@ class ApiClient {
               localStorage.removeItem("accessToken");
               localStorage.removeItem("refreshToken");
               localStorage.removeItem("user");
-              localStorage.removeItem("account_info");
               window.location.href = "/signin";
             }
 
