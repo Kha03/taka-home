@@ -4,8 +4,23 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/lib/api/services/auth";
 import { User } from "@/lib/api";
-import { setCookie, deleteCookie } from "@/lib/utils/cookie-utils";
+import { setCookie, deleteCookie, getCookie } from "@/lib/utils/cookie-utils";
 import { useAuthSync } from "@/hooks/use-auth-sync";
+
+/**
+ * Check if JWT token is expired
+ */
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp) return true;
+    
+    // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
 
 interface AuthContextType {
   user: User | null;
@@ -39,28 +54,161 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useAuthSync();
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
         const savedUser = localStorage.getItem("user");
         const token = localStorage.getItem("accessToken");
-        if (savedUser && token) {
-          setUser(JSON.parse(savedUser));
-          // Lưu cookie cho middleware với cookie-utils
-          setCookie("accessToken", token, {
-            expires: 7,
-            path: "/",
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-          });
+        const refreshToken = localStorage.getItem("refreshToken");
+        
+        console.log("🔍 Auth check - savedUser:", savedUser, "token:", token?.substring(0, 20), "refreshToken:", refreshToken?.substring(0, 20));
+        
+        // If no localStorage but has cookies, try to get from cookies
+        if (!token && !refreshToken) {
+          const cookieToken = getCookie("accessToken");
+          const cookieRefreshToken = getCookie("refreshToken");
+          
+          console.log("🍪 Checking cookies - token:", cookieToken?.substring(0, 20), "refreshToken:", cookieRefreshToken?.substring(0, 20));
+          
+          if (cookieToken || cookieRefreshToken) {
+            console.log("🔄 Found tokens in cookies but not in localStorage, syncing...");
+            
+            if (cookieToken) {
+              localStorage.setItem("accessToken", cookieToken);
+            }
+            if (cookieRefreshToken) {
+              localStorage.setItem("refreshToken", cookieRefreshToken);
+            }
+            
+            // If we have token, try to decode and get user info
+            if (cookieToken && !isTokenExpired(cookieToken)) {
+              try {
+                const payload = JSON.parse(atob(cookieToken.split(".")[1]));
+                const user: User = {
+                  id: payload.sub,
+                  email: payload.email,
+                  fullName: payload.fullName || payload.name || payload.email,
+                  avatarUrl: "/assets/imgs/avatar.png",
+                  status: "ACTIVE",
+                  CCCD: "",
+                  roles: payload.roles || [],
+                };
+                
+                localStorage.setItem("user", JSON.stringify(user));
+                setUser(user);
+                console.log("✅ Restored user from cookie token");
+                return;
+              } catch (error) {
+                console.error("❌ Failed to decode token from cookie:", error);
+              }
+            } else if (cookieRefreshToken) {
+              // Token expired but we have refresh token, continue to refresh logic below
+              console.log("🔄 Token in cookie expired, will try refresh...");
+            }
+          }
         }
-      } catch {
+        
+        if (savedUser && token) {
+          // Check if token is expired
+          const isExpired = isTokenExpired(token);
+          
+          console.log("🔍 Token expired?", isExpired);
+          
+          if (isExpired && refreshToken) {
+            // Token expired but we have refresh token, try to refresh
+            console.log("🔄 Attempting to refresh token...");
+            try {
+              const response = await authService.refreshToken(refreshToken);
+              
+              console.log("✅ Refresh token response:", response);
+              
+              if (response.code === 200 && response.data) {
+                const { accessToken, refreshToken: newRefreshToken } = response.data;
+                
+                console.log("💾 Saving new tokens...");
+                
+                // Update tokens in localStorage
+                localStorage.setItem("accessToken", accessToken);
+                if (newRefreshToken) {
+                  localStorage.setItem("refreshToken", newRefreshToken);
+                }
+                
+                // Update cookies
+                setCookie("accessToken", accessToken, {
+                  expires: 1,
+                  path: "/",
+                  secure: process.env.NODE_ENV === "production",
+                  sameSite: "lax",
+                });
+                
+                if (newRefreshToken) {
+                  setCookie("refreshToken", newRefreshToken, {
+                    expires: 7,
+                    path: "/",
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                  });
+                }
+                
+                // Keep existing user data (already in localStorage)
+                const userObj = JSON.parse(savedUser);
+                console.log("👤 Setting user:", userObj);
+                setUser(userObj);
+                
+                console.log("✅ Auth check completed successfully");
+              } else {
+                console.error("❌ Refresh response invalid:", response);
+                throw new Error("Refresh token failed");
+              }
+            } catch (error) {
+              // Refresh failed, clear all auth data
+              console.error("❌ Failed to refresh token on init:", error);
+              localStorage.removeItem("user");
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              deleteCookie("accessToken", { path: "/" });
+              deleteCookie("refreshToken", { path: "/" });
+              setUser(null);
+            }
+          } else if (!isExpired) {
+            // Token is still valid, use it
+            console.log("✅ Token still valid, using saved user");
+            setUser(JSON.parse(savedUser));
+            
+            // Sync cookies
+            setCookie("accessToken", token, {
+              expires: 1,
+              path: "/",
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "lax",
+            });
+            
+            if (refreshToken) {
+              setCookie("refreshToken", refreshToken, {
+                expires: 7,
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+              });
+            }
+          } else {
+            // Token expired and no refresh token
+            localStorage.removeItem("user");
+            localStorage.removeItem("accessToken");
+            deleteCookie("accessToken", { path: "/" });
+          }
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         deleteCookie("accessToken", { path: "/" });
+        deleteCookie("refreshToken", { path: "/" });
       } finally {
         setIsLoading(false);
       }
     };
+    
     checkAuth();
   }, []);
 
