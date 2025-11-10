@@ -20,9 +20,6 @@ export function UserMenu() {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   const { isLandlord, isAdmin } = useRole();
 
-  // Debug log
-  console.log("UserMenu - isLoading:", isLoading, "isAuthenticated:", isAuthenticated, "user:", user);
-
   // Show loading skeleton while checking auth
   if (isLoading) {
     return (

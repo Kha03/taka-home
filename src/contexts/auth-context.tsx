@@ -60,18 +60,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = localStorage.getItem("accessToken");
         const refreshToken = localStorage.getItem("refreshToken");
         
-        console.log("🔍 Auth check - savedUser:", savedUser, "token:", token?.substring(0, 20), "refreshToken:", refreshToken?.substring(0, 20));
-        
         // If no localStorage but has cookies, try to get from cookies
         if (!token && !refreshToken) {
           const cookieToken = getCookie("accessToken");
           const cookieRefreshToken = getCookie("refreshToken");
           
-          console.log("🍪 Checking cookies - token:", cookieToken?.substring(0, 20), "refreshToken:", cookieRefreshToken?.substring(0, 20));
-          
           if (cookieToken || cookieRefreshToken) {
-            console.log("🔄 Found tokens in cookies but not in localStorage, syncing...");
-            
             if (cookieToken) {
               localStorage.setItem("accessToken", cookieToken);
             }
@@ -95,14 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 
                 localStorage.setItem("user", JSON.stringify(user));
                 setUser(user);
-                console.log("✅ Restored user from cookie token");
                 return;
               } catch (error) {
-                console.error("❌ Failed to decode token from cookie:", error);
+                console.error("Failed to decode token from cookie:", error);
               }
-            } else if (cookieRefreshToken) {
-              // Token expired but we have refresh token, continue to refresh logic below
-              console.log("🔄 Token in cookie expired, will try refresh...");
             }
           }
         }
@@ -111,20 +101,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Check if token is expired
           const isExpired = isTokenExpired(token);
           
-          console.log("🔍 Token expired?", isExpired);
-          
           if (isExpired && refreshToken) {
             // Token expired but we have refresh token, try to refresh
-            console.log("🔄 Attempting to refresh token...");
             try {
               const response = await authService.refreshToken(refreshToken);
               
-              console.log("✅ Refresh token response:", response);
-              
               if (response.code === 200 && response.data) {
                 const { accessToken, refreshToken: newRefreshToken } = response.data;
-                
-                console.log("💾 Saving new tokens...");
                 
                 // Update tokens in localStorage
                 localStorage.setItem("accessToken", accessToken);
@@ -151,17 +134,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 
                 // Keep existing user data (already in localStorage)
                 const userObj = JSON.parse(savedUser);
-                console.log("👤 Setting user:", userObj);
                 setUser(userObj);
-                
-                console.log("✅ Auth check completed successfully");
               } else {
-                console.error("❌ Refresh response invalid:", response);
                 throw new Error("Refresh token failed");
               }
             } catch (error) {
               // Refresh failed, clear all auth data
-              console.error("❌ Failed to refresh token on init:", error);
+              console.error("Failed to refresh token on init:", error);
               localStorage.removeItem("user");
               localStorage.removeItem("accessToken");
               localStorage.removeItem("refreshToken");
@@ -171,7 +150,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           } else if (!isExpired) {
             // Token is still valid, use it
-            console.log("✅ Token still valid, using saved user");
             setUser(JSON.parse(savedUser));
             
             // Sync cookies
@@ -198,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        console.error("Error checking auth:", error);
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
