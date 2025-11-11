@@ -39,11 +39,17 @@ function LoginSuccessContent() {
         }
 
         // Decode base64 data
-        const decodedData = JSON.parse(
-          Buffer.from(decodeURIComponent(encodedData), "base64").toString()
-        );
-
-        console.log("Decoded OAuth data:", decodedData);
+        let decodedData;
+        try {
+          const decoded = Buffer.from(decodeURIComponent(encodedData), "base64").toString();
+          decodedData = JSON.parse(decoded);
+          console.log("Decoded OAuth data:", decodedData);
+        } catch (decodeError) {
+          console.error("Failed to decode data:", decodeError);
+          setStatus("error");
+          setMessage("Không thể giải mã dữ liệu xác thực");
+          return;
+        }
 
         const { accessToken, refreshToken, account, accountStatus } = decodedData;
 
