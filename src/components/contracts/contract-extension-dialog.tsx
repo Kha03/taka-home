@@ -17,6 +17,8 @@ import { Calendar, Clock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { contractService } from "@/lib/api/services/contract";
 import type { ContractExtensionRequest } from "@/types/contracts";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
+import { translateResponseMessage } from "@/lib/constants/error-messages";
 
 interface ContractExtensionDialogProps {
   contractId: string;
@@ -70,14 +72,11 @@ export function ContractExtensionDialog({
         setRequestNote("");
         onSuccess?.();
       } else {
-        toast.error(response.message || "Có lỗi xảy ra khi gửi yêu cầu");
+        toast.error(translateResponseMessage(response.message, "Có lỗi xảy ra khi gửi yêu cầu"));
       }
     } catch (error) {
       console.error("Error extending contract:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Không thể gửi yêu cầu gia hạn";
+      const errorMessage = getApiErrorMessage(error, "Không thể gửi yêu cầu gia hạn");
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

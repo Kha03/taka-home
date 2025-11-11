@@ -18,6 +18,7 @@ import {
   type SocketMessage,
   type UserTypingInfo,
 } from "@/lib/socket/chat-socket";
+import { translateResponseMessage } from "@/lib/constants/error-messages";
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
@@ -222,7 +223,7 @@ export function ChatProvider({
         setChats(transformedChats);
         setError(null);
       } else {
-        throw new Error(response.message || "Không thể tải danh sách chat");
+        throw new Error(translateResponseMessage(response.message, "Không thể tải danh sách chat"));
       }
     } catch {
       setError("Không thể tải danh sách chat");
@@ -244,7 +245,7 @@ export function ChatProvider({
         setMessages(transformedMessages);
         setError(null);
       } else {
-        throw new Error(response.message || "Không thể tải tin nhắn");
+        throw new Error(translateResponseMessage(response.message, "Không thể tải tin nhắn"));
       }
     } catch {
       setError("Không thể tải tin nhắn");
@@ -281,7 +282,7 @@ export function ChatProvider({
             console.warn("WebSocket send failed, but message saved via API");
           }
         } else {
-          throw new Error(response.message || "Không thể gửi tin nhắn");
+          throw new Error(translateResponseMessage(response.message, "Không thể gửi tin nhắn"));
         }
       } catch {
         setError("Không thể gửi tin nhắn");
@@ -328,7 +329,7 @@ export function ChatProvider({
 
           return newChat;
         } else {
-          throw new Error(response.message || "Không thể tạo chat");
+          throw new Error(translateResponseMessage(response.message, "Không thể tạo chat"));
         }
       } catch (err) {
         setError("Không thể tạo chat");

@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { contractService } from "@/lib/api/services/contract";
 import { cn } from "@/lib/utils/utils";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
 
 interface ContractTerminationDialogProps {
   open: boolean;
@@ -124,9 +125,7 @@ export function ContractTerminationDialog({
       console.error("Error creating termination request:", error);
       toast.error(
         "Lỗi",
-        error instanceof Error
-          ? error.message
-          : "Không thể gửi yêu cầu hủy hợp đồng"
+        getApiErrorMessage(error, "Không thể gửi yêu cầu hủy hợp đồng")
       );
     } finally {
       setIsSubmitting(false);

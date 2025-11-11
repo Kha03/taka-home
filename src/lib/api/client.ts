@@ -287,6 +287,8 @@ class ApiClient {
       // Server trả về error response
       const data = error.response.data as Record<string, unknown>;
 
+      // IMPORTANT: Keep original error code from backend, don't translate here
+      // Translation will happen at display time
       const apiError: ApiError = {
         message: (data?.message as string) || error.message || "Có lỗi xảy ra",
         status: error.response.status,
@@ -300,14 +302,14 @@ class ApiClient {
     } else if (error.request) {
       // Request được gửi nhưng không nhận được response
       throw {
-        message: "Không thể kết nối đến server",
+        message: "NETWORK_ERROR",
         status: 0,
         code: "NETWORK_ERROR",
       } as ApiError;
     } else {
       // Lỗi khác
       throw {
-        message: error.message || "Có lỗi xảy ra",
+        message: error.message || "UNKNOWN_ERROR",
         status: 0,
         code: "UNKNOWN_ERROR",
       } as ApiError;
