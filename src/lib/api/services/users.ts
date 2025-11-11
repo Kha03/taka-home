@@ -44,6 +44,26 @@ export class UsersService {
   async deleteUser(userId: string): Promise<ApiResponse<void>> {
     return await apiClient.delete<void>(`/users/${userId}`);
   }
+
+  /**
+   * Upload avatar cho user
+   */
+  async uploadAvatar(
+    file: File
+  ): Promise<ApiResponse<{ user: { avatarUrl: string } }>> {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    return await apiClient.post<{ user: { avatarUrl: string } }>(
+      "/users/upload-avatar",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  }
 }
 
 // Export singleton instance

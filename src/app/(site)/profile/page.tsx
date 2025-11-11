@@ -22,6 +22,7 @@ import { toast } from "@/hooks/use-toast";
 import { getAccountFromStorage } from "@/lib/utils/auth-utils";
 import type { Account } from "@/lib/api/types";
 import { authService } from "@/lib/api/services/auth";
+import { usersService } from "@/lib/api/services";
 
 interface ProfileFormData {
   fullName: string;
@@ -35,6 +36,7 @@ interface ProfileFormData {
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingCCCD, setIsUploadingCCCD] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -85,7 +87,7 @@ export default function ProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file size (max 5MB)
@@ -100,15 +102,57 @@ export default function ProfilePage() {
         return;
       }
 
-      // Create preview
+      // Create preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
 
-      // TODO: Upload to server
-      // uploadAvatar(file);
+      // Upload to server
+      setIsUploadingAvatar(true);
+      try {
+        const response = await usersService.uploadAvatar(file);
+
+        if (response.code === 200 && response.data?.user?.avatarUrl) {
+          const avatarUrl = response.data.user.avatarUrl;
+
+          // Update formData
+          setFormData((prev) => ({ ...prev, avatarUrl }));
+
+          // Update localStorage and state
+          if (account) {
+            const updatedAccount = {
+              ...account,
+              user: {
+                ...account.user,
+                avatarUrl,
+              },
+            };
+            localStorage.setItem(
+              "account_info",
+              JSON.stringify(updatedAccount)
+            );
+            setAccount(updatedAccount);
+          }
+
+          toast.success("Thành công", "Cập nhật ảnh đại diện thành công");
+        } else {
+          throw new Error(response.message || "Không thể upload ảnh đại diện");
+        }
+      } catch (error) {
+        console.error("Upload avatar error:", error);
+        toast.error(
+          "Lỗi",
+          error instanceof Error
+            ? error.message
+            : "Không thể upload ảnh đại diện"
+        );
+        // Revert preview on error
+        setAvatarPreview(account?.user?.avatarUrl || "/assets/imgs/avatar.png");
+      } finally {
+        setIsUploadingAvatar(false);
+      }
     }
   };
 
@@ -205,7 +249,7 @@ export default function ProfilePage() {
       );
 
       if (response.code === 200 && response.data) {
-        const { isMatch, similarity, cccdInfo } = response.data;
+        const { isMatch, cccdInfo } = response.data;
 
         if (!isMatch) {
           toast.error(
@@ -287,9 +331,17 @@ export default function ProfilePage() {
               </Avatar>
               <label
                 htmlFor="avatar-upload"
-                className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                className={`absolute inset-0 flex items-center justify-center bg-black/50 rounded-full transition-opacity cursor-pointer ${
+                  isUploadingAvatar
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-100"
+                }`}
               >
-                <Camera className="w-8 h-8 text-white" />
+                {isUploadingAvatar ? (
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-8 h-8 text-white" />
+                )}
               </label>
               <input
                 id="avatar-upload"
@@ -297,6 +349,7 @@ export default function ProfilePage() {
                 accept="image/*"
                 className="hidden"
                 onChange={handleAvatarChange}
+                disabled={isUploadingAvatar}
               />
             </div>
             <div className="text-center sm:text-left">
@@ -314,9 +367,19 @@ export default function ProfilePage() {
                 onClick={() =>
                   document.getElementById("avatar-upload")?.click()
                 }
+                disabled={isUploadingAvatar}
               >
-                <Camera className="w-4 h-4 mr-2" />
-                Thay đổi ảnh đại diện
+                {isUploadingAvatar ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Đang tải lên...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-4 h-4 mr-2" />
+                    Thay đổi ảnh đại diện
+                  </>
+                )}
               </Button>
             </div>
           </div>
