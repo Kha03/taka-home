@@ -32,7 +32,7 @@ export async function example2_APIError() {
   } catch (error) {
     // Translate error to Vietnamese
     const errorMessage = translateError(error, "Đã có lỗi xảy ra");
-    console.log(errorMessage); // Output: "Email hoặc mật khẩu không đúng"
+    console.log(errorMessage); // Output: "Mật khẩu không đúng"
     
     // Display to user
     alert(errorMessage);
@@ -95,7 +95,7 @@ export function LoginComponent() {
 export function example5_CommonErrorCodes() {
   const examples = [
     { code: "ACCOUNT_NOT_FOUND", expected: "Không tìm thấy thông tin tài khoản" },
-    { code: "INVALID_CREDENTIALS", expected: "Email hoặc mật khẩu không đúng" },
+    { code: "INVALID_CREDENTIALS", expected: "Mật khẩu không đúng" },
     { code: "EMAIL_ALREADY_REGISTERED", expected: "Email đã được đăng ký" },
     { code: "TOKEN_EXPIRED", expected: "Token đã hết hạn" },
     { code: "INSUFFICIENT_BALANCE", expected: "Số dư không đủ" },
