@@ -358,22 +358,24 @@ export default function ProfilePage() {
           return;
         }
 
-        // Cập nhật isVerified và CCCD trong localStorage và state
+        // Cập nhật isVerified, CCCD và fullName trong localStorage và state
         if (account) {
           const updatedAccount = {
             ...account,
             isVerified: true,
             user: {
               ...account.user,
-              cccd: cccdInfo.id, // Set CCCD từ response
+              fullName: cccdInfo.name || account.user.fullName, // Set fullName từ CCCD
+              CCCD: cccdInfo.id, // Set CCCD từ response
             },
           };
           localStorage.setItem("account_info", JSON.stringify(updatedAccount));
           setAccount(updatedAccount);
 
-          // Cập nhật formData để hiển thị CCCD trên UI
+          // Cập nhật formData để hiển thị CCCD và fullName trên UI
           setFormData((prev) => ({
             ...prev,
+            fullName: cccdInfo.name || prev.fullName,
             cccd: cccdInfo.id,
           }));
         }
