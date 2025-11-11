@@ -25,6 +25,12 @@ export function SignInForm() {
     e.preventDefault();
     setError("");
 
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      return;
+    }
+
     const result = await login(formData.email, formData.password);
     if (!result.success && result.error) {
       setError(result.error);

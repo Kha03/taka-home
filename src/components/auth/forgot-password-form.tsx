@@ -15,6 +15,8 @@ import {
 import { auth } from "@/lib/auth/firebase";
 import { authService } from "@/lib/api/services/auth";
 import { Phone, Mail, ArrowLeft } from "lucide-react";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
+import { translateResponseMessage } from "@/lib/constants/error-messages";
 
 type RecoveryMethod = "phone" | "email";
 type Step = "select-method" | "enter-contact" | "verify-otp" | "reset-password";
@@ -166,7 +168,7 @@ export function ForgotPasswordForm() {
         } else if (error.code === "auth/quota-exceeded") {
           setError("Đã vượt quá giới hạn gửi SMS. Vui lòng thử lại sau");
         } else {
-          setError(error.message || "Không thể gửi mã OTP. Vui lòng thử lại");
+          setError(getApiErrorMessage(error, "Không thể gửi mã OTP. Vui lòng thử lại"));
         }
       } finally {
         setIsLoading(false);
@@ -210,11 +212,11 @@ export function ForgotPasswordForm() {
         const error = err as { message?: string; status?: number };
 
         if (error.status === 404) {
-          setError("Không tìm thấy tài khoản với email này");
+          setError(getApiErrorMessage(err, "Không tìm thấy tài khoản với email này"));
         } else if (error.status === 400) {
-          setError("Email không hợp lệ");
+          setError(getApiErrorMessage(err, "Email không hợp lệ"));
         } else {
-          setError(error.message || "Không thể gửi email khôi phục. Vui lòng thử lại");
+          setError(getApiErrorMessage(err, "Không thể gửi email khôi phục. Vui lòng thử lại"));
         }
       } finally {
         setIsLoading(false);
@@ -269,7 +271,7 @@ export function ForgotPasswordForm() {
         });
 
         if (response.code !== 200) {
-          setError(response.message || "Không thể đổi mật khẩu");
+          setError(translateResponseMessage(response.message, "Không thể đổi mật khẩu"));
           return;
         }
 
@@ -288,11 +290,11 @@ export function ForgotPasswordForm() {
         };
 
         if (error.status === 401) {
-          setError("Token không hợp lệ hoặc đã hết hạn");
+          setError(getApiErrorMessage(apiError, "Token không hợp lệ hoặc đã hết hạn"));
         } else if (error.status === 404) {
-          setError("Không tìm thấy tài khoản với số điện thoại này");
+          setError(getApiErrorMessage(apiError, "Không tìm thấy tài khoản với số điện thoại này"));
         } else {
-          setError(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại");
+          setError(getApiErrorMessage(apiError, "Không thể đổi mật khẩu. Vui lòng thử lại"));
         }
       }
     } catch (err: unknown) {
@@ -305,7 +307,7 @@ export function ForgotPasswordForm() {
       } else if (error.code === "auth/code-expired") {
         setError("Mã OTP đã hết hạn. Vui lòng gửi lại");
       } else {
-        setError(error.message || "Xác thực thất bại. Vui lòng thử lại");
+        setError(getApiErrorMessage(err, "Xác thực thất bại. Vui lòng thử lại"));
       }
     } finally {
       setIsLoading(false);

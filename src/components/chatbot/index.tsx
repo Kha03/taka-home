@@ -6,6 +6,8 @@ import { ChatbotWindow } from "./chatbot-window";
 import type { ChatMessage } from "@/types/chatbot";
 import { chatbotService } from "@/lib/api/services/chatbot";
 import { toast } from "@/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
+import { translateResponseMessage } from "@/lib/constants/error-messages";
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +58,7 @@ export function Chatbot() {
             return [...filtered, botMessage];
           });
         } else {
-          throw new Error(response.message || "Có lỗi xảy ra");
+          throw new Error(translateResponseMessage(response.message, "Có lỗi xảy ra"));
         }
       } catch (error) {
         // Remove loading message
@@ -64,10 +66,7 @@ export function Chatbot() {
           prev.filter((msg) => msg.id !== loadingMessage.id)
         );
 
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Không thể kết nối đến server";
+        const errorMessage = getApiErrorMessage(error, "Không thể kết nối đến server");
 
         toast.error("Lỗi", errorMessage);
 
@@ -84,7 +83,7 @@ export function Chatbot() {
         setIsLoading(false);
       }
     },
-    [toast]
+    []
   );
 
   const handleReset = useCallback(() => {

@@ -4,12 +4,13 @@
  */
 
 import type { ApiError } from "@/lib/api/client";
+import { translateError } from "@/lib/constants/error-messages";
 
 /**
  * Lấy error message từ API error object
  * @param error - Error object từ API
  * @param fallbackMessage - Message mặc định nếu không có message từ API
- * @returns Error message string
+ * @returns Error message string (đã được dịch sang tiếng Việt)
  */
 export function getApiErrorMessage(
   error: unknown,
@@ -17,15 +18,15 @@ export function getApiErrorMessage(
 ): string {
   if (!error) return fallbackMessage;
 
-  // Nếu là ApiError
+  // Nếu là ApiError, dịch message sang tiếng Việt
   const apiError = error as ApiError;
   if (apiError?.message) {
-    return apiError.message;
+    return translateError(apiError.message, fallbackMessage);
   }
 
   // Nếu là Error object thông thường
   if (error instanceof Error) {
-    return error.message;
+    return translateError(error.message, fallbackMessage);
   }
 
   // Fallback

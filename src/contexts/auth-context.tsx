@@ -6,6 +6,7 @@ import { authService } from "@/lib/api/services/auth";
 import { User } from "@/lib/api";
 import { setCookie, deleteCookie, getCookie } from "@/lib/utils/cookie-utils";
 import { useAuthSync } from "@/hooks/use-auth-sync";
+import { translateError } from "@/lib/constants/error-messages";
 
 /**
  * Check if JWT token is expired
@@ -268,18 +269,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: true };
       }
 
+      // Translate error message from backend
       return {
         success: false,
-        error: response.message || "Email hoặc mật khẩu không đúng",
+        error: translateError(response.message, "Mật khẩu không đúng"),
       };
     } catch (error) {
       console.error("Login error:", error);
       return {
         success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Đã có lỗi xảy ra. Vui lòng thử lại.",
+        error: translateError(error, "Đã có lỗi xảy ra. Vui lòng thử lại."),
       };
     } finally {
       setIsLoading(false);
@@ -351,18 +350,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // Translate error message from backend
       return {
         success: false,
-        error: response.message || "Đăng ký thất bại. Vui lòng thử lại.",
+        error: translateError(response.message, "Đăng ký thất bại. Vui lòng thử lại."),
       };
     } catch (error) {
       console.error("Register error:", error);
       return {
         success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Đã có lỗi xảy ra. Vui lòng thử lại.",
+        error: translateError(error, "Đã có lỗi xảy ra. Vui lòng thử lại."),
       };
     } finally {
       setIsLoading(false);
