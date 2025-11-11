@@ -19,6 +19,7 @@ import { contractService } from "@/lib/api/services/contract";
 import { ContractTermination } from "@/types/contracts";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
 
 interface ContractTerminationRespondDialogProps {
   open: boolean;
@@ -67,9 +68,7 @@ export function ContractTerminationRespondDialog({
       console.error("Error responding to termination request:", error);
       toast.error(
         "Lỗi",
-        error instanceof Error
-          ? error.message
-          : "Không thể phản hồi yêu cầu hủy hợp đồng"
+        getApiErrorMessage(error, "Không thể phản hồi yêu cầu hủy hợp đồng")
       );
     } finally {
       setIsSubmitting(false);

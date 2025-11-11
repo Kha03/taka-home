@@ -9,6 +9,8 @@ import {
   paymentService,
   type WalletResponse,
 } from "@/lib/api/services/payment";
+import { translateResponseMessage } from "@/lib/constants/error-messages";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
 
 export interface UseWalletOptions {
   autoRefresh?: boolean;
@@ -40,14 +42,10 @@ export function useWallet(options: UseWalletOptions = {}): UseWalletReturn {
       if (response.code === 200 && response.data) {
         setWallet(response.data);
       } else {
-        throw new Error(response.message || "Không thể tải thông tin ví");
+        throw new Error(translateResponseMessage(response.message, "Không thể tải thông tin ví"));
       }
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Đã xảy ra lỗi khi tải thông tin ví"
-      );
+      setError(getApiErrorMessage(err, "Đã xảy ra lỗi khi tải thông tin ví"));
       console.error("Error fetching wallet:", err);
     } finally {
       setLoading(false);

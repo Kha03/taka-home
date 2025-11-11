@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authService } from "@/lib/api/services/auth";
 import { ArrowLeft, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { getApiErrorMessage } from "@/lib/utils/error-handler";
+import { translateResponseMessage } from "@/lib/constants/error-messages";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -105,7 +107,7 @@ function ResetPasswordContent() {
       // Error: { message: "Token không hợp lệ...", error: "Unauthorized", statusCode: 401 }
 
       if (response.code !== 200) {
-        throw new Error(response.message || "Đặt lại mật khẩu thất bại");
+        throw new Error(translateResponseMessage(response.message, "Đặt lại mật khẩu thất bại"));
       }
 
       const successMessage = response.data?.message || "Đặt lại mật khẩu thành công!";
@@ -124,18 +126,20 @@ function ResetPasswordContent() {
         error?: string;
       };
 
-      // Handle backend error format
+      // Handle backend error format with translated messages
       if (error.statusCode === 401 || error.status === 401) {
         setError(
-          error.message || 
-          "Token không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu reset mật khẩu lại."
+          getApiErrorMessage(
+            err,
+            "Token không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu reset mật khẩu lại."
+          )
         );
       } else if (error.status === 400 || error.statusCode === 400) {
-        setError("Link đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu gửi lại email.");
+        setError(getApiErrorMessage(err, "Link đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu gửi lại email."));
       } else if (error.status === 404 || error.statusCode === 404) {
-        setError("Không tìm thấy yêu cầu đặt lại mật khẩu");
+        setError(getApiErrorMessage(err, "Không tìm thấy yêu cầu đặt lại mật khẩu"));
       } else {
-        setError(error.message || "Không thể đặt lại mật khẩu. Vui lòng thử lại");
+        setError(getApiErrorMessage(err, "Không thể đặt lại mật khẩu. Vui lòng thử lại"));
       }
     } finally {
       setIsLoading(false);
