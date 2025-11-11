@@ -7,7 +7,7 @@
 const AUTH_ERRORS_VI = {
   EMAIL_ALREADY_REGISTERED: "Email đã được đăng ký",
   ACCOUNT_NOT_FOUND: "Không tìm thấy thông tin tài khoản",
-  INVALID_CREDENTIALS: "Email hoặc mật khẩu không đúng",
+  INVALID_CREDENTIALS: "Mật khẩu không đúng",
   GOOGLE_AUTH_FAILED: "Xác thực Google thất bại",
   INVALID_TOKEN: "Token không hợp lệ",
   INVALID_PHONE_NUMBER: "Số điện thoại không hợp lệ",

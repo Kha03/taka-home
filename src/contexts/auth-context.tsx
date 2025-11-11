@@ -272,7 +272,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Translate error message from backend
       return {
         success: false,
-        error: translateError(response.message, "Email hoặc mật khẩu không đúng"),
+        error: translateError(response.message, "Mật khẩu không đúng"),
       };
     } catch (error) {
       console.error("Login error:", error);
