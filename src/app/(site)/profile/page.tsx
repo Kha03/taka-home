@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Camera,
   Mail,
@@ -17,11 +25,14 @@ import {
   Loader2,
   Upload,
   CheckCircle2,
+  Video,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getAccountFromStorage } from "@/lib/utils/auth-utils";
 import type { Account } from "@/lib/api/types";
 import { authService } from "@/lib/api/services/auth";
+import { usersService } from "@/lib/api/services";
 
 interface ProfileFormData {
   fullName: string;
@@ -35,6 +46,7 @@ interface ProfileFormData {
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingCCCD, setIsUploadingCCCD] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -48,6 +60,11 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [faceImage, setFaceImage] = useState<File | null>(null);
   const [cccdImage, setCccdImage] = useState<File | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -85,7 +102,7 @@ export default function ProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file size (max 5MB)
@@ -100,45 +117,107 @@ export default function ProfilePage() {
         return;
       }
 
-      // Create preview
+      // Create preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatarPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
 
-      // TODO: Upload to server
-      // uploadAvatar(file);
+      // Upload to server
+      setIsUploadingAvatar(true);
+      try {
+        const response = await usersService.uploadAvatar(file);
+
+        if (response.code === 200 && response.data?.user?.avatarUrl) {
+          const avatarUrl = response.data.user.avatarUrl;
+
+          // Update formData
+          setFormData((prev) => ({ ...prev, avatarUrl }));
+
+          // Update localStorage and state
+          if (account) {
+            const updatedAccount = {
+              ...account,
+              user: {
+                ...account.user,
+                avatarUrl,
+              },
+            };
+            localStorage.setItem(
+              "account_info",
+              JSON.stringify(updatedAccount)
+            );
+            setAccount(updatedAccount);
+          }
+
+          toast.success("Thành công", "Cập nhật ảnh đại diện thành công");
+        } else {
+          throw new Error(response.message || "Không thể upload ảnh đại diện");
+        }
+      } catch (error) {
+        console.error("Upload avatar error:", error);
+        toast.error(
+          "Lỗi",
+          error instanceof Error
+            ? error.message
+            : "Không thể upload ảnh đại diện"
+        );
+        // Revert preview on error
+        setAvatarPreview(account?.user?.avatarUrl || "/assets/imgs/avatar.png");
+      } finally {
+        setIsUploadingAvatar(false);
+      }
     }
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // TODO: Call API to update profile
-      // await userService.updateProfile(formData);
+      // Validate phone number
+      if (!formData.phone || formData.phone.trim() === "") {
+        toast.error("Lỗi", "Số điện thoại không được để trống");
+        return;
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Validate phone format (10-11 digits)
+      if (!/^[0-9]{10,11}$/.test(formData.phone)) {
+        toast.error("Lỗi", "Số điện thoại phải có 10-11 chữ số");
+        return;
+      }
 
-      // Update localStorage
-      if (account) {
+      if (!account?.user?.id) {
+        toast.error("Lỗi", "Không tìm thấy thông tin người dùng");
+        return;
+      }
+
+      // Call API to update profile (only phone)
+      const response = await usersService.updateUser(account.user.id, {
+        phone: formData.phone,
+      });
+
+      if (response.code === 200 && response.data) {
+        // Update localStorage
         const updatedAccount = {
           ...account,
           user: {
             ...account.user,
-            fullName: formData.fullName,
-            phone: formData.phone,
-            avatarUrl: formData.avatarUrl || account.user.avatarUrl,
+            phone: response.data.phone,
           },
         };
         localStorage.setItem("account_info", JSON.stringify(updatedAccount));
         setAccount(updatedAccount);
-      }
 
-      toast.success("Thành công", "Cập nhật thông tin cá nhân thành công");
-    } catch {
-      toast.error("Lỗi", "Không thể cập nhật thông tin");
+        toast.success("Thành công", "Cập nhật số điện thoại thành công");
+      } else {
+        throw new Error(response.message || "Không thể cập nhật thông tin");
+      }
+    } catch (error) {
+      console.error("Update profile error:", error);
+      toast.error(
+        "Lỗi",
+        error instanceof Error ? error.message : "Không thể cập nhật thông tin"
+      );
     } finally {
       setIsSaving(false);
     }
@@ -167,28 +246,92 @@ export default function ProfilePage() {
     e.target.value = "";
   };
 
-  const handleFaceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Hàm mở camera
+  const openCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: 640, height: 480 },
+      });
+      setStream(mediaStream);
+      setIsCameraOpen(true);
+      setCapturedImage(null);
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Lỗi", "Kích thước ảnh không được vượt quá 10MB");
-      return;
+      // Wait for dialog to render then attach stream
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      toast.error(
+        "Lỗi",
+        "Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập."
+      );
     }
-
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Lỗi", "Vui lòng chọn file ảnh");
-      return;
-    }
-
-    // Store face image
-    setFaceImage(file);
-
-    // Reset input
-    e.target.value = "";
   };
+
+  // Hàm đóng camera
+  const closeCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+    setIsCameraOpen(false);
+    setCapturedImage(null);
+  };
+
+  // Hàm chụp ảnh
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.drawImage(video, 0, 0);
+        const imageDataUrl = canvas.toDataURL("image/jpeg");
+        setCapturedImage(imageDataUrl);
+      }
+    }
+  };
+
+  // Hàm chụp lại
+  const retakePhoto = () => {
+    setCapturedImage(null);
+  };
+
+  // Hàm xác nhận ảnh và chuyển thành File
+  const confirmPhoto = () => {
+    if (capturedImage) {
+      // Convert base64 to File
+      fetch(capturedImage)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], "face-photo.jpg", {
+            type: "image/jpeg",
+          });
+          setFaceImage(file);
+          closeCamera();
+          toast.success("Thành công", "Đã chụp ảnh khuôn mặt");
+        })
+        .catch((error) => {
+          console.error("Error converting image:", error);
+          toast.error("Lỗi", "Không thể lưu ảnh");
+        });
+    }
+  };
+
+  // Cleanup khi component unmount
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
 
   const handleVerifyIdentity = async () => {
     if (!faceImage || !cccdImage) {
@@ -205,7 +348,7 @@ export default function ProfilePage() {
       );
 
       if (response.code === 200 && response.data) {
-        const { isMatch, similarity, cccdInfo } = response.data;
+        const { isMatch, cccdInfo } = response.data;
 
         if (!isMatch) {
           toast.error(
@@ -215,22 +358,24 @@ export default function ProfilePage() {
           return;
         }
 
-        // Cập nhật isVerified và CCCD trong localStorage và state
+        // Cập nhật isVerified, CCCD và fullName trong localStorage và state
         if (account) {
           const updatedAccount = {
             ...account,
             isVerified: true,
             user: {
               ...account.user,
-              cccd: cccdInfo.id, // Set CCCD từ response
+              fullName: cccdInfo.name || account.user.fullName, // Set fullName từ CCCD
+              CCCD: cccdInfo.id, // Set CCCD từ response
             },
           };
           localStorage.setItem("account_info", JSON.stringify(updatedAccount));
           setAccount(updatedAccount);
 
-          // Cập nhật formData để hiển thị CCCD trên UI
+          // Cập nhật formData để hiển thị CCCD và fullName trên UI
           setFormData((prev) => ({
             ...prev,
+            fullName: cccdInfo.name || prev.fullName,
             cccd: cccdInfo.id,
           }));
         }
@@ -287,9 +432,17 @@ export default function ProfilePage() {
               </Avatar>
               <label
                 htmlFor="avatar-upload"
-                className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                className={`absolute inset-0 flex items-center justify-center bg-black/50 rounded-full transition-opacity cursor-pointer ${
+                  isUploadingAvatar
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-100"
+                }`}
               >
-                <Camera className="w-8 h-8 text-white" />
+                {isUploadingAvatar ? (
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-8 h-8 text-white" />
+                )}
               </label>
               <input
                 id="avatar-upload"
@@ -297,6 +450,7 @@ export default function ProfilePage() {
                 accept="image/*"
                 className="hidden"
                 onChange={handleAvatarChange}
+                disabled={isUploadingAvatar}
               />
             </div>
             <div className="text-center sm:text-left">
@@ -314,9 +468,19 @@ export default function ProfilePage() {
                 onClick={() =>
                   document.getElementById("avatar-upload")?.click()
                 }
+                disabled={isUploadingAvatar}
               >
-                <Camera className="w-4 h-4 mr-2" />
-                Thay đổi ảnh đại diện
+                {isUploadingAvatar ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Đang tải lên...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-4 h-4 mr-2" />
+                    Thay đổi ảnh đại diện
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -332,15 +496,13 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Full Name */}
             <div className="space-y-2">
-              <Label htmlFor="fullName">
-                Họ và tên <span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="fullName">Họ và tên</Label>
               <Input
                 id="fullName"
                 name="fullName"
                 placeholder="Nguyễn Văn A"
                 value={formData.fullName}
-                onChange={handleInputChange}
+                disabled
               />
             </div>
 
@@ -395,36 +557,31 @@ export default function ProfilePage() {
               </div>
               {!account?.isVerified && (
                 <div className="mt-2 space-y-3">
-                  {/* Face Image Upload */}
+                  {/* Face Image Camera Capture */}
                   <div>
-                    <label
-                      htmlFor="face-upload"
-                      className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
+                    <Button
+                      type="button"
+                      onClick={openCamera}
+                      disabled={isUploadingCCCD}
+                      className={`w-full ${
                         faceImage
-                          ? "bg-green-100 text-green-700 border-2 border-green-500"
+                          ? "bg-green-100 text-green-700 border-2 border-green-500 hover:bg-green-200"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
+                      variant="outline"
                     >
                       {faceImage ? (
                         <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          Đã chọn ảnh khuôn mặt
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          Đã chụp ảnh khuôn mặt
                         </>
                       ) : (
                         <>
-                          <Upload className="w-4 h-4" />
-                          Upload ảnh khuôn mặt
+                          <Video className="w-4 h-4 mr-2" />
+                          Chụp ảnh khuôn mặt bằng camera
                         </>
                       )}
-                    </label>
-                    <input
-                      id="face-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleFaceUpload}
-                      disabled={isUploadingCCCD}
-                    />
+                    </Button>
                   </div>
 
                   {/* CCCD Image Upload */}
@@ -579,6 +736,87 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Camera Dialog */}
+      <Dialog open={isCameraOpen} onOpenChange={closeCamera}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Chụp ảnh khuôn mặt</DialogTitle>
+            <DialogDescription>
+              Hãy đảm bảo khuôn mặt của bạn được chiếu sáng tốt và nằm trong
+              khung hình
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Video/Canvas Container */}
+            <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
+              {!capturedImage ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={capturedImage}
+                  alt="Captured"
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+
+            {/* Hidden canvas for capturing */}
+            <canvas ref={canvasRef} className="hidden" />
+
+            {/* Action Buttons */}
+            <DialogFooter className="flex-row gap-2 sm:gap-2">
+              {!capturedImage ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={closeCamera}
+                    className="flex-1 border-red-500 text-red-500"
+                  >
+                    Hủy
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={capturePhoto}
+                    className="flex-1 bg-[#DCBB87] hover:bg-[#B8935A]"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Chụp ảnh
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={retakePhoto}
+                    className="flex-1 text-primary"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    Chụp lại
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={confirmPhoto}
+                    className="flex-1 bg-[#DCBB87] hover:bg-[#B8935A]"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Xác nhận
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
