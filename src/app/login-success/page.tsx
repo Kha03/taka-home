@@ -29,37 +29,80 @@ function LoginSuccessContent() {
 
     const handleOAuthCallback = async () => {
       try {
-        const token = searchParams.get("token");
-        const authStatus = searchParams.get("status");
+        // Lấy data từ query params
+        const encodedData = searchParams.get("data");
 
-        if (!token) {
+        if (!encodedData) {
           setStatus("error");
-          setMessage("Không tìm thấy token xác thực");
+          setMessage("Không tìm thấy dữ liệu xác thực");
           return;
         }
 
-        // Decode JWT to get user info for display
-        try {
-          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-          setUserInfo({
-            name:
-              tokenPayload.fullName ||
-              tokenPayload.name ||
-              tokenPayload.email?.split("@")[0],
-            email: tokenPayload.email,
-          });
-        } catch (e) {
-          console.error("Failed to decode token for user info:", e);
+        // Decode base64 data
+        const decodedData = JSON.parse(
+          Buffer.from(decodeURIComponent(encodedData), "base64").toString()
+        );
+
+        console.log("Decoded OAuth data:", decodedData);
+
+        const { accessToken, refreshToken, account, accountStatus } = decodedData;
+
+        if (!accessToken || !account) {
+          setStatus("error");
+          setMessage("Dữ liệu xác thực không hợp lệ");
+          return;
         }
 
-        // Gọi function từ AuthContext để xử lý token
-        const result = await setAuthFromToken(token);
+        // Set user info for display
+        setUserInfo({
+          name: account.user.fullName || account.email?.split("@")[0],
+          email: account.email,
+        });
+
+        // Transform API account to local User format (giống như login bình thường)
+        const user = {
+          id: account.user.id,
+          email: account.email,
+          fullName: account.user.fullName,
+          avatarUrl: account.user.avatarUrl || "/assets/imgs/avatar.png",
+          status: account.user.status,
+          CCCD: account.user.CCCD || "",
+          roles: account.roles || [],
+        };
+
+        // Store tokens and user data (giống như trong auth-context.tsx login function)
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        
+        // Store full account info for profile and other pages (giữ nguyên cấu trúc như hiện tại)
+        localStorage.setItem("account_info", JSON.stringify(account));
+        
+        // Import và sử dụng setCookie để lưu vào cookies
+        const { setCookie } = await import("@/lib/utils/cookie-utils");
+        
+        setCookie("accessToken", accessToken, {
+          expires: 1, // 1 day
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+        });
+        
+        setCookie("refreshToken", refreshToken, {
+          expires: 7, // 7 days
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+        });
+
+        // Update auth state bằng cách gọi setAuthFromToken
+        const result = await setAuthFromToken(accessToken);
 
         if (result.success) {
           setStatus("success");
           setMessage(
             `Đăng nhập thành công! ${
-              authStatus === "new"
+              accountStatus === "new"
                 ? "Chào mừng bạn đến với TAKA Home!"
                 : "Chào mừng bạn trở lại!"
             }`
@@ -68,7 +111,7 @@ function LoginSuccessContent() {
           // Show success toast chỉ một lần
           toast.success(
             "Đăng nhập thành công!",
-            authStatus === "new"
+            accountStatus === "new"
               ? "Chào mừng bạn đến với TAKA Home!"
               : "Chào mừng bạn trở lại!"
           );
