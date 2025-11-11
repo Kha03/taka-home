@@ -174,30 +174,50 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // TODO: Call API to update profile
-      // await userService.updateProfile(formData);
+      // Validate phone number
+      if (!formData.phone || formData.phone.trim() === "") {
+        toast.error("Lỗi", "Số điện thoại không được để trống");
+        return;
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Validate phone format (10-11 digits)
+      if (!/^[0-9]{10,11}$/.test(formData.phone)) {
+        toast.error("Lỗi", "Số điện thoại phải có 10-11 chữ số");
+        return;
+      }
 
-      // Update localStorage
-      if (account) {
+      if (!account?.user?.id) {
+        toast.error("Lỗi", "Không tìm thấy thông tin người dùng");
+        return;
+      }
+
+      // Call API to update profile (only phone)
+      const response = await usersService.updateUser(account.user.id, {
+        phone: formData.phone,
+      });
+
+      if (response.code === 200 && response.data) {
+        // Update localStorage
         const updatedAccount = {
           ...account,
           user: {
             ...account.user,
-            fullName: formData.fullName,
-            phone: formData.phone,
-            avatarUrl: formData.avatarUrl || account.user.avatarUrl,
+            phone: response.data.phone,
           },
         };
         localStorage.setItem("account_info", JSON.stringify(updatedAccount));
         setAccount(updatedAccount);
-      }
 
-      toast.success("Thành công", "Cập nhật thông tin cá nhân thành công");
-    } catch {
-      toast.error("Lỗi", "Không thể cập nhật thông tin");
+        toast.success("Thành công", "Cập nhật số điện thoại thành công");
+      } else {
+        throw new Error(response.message || "Không thể cập nhật thông tin");
+      }
+    } catch (error) {
+      console.error("Update profile error:", error);
+      toast.error(
+        "Lỗi",
+        error instanceof Error ? error.message : "Không thể cập nhật thông tin"
+      );
     } finally {
       setIsSaving(false);
     }
@@ -474,15 +494,13 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Full Name */}
             <div className="space-y-2">
-              <Label htmlFor="fullName">
-                Họ và tên <span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="fullName">Họ và tên</Label>
               <Input
                 id="fullName"
                 name="fullName"
                 placeholder="Nguyễn Văn A"
                 value={formData.fullName}
-                onChange={handleInputChange}
+                disabled
               />
             </div>
 
