@@ -46,6 +46,8 @@ export default function ProfilePage() {
     avatarUrl: "",
   });
   const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [faceImage, setFaceImage] = useState<File | null>(null);
+  const [cccdImage, setCccdImage] = useState<File | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -158,44 +160,100 @@ export default function ProfilePage() {
       return;
     }
 
+    // Store CCCD image
+    setCccdImage(file);
+
+    // Reset input
+    e.target.value = "";
+  };
+
+  const handleFaceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Lỗi", "Kích thước ảnh không được vượt quá 10MB");
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Lỗi", "Vui lòng chọn file ảnh");
+      return;
+    }
+
+    // Store face image
+    setFaceImage(file);
+
+    // Reset input
+    e.target.value = "";
+  };
+
+  const handleVerifyIdentity = async () => {
+    if (!faceImage || !cccdImage) {
+      toast.error("Lỗi", "Vui lòng upload cả ảnh khuôn mặt và ảnh CCCD");
+      return;
+    }
+
     setIsUploadingCCCD(true);
     try {
-      // Gọi API recognize CCCD
-      const response = await authService.recognizeCCCD(file);
+      // Gọi API verify face with CCCD
+      const response = await authService.verifyFaceWithCCCD(
+        faceImage,
+        cccdImage
+      );
 
       if (response.code === 200 && response.data) {
-        const { id, name, dob, address } = response.data;
+        const { isMatch, similarity, cccdInfo } = response.data;
 
-        // Chỉ cập nhật isVerified trong localStorage và state
+        if (!isMatch) {
+          toast.error(
+            "Xác thực thất bại",
+            "Khuôn mặt không khớp với ảnh trên CCCD. Vui lòng thử lại."
+          );
+          return;
+        }
+
+        // Cập nhật isVerified và CCCD trong localStorage và state
         if (account) {
           const updatedAccount = {
             ...account,
             isVerified: true,
+            user: {
+              ...account.user,
+              cccd: cccdInfo.id, // Set CCCD từ response
+            },
           };
           localStorage.setItem("account_info", JSON.stringify(updatedAccount));
           setAccount(updatedAccount);
+
+          // Cập nhật formData để hiển thị CCCD trên UI
+          setFormData((prev) => ({
+            ...prev,
+            cccd: cccdInfo.id,
+          }));
         }
 
         // Hiển thị thông báo với thông tin nhận dạng được
-        toast.success(
-          "Xác thực CCCD thành công!",
-          `Thông tin nhận dạng:\n• Số CCCD: ${id}\n• Họ tên: ${name}\n• Ngày sinh: ${dob}\n• Địa chỉ: ${address}`
-        );
+        toast.success("Xác thực thành công!");
+
+        // Reset images after successful verification
+        setFaceImage(null);
+        setCccdImage(null);
       } else {
-        throw new Error(response.message || "Upload failed");
+        throw new Error(response.message || "Xác thực thất bại");
       }
     } catch (error) {
-      console.error("CCCD upload error:", error);
+      console.error("Identity verification error:", error);
       toast.error(
         "Lỗi",
         error instanceof Error
           ? error.message
-          : "Không thể xác thực CCCD. Vui lòng thử lại."
+          : "Không thể xác thực danh tính. Vui lòng thử lại."
       );
     } finally {
       setIsUploadingCCCD(false);
-      // Reset input
-      e.target.value = "";
     }
   };
 
@@ -336,37 +394,93 @@ export default function ProfilePage() {
                 />
               </div>
               {!account?.isVerified && (
-                <div className="mt-2">
-                  <label
-                    htmlFor="cccd-upload"
-                    className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
-                      isUploadingCCCD
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-[#DCBB87] text-white hover:bg-[#B8935A]"
-                    }`}
+                <div className="mt-2 space-y-3">
+                  {/* Face Image Upload */}
+                  <div>
+                    <label
+                      htmlFor="face-upload"
+                      className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
+                        faceImage
+                          ? "bg-green-100 text-green-700 border-2 border-green-500"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {faceImage ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          Đã chọn ảnh khuôn mặt
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload ảnh khuôn mặt
+                        </>
+                      )}
+                    </label>
+                    <input
+                      id="face-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFaceUpload}
+                      disabled={isUploadingCCCD}
+                    />
+                  </div>
+
+                  {/* CCCD Image Upload */}
+                  <div>
+                    <label
+                      htmlFor="cccd-upload"
+                      className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
+                        cccdImage
+                          ? "bg-green-100 text-green-700 border-2 border-green-500"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {cccdImage ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          Đã chọn ảnh CCCD
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          Upload ảnh CCCD
+                        </>
+                      )}
+                    </label>
+                    <input
+                      id="cccd-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleCCCDUpload}
+                      disabled={isUploadingCCCD}
+                    />
+                  </div>
+
+                  {/* Verify Button */}
+                  <Button
+                    onClick={handleVerifyIdentity}
+                    disabled={!faceImage || !cccdImage || isUploadingCCCD}
+                    className="w-full bg-[#DCBB87] hover:bg-[#B8935A] text-white"
                   >
                     {isUploadingCCCD ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Đang xử lý...
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Đang xác thực...
                       </>
                     ) : (
                       <>
-                        <Upload className="w-4 h-4" />
-                        Upload ảnh CCCD để xác thực
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Xác thực danh tính
                       </>
                     )}
-                  </label>
-                  <input
-                    id="cccd-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleCCCDUpload}
-                    disabled={isUploadingCCCD}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Upload ảnh mặt trước CCCD để xác thực tài khoản
+                  </Button>
+
+                  <p className="text-xs text-gray-500">
+                    Upload ảnh khuôn mặt và ảnh mặt trước CCCD để xác thực tài
+                    khoản
                   </p>
                 </div>
               )}

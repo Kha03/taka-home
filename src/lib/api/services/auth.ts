@@ -24,7 +24,7 @@ export class AuthService {
     // Tự động set token vào client nếu login thành công
     if (response.code === 200 && response.data?.accessToken) {
       apiClient.setAuthToken(response.data.accessToken);
-      
+
       // Lưu token vào localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", response.data.accessToken);
@@ -116,7 +116,10 @@ export class AuthService {
     token: string;
     newPassword: string;
   }): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post<{ message: string }>("/auth/reset-password-email", data);
+    return apiClient.post<{ message: string }>(
+      "/auth/reset-password-email",
+      data
+    );
   }
 
   /**
@@ -152,10 +155,10 @@ export class AuthService {
     // Cập nhật cả accessToken và refreshToken mới vào localStorage
     if (response.code === 200 && response.data?.accessToken) {
       apiClient.setAuthToken(response.data.accessToken);
-      
+
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", response.data.accessToken);
-        
+
         // Lưu account_info nếu API trả về
         if (response.data.account) {
           localStorage.setItem(
@@ -189,31 +192,47 @@ export class AuthService {
   }
 
   /**
-   * Upload ảnh CCCD để xác thực tài khoản
+   * Xác thực gương mặt với CCCD
    */
-  async recognizeCCCD(imageFile: File): Promise<ApiResponse<{
-    id: string;           // Số CCCD
-    name: string;         // Họ và tên
-    dob: string;          // Date of birth - Ngày sinh
-    sex: string;          // Giới tính
-    home: string;         // Quê quán
-    address: string;      // Địa chỉ thường trú
-    doe: string;          // Date of expiry - Ngày hết hạn
-    poi: string;          // Place of issue - Nơi cấp
-  }>> {
+  async verifyFaceWithCCCD(
+    faceImage: File,
+    cccdImage: File
+  ): Promise<
+    ApiResponse<{
+      isMatch: boolean;
+      similarity: number;
+      isBothImgIDCard: boolean;
+      cccdInfo: {
+        id: string; // Số CCCD
+        name: string; // Họ và tên
+        dob: string; // Date of birth - Ngày sinh
+        sex: string; // Giới tính
+        home: string; // Quê quán
+        address: string; // Địa chỉ thường trú
+        doe: string; // Date of expiry - Ngày hết hạn
+        poi: string; // Place of issue - Nơi cấp
+      };
+    }>
+  > {
     const formData = new FormData();
-    formData.append("image", imageFile);
+    formData.append("faceImage", faceImage);
+    formData.append("cccdImage", cccdImage);
 
     return apiClient.post<{
-      id: string;
-      name: string;
-      dob: string;
-      sex: string;
-      home: string;
-      address: string;
-      doe: string;
-      poi: string;
-    }>("/users/recognize-cccd", formData, {
+      isMatch: boolean;
+      similarity: number;
+      isBothImgIDCard: boolean;
+      cccdInfo: {
+        id: string;
+        name: string;
+        dob: string;
+        sex: string;
+        home: string;
+        address: string;
+        doe: string;
+        poi: string;
+      };
+    }>("/users/verify-face-with-cccd", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
