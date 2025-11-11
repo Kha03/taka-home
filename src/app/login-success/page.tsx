@@ -38,11 +38,23 @@ function LoginSuccessContent() {
           return;
         }
 
-        // Decode base64 data
+        // Decode base64 data with proper UTF-8 handling
         let decodedData;
         try {
-          const decoded = Buffer.from(decodeURIComponent(encodedData), "base64").toString();
-          decodedData = JSON.parse(decoded);
+          // Decode URI component first
+          const uriDecoded = decodeURIComponent(encodedData);
+          
+          // Decode base64 to UTF-8 string properly
+          const base64Decoded = atob(uriDecoded);
+          
+          // Convert to UTF-8 by handling each character code
+          const utf8String = decodeURIComponent(
+            base64Decoded.split('').map(function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')
+          );
+          
+          decodedData = JSON.parse(utf8String);
           console.log("Decoded OAuth data:", decodedData);
         } catch (decodeError) {
           console.error("Failed to decode data:", decodeError);
