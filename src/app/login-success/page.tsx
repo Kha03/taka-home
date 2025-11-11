@@ -44,17 +44,16 @@ function LoginSuccessContent() {
           // Decode URI component first
           const uriDecoded = decodeURIComponent(encodedData);
           
-          // Decode base64 to UTF-8 string properly
-          const base64Decoded = atob(uriDecoded);
+          // Use TextDecoder for proper UTF-8 decoding
+          const binaryString = atob(uriDecoded);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
           
-          // Convert to UTF-8 by handling each character code
-          const utf8String = decodeURIComponent(
-            base64Decoded.split('').map(function(c) {
-              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join('')
-          );
-          
+          const utf8String = new TextDecoder('utf-8').decode(bytes);
           decodedData = JSON.parse(utf8String);
+          
           console.log("Decoded OAuth data:", decodedData);
         } catch (decodeError) {
           console.error("Failed to decode data:", decodeError);
