@@ -372,20 +372,8 @@ export default function NewPropertyPage() {
           );
         }
 
-        const successMessage = response.message || "Đăng tin thành công!";
-
-        // Show success confirmation with toast
-        toast.confirm(
-          successMessage,
-          "Bạn có muốn xem danh sách bất động sản của mình không?",
-          () => {
-            router.push("/my-properties");
-          },
-          () => {
-            // Reset form for creating another property
-            methods.reset();
-          }
-        );
+        // Redirect to pending approval page
+        router.push("/my-properties/pending-approval");
       } else {
         const errorMessage = response?.message || "Có lỗi xảy ra khi đăng tin";
         setSubmitError(errorMessage);
@@ -478,7 +466,7 @@ export default function NewPropertyPage() {
                             htmlFor="kind-apart"
                             className="text-[#4F4F4F]"
                           >
-                            Nhà ở/Chung cư
+                            Chung cư
                           </Label>
                         </div>
                         <div className="flex items-center gap-2">

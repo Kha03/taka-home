@@ -2,11 +2,10 @@
 
 import React from "react";
 
-export function Stepper({ step }: { step: 1 | 2 | 3 }) {
+export function Stepper({ step }: { step: 1 | 2 }) {
   const items = [
     { id: 1, label: "Nhập thông tin BĐS" },
-    { id: 2, label: "Tạo hợp đồng" },
-    { id: 3, label: "Chờ xét duyệt" },
+    { id: 2, label: "Chờ xét duyệt" },
   ] as const;
 
   return (
