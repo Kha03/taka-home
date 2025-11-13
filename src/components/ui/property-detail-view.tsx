@@ -122,6 +122,7 @@ export function PropertyDetailView({
         unit: apartmentProperty.unit || "",
         floor: apartmentProperty.floor || 0,
         block: apartmentProperty.block || "",
+        propertyType: apartmentProperty.type as "APARTMENT" | "HOUSING",
       };
     }
     return undefined;

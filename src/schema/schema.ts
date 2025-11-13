@@ -31,7 +31,7 @@ export const VALIDATION_MESSAGES = {
   },
 };
 
-export const ListingKind = z.enum(["APARTMENT", "BOARDING"], {
+export const ListingKind = z.enum(["APARTMENT", "BOARDING", "HOUSING"], {
   error: BASE_REQUIRED,
 });
 
@@ -98,8 +98,8 @@ export const FormSchema = z
   })
   .refine(
     (data) => {
-      // If APARTMENT, area and price are required
-      if (data.kind === "APARTMENT") {
+      // If APARTMENT or HOUSING, area and price are required
+      if (data.kind === "APARTMENT" || data.kind === "HOUSING") {
         return (
           data.area !== undefined &&
           data.area > 0 &&

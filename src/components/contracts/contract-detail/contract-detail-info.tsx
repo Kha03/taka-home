@@ -39,7 +39,11 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
           <div>
             <p className="text-sm text-muted-foreground mb-1">Loại hình</p>
             <p className="font-semibold text-foreground">
-              {property.type === "APARTMENT" ? "Chung cư" : "Nhà trọ"}
+              {property.type === "APARTMENT"
+                ? "Chung cư"
+                : property.type === "HOUSING"
+                ? "Nhà riêng"
+                : "Nhà trọ"}
             </p>
           </div>
           <div>

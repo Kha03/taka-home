@@ -38,9 +38,15 @@ export function RentalRequestStatus({
           : "bg-[#00AE26]/20"
       )}
     >
-      <Avatar className="w-9 h-9 ml-2 flex items-center justify-center">
-        <AvatarImage src={user.avatar} alt={user.name} />
-        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+      <Avatar className="w-9 h-9 ml-2 flex items-center justify-center rounded-full overflow-hidden">
+        <AvatarImage
+          className="w-full h-full object-cover"
+          src={user.avatar}
+          alt={user.name}
+        />
+        <AvatarFallback className="text-sm">
+          {user.name.charAt(0)}
+        </AvatarFallback>
       </Avatar>
 
       <div className="flex-1">

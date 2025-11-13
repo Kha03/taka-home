@@ -8,7 +8,7 @@ import { CreateInvoiceDialog } from "@/components/contracts/create-invoice-dialo
 interface ContractLiquidationAlertProps {
   contractId: string;
   contractEndDate: string;
-  propertyType: "APARTMENT" | "BOARDING";
+  propertyType: "APARTMENT" | "BOARDING" | "HOUSING";
   userRole: string;
   onInvoiceCreated?: () => void;
 }

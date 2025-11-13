@@ -15,8 +15,9 @@ import { PropertyTypeEnum } from "@/lib/api/types";
 
 // Mapping PropertyTypeEnum sang tiếng Việt
 const propertyTypeLabels: Record<PropertyTypeEnum, string> = {
-  [PropertyTypeEnum.APARTMENT]: "Nhà ở/Chung cư",
+  [PropertyTypeEnum.APARTMENT]: "Chung cư",
   [PropertyTypeEnum.BOARDING]: "Nhà trọ",
+  [PropertyTypeEnum.HOUSING]: "Nhà riêng",
 };
 
 export function HeroSearch() {
@@ -78,6 +79,14 @@ export function HeroSearch() {
                 }}
               >
                 {propertyTypeLabels[PropertyTypeEnum.APARTMENT]}
+              </CommandItem>
+              <CommandItem
+                onSelect={() => {
+                  setSelectedType(PropertyTypeEnum.HOUSING);
+                  setCategoryOpen(false);
+                }}
+              >
+                {propertyTypeLabels[PropertyTypeEnum.HOUSING]}
               </CommandItem>
               <CommandItem
                 onSelect={() => {

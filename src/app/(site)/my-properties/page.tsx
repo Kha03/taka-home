@@ -90,11 +90,13 @@ export default function MyPropertiesPage() {
   }, []);
 
   // Convert API Property to PropertyRoomProps for Room View
-  // For APARTMENT: hiển thị toàn bộ căn hộ như 1 property
+  // For APARTMENT & HOUSING: hiển thị toàn bộ căn hộ/nhà như 1 property
   // For BOARDING: mỗi room sẽ là 1 PropertyRoom riêng với thông tin từ nested roomType
   const convertToPropertyRooms = (property: Property): PropertyRoomProps[] => {
-    // Nếu là APARTMENT, trả về 1 item duy nhất
-    if (property.type === "APARTMENT") {
+    // Nếu là APARTMENT hoặc HOUSING, trả về 1 item duy nhất
+    if (property.type === "APARTMENT" || property.type === "HOUSING") {
+      const category = property.type === "APARTMENT" ? "Chung cư" : "Nhà riêng";
+
       return [
         {
           id: property.id,
@@ -108,7 +110,7 @@ export default function MyPropertiesPage() {
           area: property.area || 0,
           address: `${property.address}, ${property.ward}, ${property.province}`,
           furnitureStatus: property.furnishing || "Không rõ",
-          category: "Chung cư",
+          category: category,
           price: property.price || 0,
           currency: "VND",
         },
@@ -258,40 +260,61 @@ export default function MyPropertiesPage() {
   };
 
   const propertyTabs = useMemo(() => {
-    // Đếm tổng số phòng cho BOARDING, tổng số properties cho APARTMENT
     let totalAll = 0;
     let totalRented = 0;
     let totalEmpty = 0;
 
-    properties.forEach((property) => {
-      if (property.type === "BOARDING" && property.rooms) {
-        // Đếm từng room trực tiếp từ property.rooms
-        const roomsCount = property.rooms.length;
-        const rentedRooms = property.rooms.filter(
-          (room) => !room.isVisible
-        ).length;
-        const emptyRooms = roomsCount - rentedRooms;
+    if (activeView === "room") {
+      // Xem theo phòng: đếm tổng số phòng cho BOARDING, tổng số properties cho APARTMENT & HOUSING
+      properties.forEach((property) => {
+        if (property.type === "BOARDING" && property.rooms) {
+          // Đếm từng room trực tiếp từ property.rooms
+          const roomsCount = property.rooms.length;
+          const rentedRooms = property.rooms.filter(
+            (room) => !room.isVisible
+          ).length;
+          const emptyRooms = roomsCount - rentedRooms;
 
-        totalAll += roomsCount;
-        totalRented += rentedRooms;
-        totalEmpty += emptyRooms;
-      } else {
-        // APARTMENT: đếm property
-        totalAll += 1;
-        if (!property.isVisible) {
-          totalRented += 1;
+          totalAll += roomsCount;
+          totalRented += rentedRooms;
+          totalEmpty += emptyRooms;
         } else {
-          totalEmpty += 1;
+          // APARTMENT & HOUSING: đếm property
+          totalAll += 1;
+          if (!property.isVisible) {
+            totalRented += 1;
+          } else {
+            totalEmpty += 1;
+          }
         }
-      }
-    });
+      });
+    } else {
+      // Xem theo căn: chỉ đếm các BĐS loại BOARDING
+      const boardingProperties = properties.filter(
+        (p) => p.type === "BOARDING"
+      );
+
+      boardingProperties.forEach((property) => {
+        if (property.rooms) {
+          const roomsCount = property.rooms.length;
+          const rentedRooms = property.rooms.filter(
+            (room) => !room.isVisible
+          ).length;
+          const emptyRooms = roomsCount - rentedRooms;
+
+          totalAll += roomsCount;
+          totalRented += rentedRooms;
+          totalEmpty += emptyRooms;
+        }
+      });
+    }
 
     return [
       { id: "all", label: "Tất cả", count: totalAll },
       { id: "rented", label: "Đang cho thuê", count: totalRented },
       { id: "empty", label: "Trống", count: totalEmpty },
     ];
-  }, [properties]);
+  }, [properties, activeView]);
 
   const PAGE_SIZE = 4;
 

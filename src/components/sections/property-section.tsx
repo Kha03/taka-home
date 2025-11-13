@@ -1,10 +1,11 @@
 "use client";
 
 import { PropertyCard } from "@/components/ui/property-card";
-import { AlignRight, ArrowRight, LucideIcon } from "lucide-react";
+import { ArrowRight, LucideIcon } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface Property {
+  id?: string;
   title: string;
   price: string;
   location: string;
@@ -42,7 +43,8 @@ export function PropertySection({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {properties.map((property, index) => (
             <PropertyCard
-              key={index}
+              key={property.id || index}
+              id={property.id}
               title={property.title}
               price={property.price}
               location={property.location}

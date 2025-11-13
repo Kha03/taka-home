@@ -175,7 +175,11 @@ export function PropertyDetailModal({
       } border-none shadow-sm hover:bg-opacity-100 pointer-events-none`}
     >
       <Building2 className="w-3 h-3 mr-1" />
-      {isBoarding ? "Nhà trọ" : "Chung cư"}
+      {isBoarding
+        ? "Nhà trọ"
+        : property.type === "HOUSING"
+        ? "Nhà riêng"
+        : "Chung cư"}
     </Badge>
   );
 
