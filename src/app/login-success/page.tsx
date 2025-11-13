@@ -41,16 +41,16 @@ function LoginSuccessContent() {
         // Decode base64 data with proper UTF-8 handling
         let decodedData;
         try {
-          // Decode URI component first
-          const uriDecoded = decodeURIComponent(encodedData);
+          // Decode base64 to binary string
+          const binaryString = atob(encodedData);
           
-          // Use TextDecoder for proper UTF-8 decoding
-          const binaryString = atob(uriDecoded);
+          // Convert binary string to Uint8Array
           const bytes = new Uint8Array(binaryString.length);
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
           
+          // Decode UTF-8 bytes to string
           const utf8String = new TextDecoder('utf-8').decode(bytes);
           decodedData = JSON.parse(utf8String);
           
