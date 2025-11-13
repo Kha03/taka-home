@@ -6,7 +6,11 @@ export const metadata: Metadata = {
   description: "Đăng nhập vào tài khoản Taka Home của bạn",
 };
 
-export default function SignInPage() {
+type SignInPageProps = {
+  searchParams: { error?: string };
+};
+
+export default function SignInPage({ searchParams }: SignInPageProps) {
   return (
     <>
       <div className="mb-6 space-y-2 text-center">
@@ -15,7 +19,7 @@ export default function SignInPage() {
         </h1>
         <p className="text-muted-foreground">Vui lòng đăng nhập để tiếp tục</p>
       </div>
-      <SignInForm />
+      <SignInForm errorFromUrl={searchParams.error} />
     </>
   );
 }

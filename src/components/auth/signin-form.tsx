@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,43 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { handleGoogleAuth, isGoogleOAuthConfigured } from "@/lib/auth/google-oauth";
 
-export function SignInForm() {
+type SignInFormProps = {
+  errorFromUrl?: string;
+};
+
+const getErrorMessage = (errorCode?: string): string => {
+  switch (errorCode) {
+    case "no_code":
+      return "Bạn đã hủy đăng nhập bằng Google. Vui lòng thử lại hoặc đăng nhập bằng email.";
+    case "access_denied":
+      return "Bạn đã từ chối cấp quyền truy cập. Vui lòng thử lại và chấp nhận để tiếp tục.";
+    case "invalid_token":
+      return "Phiên đăng nhập không hợp lệ. Vui lòng thử lại.";
+    case "server_error":
+      return "Đã xảy ra lỗi từ phía máy chủ. Vui lòng thử lại sau.";
+    default:
+      return errorCode ? "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại." : "";
+  }
+};
+
+export function SignInForm({ errorFromUrl }: SignInFormProps) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const { login, isLoading } = useAuth();
+
+  // Handle error from URL params (from Google OAuth callback)
+  useEffect(() => {
+    if (errorFromUrl) {
+      const errorMessage = getErrorMessage(errorFromUrl);
+      setError(errorMessage);
+      
+      // Clear the error from URL after displaying it
+      if (window.history.replaceState) {
+        window.history.replaceState(null, "", "/signin");
+      }
+    }
+  }, [errorFromUrl]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
