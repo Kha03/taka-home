@@ -65,7 +65,12 @@ export const bookingToContract = (booking: Booking): ContractVM => {
     address: `${property.address}, ${property.ward}, ${property.province}`,
     propertyCode,
     propertyType: furnishing,
-    category: property.type === "APARTMENT" ? "Chung cư" : "Nhà trọ",
+    category:
+      property.type === "APARTMENT"
+        ? "Chung cư"
+        : property.type === "HOUSING"
+        ? "Nhà riêng"
+        : "Nhà trọ",
     price,
     deposit,
     status: contractStatus,

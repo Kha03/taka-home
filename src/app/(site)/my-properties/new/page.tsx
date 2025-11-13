@@ -170,6 +170,8 @@ export default function NewPropertyPage() {
       type:
         formData.kind === "APARTMENT"
           ? PropertyTypeEnum.APARTMENT
+          : formData.kind === "HOUSING"
+          ? PropertyTypeEnum.HOUSING
           : PropertyTypeEnum.BOARDING,
       province: formData.province,
       ward: formData.ward,
@@ -179,12 +181,16 @@ export default function NewPropertyPage() {
       isVisible: true,
     };
 
-    // For apartment - add apartment-specific fields
-    if (formData.kind === "APARTMENT") {
+    // For apartment & housing - add fields
+    if (formData.kind === "APARTMENT" || formData.kind === "HOUSING") {
       return {
         ...baseData,
         unit: formData.unit?.trim() || undefined,
-        block: formData.block?.trim() || undefined,
+        // Block chỉ áp dụng cho APARTMENT, không có cho HOUSING
+        block:
+          formData.kind === "APARTMENT"
+            ? formData.block?.trim() || undefined
+            : undefined,
         floor: formData.floor ? Number(formData.floor) : undefined,
         bedrooms: toSafeNumber(formData.bedrooms),
         bathrooms: toSafeNumber(formData.bathrooms),
@@ -274,8 +280,11 @@ export default function NewPropertyPage() {
 
         // Upload images after property creation
         try {
-          if (values.kind === "APARTMENT" && createdProperty?.id) {
-            // For APARTMENT: upload to property.id
+          if (
+            (values.kind === "APARTMENT" || values.kind === "HOUSING") &&
+            createdProperty?.id
+          ) {
+            // For APARTMENT & HOUSING: upload to property.id
             const heroImageUrl = values.gallery?.[0];
             const imageUrls = values.gallery?.slice(1) || [];
 
@@ -295,7 +304,7 @@ export default function NewPropertyPage() {
 
               await propertyService.uploadPropertyImages(
                 createdProperty.id,
-                "APARTMENT",
+                values.kind === "HOUSING" ? "HOUSING" : "APARTMENT",
                 heroImageFile || undefined,
                 validImageFiles
               );
@@ -473,6 +482,15 @@ export default function NewPropertyPage() {
                           </Label>
                         </div>
                         <div className="flex items-center gap-2">
+                          <RadioGroupItem value="HOUSING" id="kind-housing" />
+                          <Label
+                            htmlFor="kind-housing"
+                            className="text-[#4F4F4F]"
+                          >
+                            Nhà riêng
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
                           <RadioGroupItem value="BOARDING" id="kind-board" />
                           <Label
                             htmlFor="kind-board"
@@ -510,6 +528,17 @@ export default function NewPropertyPage() {
                           <Field name="unit" placeholder="Mã căn" />
                           <Field name="block" placeholder="Block/tháp" />
                           <Field name="floor" placeholder="Tầng số" />
+                        </div>
+                      </>
+                    ) : kind === "HOUSING" ? (
+                      <>
+                        <Label className="mb-2 text-[#4F4F4F] flex items-center gap-1 font-semibold">
+                          Thông tin nhà
+                          <CircleAlert className="h-4 w-4 text-[#FA0000]" />
+                        </Label>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <Field name="unit" placeholder="Mã nhà" />
+                          <Field name="floor" placeholder="Số tầng" />
                         </div>
                       </>
                     ) : (
@@ -695,7 +724,7 @@ export default function NewPropertyPage() {
                 <hr className="border-border" />
 
                 {/* Thông tin chi tiết + Diện tích & Giá */}
-                {kind === "APARTMENT" ? (
+                {kind === "APARTMENT" || kind === "HOUSING" ? (
                   <div className="grid gap-6 lg:grid-cols-3">
                     <div className="space-y-4 lg:col-span-2">
                       <div className="flex items-center gap-2.5 mb-2">

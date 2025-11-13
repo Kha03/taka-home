@@ -90,11 +90,13 @@ export default function MyPropertiesPage() {
   }, []);
 
   // Convert API Property to PropertyRoomProps for Room View
-  // For APARTMENT: hiển thị toàn bộ căn hộ như 1 property
+  // For APARTMENT & HOUSING: hiển thị toàn bộ căn hộ/nhà như 1 property
   // For BOARDING: mỗi room sẽ là 1 PropertyRoom riêng với thông tin từ nested roomType
   const convertToPropertyRooms = (property: Property): PropertyRoomProps[] => {
-    // Nếu là APARTMENT, trả về 1 item duy nhất
-    if (property.type === "APARTMENT") {
+    // Nếu là APARTMENT hoặc HOUSING, trả về 1 item duy nhất
+    if (property.type === "APARTMENT" || property.type === "HOUSING") {
+      const category = property.type === "APARTMENT" ? "Chung cư" : "Nhà riêng";
+
       return [
         {
           id: property.id,
@@ -108,7 +110,7 @@ export default function MyPropertiesPage() {
           area: property.area || 0,
           address: `${property.address}, ${property.ward}, ${property.province}`,
           furnitureStatus: property.furnishing || "Không rõ",
-          category: "Chung cư",
+          category: category,
           price: property.price || 0,
           currency: "VND",
         },
@@ -258,7 +260,7 @@ export default function MyPropertiesPage() {
   };
 
   const propertyTabs = useMemo(() => {
-    // Đếm tổng số phòng cho BOARDING, tổng số properties cho APARTMENT
+    // Đếm tổng số phòng cho BOARDING, tổng số properties cho APARTMENT & HOUSING
     let totalAll = 0;
     let totalRented = 0;
     let totalEmpty = 0;
@@ -276,7 +278,7 @@ export default function MyPropertiesPage() {
         totalRented += rentedRooms;
         totalEmpty += emptyRooms;
       } else {
-        // APARTMENT: đếm property
+        // APARTMENT & HOUSING: đếm property
         totalAll += 1;
         if (!property.isVisible) {
           totalRented += 1;

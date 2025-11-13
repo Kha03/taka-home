@@ -115,7 +115,11 @@ export function PropertyApprovalModal({
       } border-none shadow-sm hover:bg-opacity-100 pointer-events-none`}
     >
       <Building2 className="w-3 h-3 mr-1" />
-      {isBoarding ? "Phòng trọ" : "Chung cư"}
+      {isBoarding
+        ? "Phòng trọ"
+        : property && "type" in property && property.type === "HOUSING"
+        ? "Nhà riêng"
+        : "Chung cư"}
     </Badge>
   );
 

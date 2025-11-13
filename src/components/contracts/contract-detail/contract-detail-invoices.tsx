@@ -29,7 +29,7 @@ interface ContractDetailInvoicesProps {
   contractId: string;
   bookingStatus: string;
   userRole?: string;
-  propertyType?: "APARTMENT" | "BOARDING";
+  propertyType?: "APARTMENT" | "BOARDING" | "HOUSING";
 }
 
 export function ContractDetailInvoices({

@@ -261,7 +261,12 @@ export default function RentalRequestsPage() {
       area: area,
       address: `${property.address}, ${property.ward}, ${property.province}`,
       furnitureStatus: furnishing,
-      category: property.type === "APARTMENT" ? "Chung cư" : "Nhà trọ",
+      category:
+        property.type === "APARTMENT"
+          ? "Chung cư"
+          : property.type === "HOUSING"
+          ? "Nhà riêng"
+          : "Nhà trọ",
       price: price,
       currency: "VND",
       roomType: roomTypeName, // Loại phòng (VD: "Loại 1", "Loại 2") cho phòng trọ

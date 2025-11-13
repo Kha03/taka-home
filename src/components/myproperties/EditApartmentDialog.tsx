@@ -195,21 +195,25 @@ export function EditApartmentDialog({
 
             {/* Block & Unit */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="block">Toà nhà</Label>
-                <Input
-                  id="block"
-                  value={formData.block}
-                  onChange={(e) =>
-                    setFormData({ ...formData, block: e.target.value })
-                  }
-                  placeholder="VD: Block A"
-                />
-              </div>
+              {/* Chỉ hiển thị Block cho APARTMENT */}
+              {property?.type === "APARTMENT" && (
+                <div className="space-y-2">
+                  <Label htmlFor="block">Toà nhà</Label>
+                  <Input
+                    id="block"
+                    value={formData.block}
+                    onChange={(e) =>
+                      setFormData({ ...formData, block: e.target.value })
+                    }
+                    placeholder="VD: Block A"
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="unit">
-                  Mã căn hộ <span className="text-red-500">*</span>
+                  {property?.type === "HOUSING" ? "Mã nhà" : "Mã căn hộ"}{" "}
+                  <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="unit"
@@ -217,7 +221,9 @@ export function EditApartmentDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, unit: e.target.value })
                   }
-                  placeholder="VD: A-1001"
+                  placeholder={
+                    property?.type === "HOUSING" ? "VD: NH-001" : "VD: A-1001"
+                  }
                   required
                 />
               </div>

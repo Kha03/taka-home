@@ -19,6 +19,8 @@ function SearchContent() {
 
     if (type === "APARTMENT") {
       parts.push("Nhà ở/Chung cư");
+    } else if (type === "HOUSING") {
+      parts.push("Nhà riêng");
     } else if (type === "BOARDING") {
       parts.push("Phòng trọ");
     } else {

@@ -28,6 +28,7 @@ interface UnitForApartment {
   unit: string;
   floor?: number;
   block?: string;
+  propertyType?: "APARTMENT" | "HOUSING"; // Thêm để phân biệt loại property
 }
 interface PropertySidebarProps {
   landlord: LandlordAndTenant;
@@ -371,22 +372,29 @@ export function PropertySidebar({
               <div className="space-y-3">
                 <div className="bg-muted/50 rounded-lg p-4 border border-border">
                   <p className="text-sm text-muted-foreground mb-2">
-                    Thông tin căn hộ:
+                    {unitForApartment.propertyType === "HOUSING"
+                      ? "Thông tin nhà:"
+                      : "Thông tin căn hộ:"}
                   </p>
                   <div className="space-y-1">
-                    {unitForApartment.block && (
-                      <p className="text-base font-semibold text-primary">
-                        Tòa nhà: {unitForApartment.block}
-                      </p>
-                    )}
+                    {unitForApartment.block &&
+                      unitForApartment.propertyType !== "HOUSING" && (
+                        <p className="text-base font-semibold text-primary">
+                          Tòa nhà: {unitForApartment.block}
+                        </p>
+                      )}
                     {unitForApartment.floor && (
                       <p className="text-base font-semibold text-primary">
-                        Tầng: {unitForApartment.floor}
+                        {unitForApartment.propertyType === "HOUSING"
+                          ? `Số tầng: ${unitForApartment.floor}`
+                          : `Tầng: ${unitForApartment.floor}`}
                       </p>
                     )}
                     {unitForApartment.unit && (
                       <p className="text-base font-semibold text-primary">
-                        Căn hộ: {unitForApartment.unit}
+                        {unitForApartment.propertyType === "HOUSING"
+                          ? `Mã nhà: ${unitForApartment.unit}`
+                          : `Căn hộ: ${unitForApartment.unit}`}
                       </p>
                     )}
                   </div>

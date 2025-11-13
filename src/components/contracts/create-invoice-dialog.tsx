@@ -37,7 +37,7 @@ interface CreateInvoiceDialogProps {
   isOpen: boolean;
   onClose: () => void;
   contractId: string;
-  propertyType: "APARTMENT" | "BOARDING";
+  propertyType: "APARTMENT" | "BOARDING" | "HOUSING";
   onSuccess?: () => void;
   isLiquidation?: boolean;
 }
@@ -327,7 +327,7 @@ export function CreateInvoiceDialog({
   };
 
   const handleSubmit = async () => {
-    if (propertyType === "APARTMENT") {
+    if (propertyType === "APARTMENT" || propertyType === "HOUSING") {
       if (!validateApartmentForm()) return;
 
       setIsSubmitting(true);
@@ -410,6 +410,8 @@ export function CreateInvoiceDialog({
               ? "Tạo hóa đơn thanh lý"
               : propertyType === "APARTMENT"
               ? "Tạo hóa đơn căn hộ"
+              : propertyType === "HOUSING"
+              ? "Tạo hóa đơn nhà riêng"
               : "Tạo hóa đơn phòng trọ"}
           </DialogTitle>
         </DialogHeader>
@@ -446,8 +448,8 @@ export function CreateInvoiceDialog({
             )}
           </div>
 
-          {/* APARTMENT: Upload invoice */}
-          {propertyType === "APARTMENT" && (
+          {/* APARTMENT & HOUSING: Upload invoice */}
+          {(propertyType === "APARTMENT" || propertyType === "HOUSING") && (
             <div className="space-y-4">
               <div>
                 <Label>

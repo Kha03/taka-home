@@ -130,7 +130,9 @@ export default function ContractDetailPage() {
           <ContractLiquidationAlert
             contractId={booking.contract.id}
             contractEndDate={booking.contract.endDate}
-            propertyType={booking.property.type as "APARTMENT" | "BOARDING"}
+            propertyType={
+              booking.property.type as "APARTMENT" | "BOARDING" | "HOUSING"
+            }
             userRole={userRole}
             onInvoiceCreated={handleRefresh}
           />
@@ -149,7 +151,9 @@ export default function ContractDetailPage() {
             contractId={booking.contract.id}
             bookingStatus={booking.status}
             userRole={userRole}
-            propertyType={booking.property.type as "APARTMENT" | "BOARDING"}
+            propertyType={
+              booking.property.type as "APARTMENT" | "BOARDING" | "HOUSING"
+            }
           />
         )}
 
