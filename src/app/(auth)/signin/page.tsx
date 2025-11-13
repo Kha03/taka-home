@@ -7,10 +7,12 @@ export const metadata: Metadata = {
 };
 
 type SignInPageProps = {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 };
 
-export default function SignInPage({ searchParams }: SignInPageProps) {
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const params = await searchParams;
+
   return (
     <>
       <div className="mb-6 space-y-2 text-center">
@@ -19,7 +21,7 @@ export default function SignInPage({ searchParams }: SignInPageProps) {
         </h1>
         <p className="text-muted-foreground">Vui lòng đăng nhập để tiếp tục</p>
       </div>
-      <SignInForm errorFromUrl={searchParams.error} />
+      <SignInForm errorFromUrl={params.error} />
     </>
   );
 }
