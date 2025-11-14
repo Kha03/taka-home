@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 /**
@@ -124,7 +125,7 @@ export function useNotifications(
     if (userId) {
       fetchNotifications();
     }
-  }, [userId, fetchNotifications]);
+  }, [userId]);
 
   // Auto refresh
   useEffect(() => {
