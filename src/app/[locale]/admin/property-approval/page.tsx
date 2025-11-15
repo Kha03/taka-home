@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Check, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // Components
 import StatusTab from "@/components/ui/status-tab";
