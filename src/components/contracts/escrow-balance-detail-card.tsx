@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Wallet, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ export function EscrowBalanceDetailCard({
   userRole,
   onRefresh,
 }: EscrowBalanceDetailCardProps) {
+  const t = useTranslations("contract");
   const [balance, setBalance] = useState<EscrowBalanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -103,7 +105,7 @@ export function EscrowBalanceDetailCard({
         <CardContent className="py-6">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Wallet className="w-4 h-4 animate-pulse" />
-            <span>Đang tải số dư cọc...</span>
+            <span>{t("loadingEscrowBalance")}</span>
           </div>
         </CardContent>
       </Card>

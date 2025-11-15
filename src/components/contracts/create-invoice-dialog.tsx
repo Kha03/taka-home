@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -61,6 +62,8 @@ export function CreateInvoiceDialog({
   onSuccess,
   isLiquidation = false,
 }: CreateInvoiceDialogProps) {
+  const t = useTranslations("contract");
+
   // Common states
   const [dueDate, setDueDate] = useState("");
   const [billingPeriod, setBillingPeriod] = useState("");
@@ -281,7 +284,7 @@ export function CreateInvoiceDialog({
     }
     for (const item of invoiceItems) {
       if (!item.description.trim()) {
-        toast.error("Vui lòng điền mô tả cho tất cả các mục");
+        toast.error(t("fillAllDescriptions"));
         return false;
       }
       if (item.amount <= 0) {

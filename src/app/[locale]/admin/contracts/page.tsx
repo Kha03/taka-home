@@ -1,0 +1,34 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { AdminHeader } from "@/components/admin";
+import { FileText } from "lucide-react";
+
+export default function ContractsPage() {
+  const t = useTranslations("contract");
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
+      <AdminHeader
+        title={t("contractManagement")}
+        description={t("contractManagementDescription")}
+      />
+
+      <div className="p-6">
+        <div className="flex items-center justify-center h-[400px] border rounded-lg">
+          <div className="text-center space-y-4">
+            <FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+            <div>
+              <h3 className="font-semibold text-lg">
+                {t("featureInDevelopment")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {t("contractManagementComingSoon")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

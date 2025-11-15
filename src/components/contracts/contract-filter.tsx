@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Filter, Search } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -25,12 +26,13 @@ export default function ContractFilter({
   paymentStatus,
   setPaymentStatus,
 }: ContractFilterProps) {
+  const t = useTranslations("contract");
   return (
     <div className="flex gap-3 items-center">
       <div className="flex-1 relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary w-4 h-4" />
         <Input
-          placeholder="Tìm kiếm tên bất động sản, tên người thuê"
+          placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="
@@ -46,25 +48,25 @@ export default function ContractFilter({
       </div>
       <Select value={category} onValueChange={setCategory}>
         <SelectTrigger className="bg-primary-foreground text-secondary font-bold border-secondary rounded-full px-6 h-11 shadow-secondary min-w-[160px]  data-[placeholder]:text-secondary">
-          <SelectValue placeholder="Danh mục" />
+          <SelectValue placeholder={t("category")} />
         </SelectTrigger>
         <SelectContent className="bg-primary-foreground">
-          <SelectItem value="all">Tất cả</SelectItem>
-          <SelectItem value="nha-dat">Nhà đất</SelectItem>
-          <SelectItem value="can-ho">Căn hộ</SelectItem>
-          <SelectItem value="dat-nen">Đất nền</SelectItem>
-          <SelectItem value="nha-rieng">Nhà riêng</SelectItem>
+          <SelectItem value="all">{t("all")}</SelectItem>
+          <SelectItem value="nha-dat">{t("realEstate")}</SelectItem>
+          <SelectItem value="can-ho">{t("apartment")}</SelectItem>
+          <SelectItem value="dat-nen">{t("land")}</SelectItem>
+          <SelectItem value="nha-rieng">{t("house")}</SelectItem>
         </SelectContent>
       </Select>
       <Select value={paymentStatus} onValueChange={setPaymentStatus}>
         <SelectTrigger className="bg-primary-foreground text-secondary font-bold border-secondary rounded-full px-6 h-11 shadow-secondary min-w-[200px] data-[placeholder]:text-secondary">
-          <SelectValue placeholder="Trạng thái thanh toán" />
+          <SelectValue placeholder={t("paymentStatusLabel")} />
         </SelectTrigger>
         <SelectContent className="bg-primary-foreground">
-          <SelectItem value="all">Tất cả</SelectItem>
-          <SelectItem value="paid">Đã thanh toán</SelectItem>
-          <SelectItem value="pending">Chờ thanh toán</SelectItem>
-          <SelectItem value="overdue">Quá hạn</SelectItem>
+          <SelectItem value="all">{t("all")}</SelectItem>
+          <SelectItem value="paid">{t("paid")}</SelectItem>
+          <SelectItem value="pending">{t("status.pending")}</SelectItem>
+          <SelectItem value="overdue">{t("overdue")}</SelectItem>
         </SelectContent>
       </Select>
       <Button
@@ -72,7 +74,7 @@ export default function ContractFilter({
 "
       >
         <Filter className="w-4 h-4" />
-        Lọc
+        {t("filter")}
       </Button>
     </div>
   );

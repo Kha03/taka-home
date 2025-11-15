@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,8 @@ export function ContractExtensionStatus({
   userRole,
   requiredDeposit,
 }: ContractExtensionStatusProps) {
+  const t = useTranslations("contract");
+  const tCommon = useTranslations("common");
   const [extensions, setExtensions] = useState<ContractExtension[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -133,55 +136,55 @@ export function ContractExtensionStatus({
         };
       case "AWAITING_SIGNATURES":
         return {
-          label: "Chờ ký",
+          label: t("pendingSignature"),
           color:
             "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
           icon: <FileSignature className="w-4 h-4" />,
         };
       case "LANDLORD_SIGNED":
         return {
-          label: "Chủ nhà đã ký",
+          label: t("landlordSigned"),
           color:
             "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
           icon: <CheckCircle2 className="w-4 h-4" />,
         };
       case "AWAITING_ESCROW":
         return {
-          label: "Chờ cọc",
+          label: t("waitingDeposit"),
           color:
             "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
           icon: <Wallet className="w-4 h-4" />,
         };
       case "ESCROW_FUNDED_T":
         return {
-          label: "Người thuê đã cọc",
+          label: t("tenantDeposited"),
           color:
             "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400",
           icon: <CheckCircle2 className="w-4 h-4" />,
         };
       case "ESCROW_FUNDED_L":
         return {
-          label: "Chủ nhà đã cọc",
+          label: t("landlordDeposited"),
           color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400",
           icon: <CheckCircle2 className="w-4 h-4" />,
         };
 
       case "ACTIVE":
         return {
-          label: "Đã kích hoạt",
+          label: t("activated"),
           color:
             "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
           icon: <CheckCircle2 className="w-4 h-4" />,
         };
       case "REJECTED":
         return {
-          label: "Đã từ chối",
+          label: t("rejected"),
           color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
           icon: <XCircle className="w-4 h-4" />,
         };
       case "CANCELLED":
         return {
-          label: "Đã hủy",
+          label: t("cancelled"),
           color:
             "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
           icon: <XCircle className="w-4 h-4" />,
@@ -364,7 +367,7 @@ export function ContractExtensionStatus({
     return (
       <Button variant="outline" disabled className="w-full">
         <Clock className="w-4 h-4 mr-2 animate-pulse" />
-        Đang tải...
+        {t("loading")}
       </Button>
     );
   }
@@ -385,10 +388,10 @@ export function ContractExtensionStatus({
         className="w-full text-primary border-blue-300 hover:bg-blue-50"
       >
         <History className="w-4 h-4 mr-2" />
-        Xem yêu cầu gia hạn ({extensions.length})
+        {t("viewExtensionRequests")} ({extensions.length})
         {pendingCount > 0 && (
           <Badge className="ml-2 bg-orange-500 text-white">
-            {pendingCount} chờ xử lý
+            {pendingCount} {t("pending").toLowerCase()}
           </Badge>
         )}
       </Button>
@@ -397,7 +400,7 @@ export function ContractExtensionStatus({
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
-              Danh sách yêu cầu gia hạn ({extensions.length})
+              {t("extensionRequestsList")} ({extensions.length})
             </DialogTitle>
           </DialogHeader>
 

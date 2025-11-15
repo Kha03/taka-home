@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 import { PropertySection } from "./property-section";
 import { useEffect, useState } from "react";
@@ -7,6 +8,8 @@ import { propertyService } from "@/lib/api/services/property";
 import type { Property } from "@/lib/api/types";
 
 export function FeaturedProperties() {
+  const t = useTranslations("sections");
+  const tCommon = useTranslations("common");
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,11 +73,11 @@ export function FeaturedProperties() {
               <Star className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-xl font-bold text-primary">
-              Bất động sản nổi bật
+              {t("featuredProperties")}
             </h2>
           </div>
           <div className="text-center py-8 text-gray-500">
-            Đang tải dữ liệu...
+            {tCommon("loading")}
           </div>
         </div>
       </section>
@@ -83,7 +86,7 @@ export function FeaturedProperties() {
 
   return (
     <PropertySection
-      title="Bất động sản nổi bật"
+      title={t("featuredProperties")}
       icon={Star}
       properties={convertedProperties}
     />

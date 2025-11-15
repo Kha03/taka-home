@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Phone, Star, Send, MessageCircleMore } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -70,6 +71,7 @@ export function PropertySidebar({
   });
   const [isLoadingStats, setIsLoadingStats] = useState(false);
 
+  const t = useTranslations("propertyDetail");
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
@@ -105,10 +107,7 @@ export function PropertySidebar({
   const handleStartChat = async () => {
     // Kiểm tra đăng nhập
     if (!isAuthenticated || !user) {
-      toast.error(
-        "Vui lòng đăng nhập",
-        "Bạn cần đăng nhập để chat với chủ nhà."
-      );
+      toast.error(t("loginRequired"), t("loginToChat"));
       router.push(
         `/signin?from=${encodeURIComponent(window.location.pathname)}`
       );
@@ -117,7 +116,7 @@ export function PropertySidebar({
 
     // Không cho phép chat với chính mình
     if (user.id === landlord.id) {
-      toast.error("Không thể chat", "Bạn không thể chat với chính mình.");
+      toast.error(t("cannotSendRequest"), t("cannotChatSelf"));
       return;
     }
 
@@ -131,16 +130,16 @@ export function PropertySidebar({
         // Lấy chatroom từ response
         const chatroom = response.data;
 
-        toast.success("Thành công", "Đã tạo phòng chat. Đang chuyển hướng...");
+        toast.success(t("success"), t("chatCreated"));
 
         // Chuyển đến trang chat với chatroomId
         router.push(`/chat?roomId=${chatroom.id}`);
       } else {
-        toast.error("Lỗi", response.message || "Không thể tạo phòng chat.");
+        toast.error(t("error"), response.message || t("cannotCreateChat"));
       }
     } catch (error) {
       console.error("Error creating chat:", error);
-      toast.error("Lỗi", "Có lỗi xảy ra khi tạo phòng chat. Vui lòng thử lại.");
+      toast.error(t("error"), t("chatError"));
     } finally {
       setIsCreatingChat(false);
     }
@@ -149,10 +148,7 @@ export function PropertySidebar({
   const handleCreateBooking = async () => {
     // Kiểm tra đăng nhập
     if (!isAuthenticated || !user) {
-      toast.error(
-        "Vui lòng đăng nhập",
-        "Bạn cần đăng nhập để gửi yêu cầu thuê."
-      );
+      toast.error(t("loginRequired"), t("loginToRent"));
       router.push(
         `/signin?from=${encodeURIComponent(window.location.pathname)}`
       );
@@ -161,20 +157,14 @@ export function PropertySidebar({
 
     // Không cho phép tự thuê nhà của mình
     if (user.id === landlord.id) {
-      toast.error(
-        "Không thể gửi yêu cầu",
-        "Bạn không thể thuê bất động sản của chính mình."
-      );
+      toast.error(t("cannotSendRequest"), t("cannotRentOwnProperty"));
       return;
     }
 
     // Kiểm tra chọn phòng cho boarding
     if (propertyType === "boarding") {
       if (!selectedUnit) {
-        toast.warning(
-          "Vui lòng chọn phòng",
-          "Bạn cần chọn phòng trước khi gửi yêu cầu thuê."
-        );
+        toast.warning(t("pleaseSelectRoom"), t("selectRoomBeforeRequest"));
         return;
       }
     }
@@ -193,7 +183,7 @@ export function PropertySidebar({
         const roomId = selectedRoom?.id;
 
         if (!roomId) {
-          toast.error("Lỗi", "Không tìm thấy thông tin phòng.");
+          toast.error(t("error"), t("roomNotFound"));
           return;
         }
 
@@ -207,10 +197,7 @@ export function PropertySidebar({
       const response = await bookingService.createBooking(bookingData);
 
       if ((response.code === 201 || response.code === 200) && response.data) {
-        toast.success(
-          "Thành công",
-          "Yêu cầu thuê đã được gửi. Vui lòng chờ chủ nhà xác nhận."
-        );
+        toast.success(t("success"), t("requestSentSuccess"));
 
         // Reset selected unit
         setSelectedUnit("");
@@ -218,14 +205,11 @@ export function PropertySidebar({
         // Optional: Chuyển hướng đến trang rental requests
         // router.push("/rental-requests");
       } else {
-        toast.error("Lỗi", response.message || "Không thể gửi yêu cầu thuê.");
+        toast.error(t("error"), response.message || t("cannotSendRequest"));
       }
     } catch (error) {
       console.error("Error creating booking:", error);
-      toast.error(
-        "Lỗi",
-        "Có lỗi xảy ra khi gửi yêu cầu thuê. Vui lòng thử lại."
-      );
+      toast.error(t("error"), t("errorSendingRequest"));
     } finally {
       setIsCreatingBooking(false);
     }
@@ -290,7 +274,7 @@ export function PropertySidebar({
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-sm text-muted-foreground">
-                    Đang hoạt động
+                    {t("online")}
                   </span>
                 </div>
               </div>
@@ -301,14 +285,16 @@ export function PropertySidebar({
               disabled={isCreatingChat}
             >
               <MessageCircleMore className="h-4 w-4" />
-              {isCreatingChat ? "Đang tạo..." : "Chat ngay"}
+              {isCreatingChat ? t("creating") : t("chatNow")}
             </Button>
           </div>
           <div className="flex items-center gap-2 mb-5 ml-14">
             <div className="bg-secondary w-5 h-5 flex items-center justify-center rounded-full">
               <Phone className="h-3 w-3 text-primary-foreground" />
             </div>
-            <span className="text-sm">Số điện thoại: {landlord.phone}</span>
+            <span className="text-sm">
+              {t("phoneNumber")}: {landlord.phone}
+            </span>
           </div>
 
           <div className="grid grid-cols-3 gap-4 border-dashed p-5 border rounded-[12px] border-[#ccc]">
@@ -323,7 +309,7 @@ export function PropertySidebar({
                 )}
                 <img src={"/assets/icons/house-icon.svg"} alt="Property Icon" />
               </div>
-              <div className="text-xs text-primary">Bất động sản</div>
+              <div className="text-xs text-primary">{t("properties")}</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
@@ -335,11 +321,11 @@ export function PropertySidebar({
                   </span>
                 )}
                 <img
-                  src={"/assets/icons/contract-icon.svg"}
+                  src="/assets/icons/contract-icon.svg"
                   alt="Contract Icon"
                 />
               </div>
-              <div className="text-xs text-primary">Hợp đồng</div>
+              <div className="text-xs text-primary">{t("contracts")}</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
@@ -350,9 +336,9 @@ export function PropertySidebar({
                     {landlordStats.yearsOfParticipation}
                   </span>
                 )}
-                <img src={"/assets/icons/calendar-icon.svg"} alt="Year Icon" />
+                <img src="/assets/icons/calendar-icon.svg" alt="Year Icon" />
               </div>
-              <div className="text-xs text-primary">Năm tham gia</div>
+              <div className="text-xs text-primary">{t("yearsActive")}</div>
             </div>
           </div>
         </CardContent>
@@ -362,9 +348,9 @@ export function PropertySidebar({
           {/* Rental Inquiry */}
           <div className="space-y-3 text-center">
             <h4 className="font-bold text-lg text-primary">
-              Gửi yêu cầu thuê bất động sản này?
+              {t("sendRentalRequest")}
               <span className="text-sm font-normal text-muted-foreground block">
-                Chọn phòng
+                {t("selectRoom")}
               </span>
             </h4>
             {unitForApartment ? (
@@ -373,28 +359,28 @@ export function PropertySidebar({
                 <div className="bg-muted/50 rounded-lg p-4 border border-border">
                   <p className="text-sm text-muted-foreground mb-2">
                     {unitForApartment.propertyType === "HOUSING"
-                      ? "Thông tin nhà:"
-                      : "Thông tin căn hộ:"}
+                      ? t("housingInfo")
+                      : t("apartmentInfo")}
                   </p>
                   <div className="space-y-1">
                     {unitForApartment.block &&
                       unitForApartment.propertyType !== "HOUSING" && (
                         <p className="text-base font-semibold text-primary">
-                          Tòa nhà: {unitForApartment.block}
+                          {t("building")}: {unitForApartment.block}
                         </p>
                       )}
                     {unitForApartment.floor && (
                       <p className="text-base font-semibold text-primary">
                         {unitForApartment.propertyType === "HOUSING"
-                          ? `Số tầng: ${unitForApartment.floor}`
-                          : `Tầng: ${unitForApartment.floor}`}
+                          ? `${t("floors")}: ${unitForApartment.floor}`
+                          : `${t("floor")}: ${unitForApartment.floor}`}
                       </p>
                     )}
                     {unitForApartment.unit && (
                       <p className="text-base font-semibold text-primary">
                         {unitForApartment.propertyType === "HOUSING"
-                          ? `Mã nhà: ${unitForApartment.unit}`
-                          : `Căn hộ: ${unitForApartment.unit}`}
+                          ? `${t("houseCode")}: ${unitForApartment.unit}`
+                          : `${t("apartment")}: ${unitForApartment.unit}`}
                       </p>
                     )}
                   </div>
@@ -424,14 +410,14 @@ export function PropertySidebar({
               disabled={isCreatingBooking || isRented}
             >
               <Send className="h-4 w-4 mr-2" />
-              {isCreatingBooking ? "Đang gửi..." : "Yêu cầu thuê"}
+              {isCreatingBooking ? t("sending") : t("rentalRequest")}
             </Button>
 
             {/* Thông báo khi đang cho thuê */}
             {isRented && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
                 <p className="text-sm text-yellow-700 font-medium">
-                  Đang cho thuê, hãy quay lại sau
+                  {t("currentlyRented")}
                 </p>
               </div>
             )}
@@ -443,7 +429,7 @@ export function PropertySidebar({
       <Card className="bg-primary-foreground p-5">
         <CardContent className="p-0">
           <p className="font-semibold text-primary mb-4 text-center">
-            Đánh giá từ người thuê (12)
+            {t("reviewsFrom")} (12)
           </p>
 
           <div className="flex items-center gap-2 mb-3 justify-center">
@@ -468,7 +454,7 @@ export function PropertySidebar({
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <Textarea
-              placeholder="Viết đánh giá của bạn ..."
+              placeholder={t("writeReview")}
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
               className="flex-1"

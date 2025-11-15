@@ -1,10 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
+
 import Image from "next/image";
 import { Dancing_Script } from "next/font/google";
 import { Phone, Mail, Printer } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const dancing = Dancing_Script({ subsets: ["latin"] });
 export default function Footer() {
+  const t = useTranslations("footer");
   return (
     <footer className="w-full bg-[#FFEED3] border-t">
       <div className="py-12 px-6 max-w-7xl mx-auto">
@@ -50,7 +54,7 @@ export default function Footer() {
           {/* Liên kết */}
           <div className="lg:col-span-3">
             <h4 className="font-bold text-lg text-primary mb-4 border-l-4 border-accent pl-3">
-              Liên kết
+              {t("links")}
             </h4>
             <ul className="space-y-3">
               <li>
@@ -90,7 +94,7 @@ export default function Footer() {
                   href="#"
                   className="text-gray-600 hover:text-accent transition-colors flex items-center"
                 >
-                  • Chính sách
+                  • {t("policies")}
                 </a>
               </li>
             </ul>
@@ -99,7 +103,7 @@ export default function Footer() {
           {/* Liên hệ */}
           <div className="lg:col-span-3">
             <h4 className="font-bold text-lg text-primary mb-4 border-l-4 border-orange-400 pl-3">
-              Liên hệ
+              {t("contact")}
             </h4>
             <div className="space-y-3">
               <div className="flex items-center">

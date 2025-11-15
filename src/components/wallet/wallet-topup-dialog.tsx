@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { Wallet, RefreshCw, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,6 +35,7 @@ export function WalletTopupDialog({
   onOpenChange,
   onSuccess,
 }: WalletTopupDialogProps) {
+  const t = useTranslations("wallet");
   const [topupAmount, setTopupAmount] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -67,17 +69,17 @@ export function WalletTopupDialog({
 
     // Validation
     if (!amount || amount <= 0) {
-      toast.error("Lỗi", "Vui lòng nhập số tiền hợp lệ");
+      toast.error(t("error"), t("enterValidAmount"));
       return;
     }
 
     if (amount < 10000) {
-      toast.error("Lỗi", "Số tiền nạp tối thiểu là 10,000 VND");
+      toast.error(t("error"), t("minimumAmount"));
       return;
     }
 
     if (amount > 50000000) {
-      toast.error("Lỗi", "Số tiền nạp tối đa là 50,000,000 VND");
+      toast.error(t("error"), t("maximumAmount"));
       return;
     }
 
@@ -121,9 +123,9 @@ export function WalletTopupDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Nạp tiền vào ví</DialogTitle>
+          <DialogTitle>{t("topupTitle")}</DialogTitle>
           <DialogDescription className="flex flex-col items-center">
-            Nhập số tiền bạn muốn nạp vào ví.
+            {t("topupDescription")}
             <Image
               src="/assets/logos/VNPAY.svg"
               alt="VNPAY Logo"
@@ -137,22 +139,20 @@ export function WalletTopupDialog({
         <div className="space-y-4">
           {/* Input số tiền */}
           <div className="space-y-2">
-            <Label htmlFor="amount">Số tiền (VND)</Label>
+            <Label htmlFor="amount">{t("amount")} (VND)</Label>
             <Input
               id="amount"
-              placeholder="Nhập số tiền"
+              placeholder={t("enterAmount")}
               value={formatInputCurrency(topupAmount)}
               onChange={(e) => handleAmountChange(e.target.value)}
               className="text-lg font-semibold"
             />
-            <p className="text-xs text-gray-500">
-              Tối thiểu: 10,000 VND - Tối đa: 50,000,000 VND
-            </p>
+            <p className="text-xs text-gray-500">{t("amountRange")}</p>
           </div>
 
           {/* Các mức tiền gợi ý */}
           <div className="space-y-2">
-            <Label>Chọn nhanh</Label>
+            <Label>{t("quickSelect")}</Label>
             <div className="grid grid-cols-3 gap-2">
               {suggestedAmounts.map((amount) => (
                 <Button
@@ -178,9 +178,7 @@ export function WalletTopupDialog({
           {/* Thông tin thanh toán */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-800">
-              <strong>Lưu ý:</strong> Bạn sẽ được chuyển đến cổng thanh toán
-              VNPAY để hoàn tất giao dịch. Số tiền sẽ được cập nhật vào ví sau
-              khi thanh toán thành công.
+              <strong>{t("note")}:</strong> {t("paymentNote")}
             </p>
           </div>
         </div>
@@ -192,7 +190,7 @@ export function WalletTopupDialog({
             disabled={isProcessing}
             className="text-red-500 border-red-500"
           >
-            Hủy
+            {t("cancel")}
           </Button>
           <Button
             onClick={handleTopup}
@@ -202,12 +200,12 @@ export function WalletTopupDialog({
             {isProcessing ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                Đang xử lý...
+                {t("processing")}
               </>
             ) : (
               <>
                 <Wallet className="mr-2 h-4 w-4" />
-                Nạp tiền
+                {t("topup")}
               </>
             )}
           </Button>

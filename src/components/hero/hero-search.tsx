@@ -10,17 +10,28 @@ import {
 } from "@/components/ui/popover";
 import { useVietnameseAddress } from "@/hooks/use-vietnamese-address";
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { PropertyTypeEnum } from "@/lib/api/types";
-
-// Mapping PropertyTypeEnum sang tiếng Việt
-const propertyTypeLabels: Record<PropertyTypeEnum, string> = {
-  [PropertyTypeEnum.APARTMENT]: "Chung cư",
-  [PropertyTypeEnum.BOARDING]: "Nhà trọ",
-  [PropertyTypeEnum.HOUSING]: "Nhà riêng",
-};
+import { useTranslations } from "next-intl";
 
 export function HeroSearch() {
+  const t = useTranslations("property");
+  const tHero = useTranslations("hero");
+  const common = useTranslations("common");
+
+  // Mapping PropertyTypeEnum with translations
+  const getPropertyTypeLabel = (type: PropertyTypeEnum): string => {
+    switch (type) {
+      case PropertyTypeEnum.APARTMENT:
+        return t("apartment");
+      case PropertyTypeEnum.BOARDING:
+        return "Nhà trọ"; // Add to translations later
+      case PropertyTypeEnum.HOUSING:
+        return t("house");
+      default:
+        return type;
+    }
+  };
   const { provinces } = useVietnameseAddress();
   const router = useRouter();
   const [selectedProvince, setSelectedProvince] = useState<string>("");
@@ -47,7 +58,7 @@ export function HeroSearch() {
       </div>
       <Input
         name="kw"
-        placeholder="Tìm kiếm bất động sản..."
+        placeholder={tHero("searchPlaceholder")}
         className="placeholder:text-primary placeholder:font-bold text-primary font-medium"
         style={{ boxShadow: "none", border: "none" }}
       />
@@ -58,7 +69,7 @@ export function HeroSearch() {
             variant="ghost"
             className=" w-70 rounded-none  border-l border-gray-200 bg-transparent  pl-4  py-2 hover:bg-primary/5 font-bold text-primary"
           >
-            {selectedType ? propertyTypeLabels[selectedType] : "Danh mục"}
+            {selectedType ? getPropertyTypeLabel(selectedType) : t("type")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0">
@@ -78,7 +89,7 @@ export function HeroSearch() {
                   setCategoryOpen(false);
                 }}
               >
-                {propertyTypeLabels[PropertyTypeEnum.APARTMENT]}
+                {getPropertyTypeLabel(PropertyTypeEnum.APARTMENT)}
               </CommandItem>
               <CommandItem
                 onSelect={() => {
@@ -86,7 +97,7 @@ export function HeroSearch() {
                   setCategoryOpen(false);
                 }}
               >
-                {propertyTypeLabels[PropertyTypeEnum.HOUSING]}
+                {getPropertyTypeLabel(PropertyTypeEnum.HOUSING)}
               </CommandItem>
               <CommandItem
                 onSelect={() => {
@@ -94,7 +105,7 @@ export function HeroSearch() {
                   setCategoryOpen(false);
                 }}
               >
-                {propertyTypeLabels[PropertyTypeEnum.BOARDING]}
+                {getPropertyTypeLabel(PropertyTypeEnum.BOARDING)}
               </CommandItem>
             </CommandList>
           </Command>
@@ -108,7 +119,7 @@ export function HeroSearch() {
             variant="ghost"
             className="w-70 rounded-none  border-l border-gray-200 bg-transparent pl-4  py-2 hover:bg-primary/5 font-bold text-primary"
           >
-            {selectedProvince || "Toàn quốc"}
+            {selectedProvince || t("location")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0">
@@ -120,7 +131,7 @@ export function HeroSearch() {
                   setLocationOpen(false);
                 }}
               >
-                Toàn quốc
+                {t("location")}
               </CommandItem>
               {provinces.map((province) => (
                 <CommandItem
@@ -139,7 +150,7 @@ export function HeroSearch() {
       </Popover>
       <Button type="submit" className="bg-accent" size={"post"}>
         <Search />
-        Tìm kiếm
+        {common("search")}
       </Button>
     </form>
   );

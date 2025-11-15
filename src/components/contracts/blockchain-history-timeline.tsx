@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { BlockchainContractHistoryItem } from "@/types/contracts";
 import {
   Card,
@@ -25,7 +26,8 @@ interface BlockchainHistoryTimelineProps {
   history: BlockchainContractHistoryItem[];
 }
 
-const getStatusBadge = (status: string) => {
+const StatusBadge = ({ status }: { status: string }) => {
+  const t = useTranslations("contract");
   const statusMap: Record<
     string,
     {
@@ -33,12 +35,12 @@ const getStatusBadge = (status: string) => {
       variant: "default" | "secondary" | "destructive" | "outline";
     }
   > = {
-    PENDING_SIGNATURE: { label: "Chờ ký", variant: "outline" },
-    WAIT_DEPOSIT: { label: "Chờ cọc", variant: "secondary" },
-    WAIT_FIRST_PAYMENT: { label: "Chờ thanh toán", variant: "secondary" },
-    ACTIVE: { label: "Đang hoạt động", variant: "default" },
-    EXPIRED: { label: "Hết hạn", variant: "destructive" },
-    CANCELLED: { label: "Đã hủy", variant: "destructive" },
+    PENDING_SIGNATURE: { label: t("pendingSignature"), variant: "outline" },
+    WAIT_DEPOSIT: { label: t("waitingDeposit"), variant: "secondary" },
+    WAIT_FIRST_PAYMENT: { label: t("waitingPayment"), variant: "secondary" },
+    ACTIVE: { label: t("activeStatus"), variant: "default" },
+    EXPIRED: { label: t("expired"), variant: "destructive" },
+    CANCELLED: { label: t("cancelled"), variant: "destructive" },
   };
 
   const config = statusMap[status] || {
@@ -66,6 +68,8 @@ const formatDateTime = (dateString: string) => {
 export function BlockchainHistoryTimeline({
   history,
 }: BlockchainHistoryTimelineProps) {
+  const t = useTranslations("contract");
+
   // Sort by timestamp descending (newest first)
   const sortedHistory = [...history].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -89,9 +93,9 @@ export function BlockchainHistoryTimeline({
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-lg">
-                      Giao dịch #{sortedHistory.length - index}
+                      {t("transaction")} #{sortedHistory.length - index}
                     </CardTitle>
-                    {isLatest && <Badge variant="default">Mới nhất</Badge>}
+                    {isLatest && <Badge variant="default">{t("newest")}</Badge>}
                   </div>
                   <CardDescription className="space-y-1">
                     <div className="flex items-center gap-2 text-xs">
@@ -113,13 +117,13 @@ export function BlockchainHistoryTimeline({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <FileSignature className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Mã HĐ:</span>
+                    <span className="font-medium">{t("contractCode")}:</span>
                     <span className="font-mono">{value.contractId}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
                     <Coins className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Tiền thuê:</span>
+                    <span className="font-medium">{t("monthlyRent")}:</span>
                     <span className="font-semibold text-primary">
                       {formatCurrency(value.rentAmount)}
                     </span>
@@ -127,7 +131,7 @@ export function BlockchainHistoryTimeline({
 
                   <div className="flex items-center gap-2 text-sm">
                     <Coins className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Tiền cọc:</span>
+                    <span className="font-medium">{t("deposit")}:</span>
                     <span>{formatCurrency(value.depositAmount)}</span>
                   </div>
                 </div>
@@ -135,20 +139,20 @@ export function BlockchainHistoryTimeline({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Bắt đầu:</span>
+                    <span className="font-medium">{t("startingDate")}:</span>
                     <span>{formatDateTime(value.startDate)}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Kết thúc:</span>
+                    <span className="font-medium">{t("endingDate")}:</span>
                     <span>{formatDateTime(value.endDate)}</span>
                   </div>
 
                   {value.activatedAt && (
                     <div className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span className="font-medium">Kích hoạt:</span>
+                      <span className="font-medium">{t("activated")}:</span>
                       <span>{formatDateTime(value.activatedAt)}</span>
                     </div>
                   )}
@@ -157,7 +161,9 @@ export function BlockchainHistoryTimeline({
 
               {/* Signatures */}
               <div className="space-y-2">
-                <h4 className="font-medium text-sm">Chữ ký điện tử:</h4>
+                <h4 className="font-medium text-sm">
+                  {t("electronicSignature")}:
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div className="p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-2 mb-1">
@@ -166,18 +172,21 @@ export function BlockchainHistoryTimeline({
                       ) : (
                         <Clock className="h-4 w-4 text-yellow-600" />
                       )}
-                      <span className="font-medium text-sm">Chủ nhà</span>
+                      <span className="font-medium text-sm">
+                        {t("landlordLabel")}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {value.signatures.landlord.status === "SIGNED"
-                        ? `Đã ký: ${formatDateTime(
+                        ? `${t("signed")}: ${formatDateTime(
                             value.signatures.landlord.signedAt
                           )}`
-                        : "Chưa ký"}
+                        : t("notSigned")}
                     </p>
                     {value.landlordSignedHash && (
                       <p className="text-xs font-mono text-muted-foreground mt-1 truncate">
-                        Hash: {value.landlordSignedHash.substring(0, 16)}...
+                        {t("hash")}: {value.landlordSignedHash.substring(0, 16)}
+                        ...
                       </p>
                     )}
                   </div>
@@ -190,14 +199,16 @@ export function BlockchainHistoryTimeline({
                         ) : (
                           <Clock className="h-4 w-4 text-yellow-600" />
                         )}
-                        <span className="font-medium text-sm">Người thuê</span>
+                        <span className="font-medium text-sm">
+                          {t("tenantLabel")}
+                        </span>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {value.signatures.tenant.status === "SIGNED"
-                          ? `Đã ký: ${formatDateTime(
+                          ? `${t("signed")}: ${formatDateTime(
                               value.signatures.tenant.signedAt
                             )}`
-                          : "Chưa ký"}
+                          : t("notSigned")}
                       </p>
                     </div>
                   )}
@@ -209,7 +220,7 @@ export function BlockchainHistoryTimeline({
                     <div className="flex items-center gap-2 mb-1">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       <span className="font-medium text-sm">
-                        Hash Hoàn Thành
+                        {t("completedHash")}
                       </span>
                     </div>
                     <p className="text-xs font-mono break-all text-muted-foreground">
@@ -222,13 +233,15 @@ export function BlockchainHistoryTimeline({
               {/* Deposit Status */}
               {(value.deposit.landlord || value.deposit.tenant) && (
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Trạng thái cọc:</h4>
+                  <h4 className="font-medium text-sm">{t("depositStatus")}:</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {value.deposit.landlord && (
                       <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                         <div className="flex items-center gap-2 mb-1">
                           <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          <span className="font-medium text-sm">Chủ nhà</span>
+                          <span className="font-medium text-sm">
+                            {t("landlordLabel")}
+                          </span>
                         </div>
                         <p className="text-xs">
                           {formatCurrency(value.deposit.landlord.amount)}
@@ -244,7 +257,7 @@ export function BlockchainHistoryTimeline({
                         <div className="flex items-center gap-2 mb-1">
                           <CheckCircle2 className="h-4 w-4 text-green-600" />
                           <span className="font-medium text-sm">
-                            Người thuê
+                            {t("tenantLabel")}
                           </span>
                         </div>
                         <p className="text-xs">
@@ -262,7 +275,7 @@ export function BlockchainHistoryTimeline({
               {/* First Payment */}
               {value.firstPayment && (
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Thanh toán đầu tiên:</h4>
+                  <h4 className="font-medium text-sm">{t("firstPayment")}:</h4>
                   <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                     <div className="flex items-center gap-2 mb-1">
                       <CheckCircle2 className="h-4 w-4 text-blue-600" />
@@ -283,7 +296,7 @@ export function BlockchainHistoryTimeline({
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     <h4 className="font-medium text-sm">
-                      Gia hạn ({value.extensions.length})
+                      {t("extensions")} ({value.extensions.length})
                     </h4>
                   </div>
                   <div className="space-y-2">
@@ -294,32 +307,32 @@ export function BlockchainHistoryTimeline({
                       >
                         <div className="flex items-center gap-2 mb-2">
                           <Badge variant="outline">
-                            Lần {ext.extensionNumber}
+                            {t("extensionNumber")} {ext.extensionNumber}
                           </Badge>
                           <Badge>{ext.status}</Badge>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
                             <span className="text-muted-foreground">
-                              Ngày cũ:
+                              {t("previousDate")}:
                             </span>
                             <p>{formatDateTime(ext.previousEndDate)}</p>
                           </div>
                           <div>
                             <span className="text-muted-foreground">
-                              Ngày mới:
+                              {t("newDate")}:
                             </span>
                             <p>{formatDateTime(ext.newEndDate)}</p>
                           </div>
                           <div>
                             <span className="text-muted-foreground">
-                              Giá cũ:
+                              {t("previousPrice")}:
                             </span>
                             <p>{formatCurrency(ext.previousRentAmount)}</p>
                           </div>
                           <div>
                             <span className="text-muted-foreground">
-                              Giá mới:
+                              {t("newPrice")}:
                             </span>
                             <p className="font-semibold text-primary">
                               {formatCurrency(ext.newRentAmount)}
@@ -331,7 +344,7 @@ export function BlockchainHistoryTimeline({
                             <div className="flex items-center gap-2 mb-1">
                               <FileSignature className="h-3 w-3 text-muted-foreground" />
                               <span className="text-xs font-medium text-muted-foreground">
-                                Hash Hợp Đồng Gia Hạn
+                                {t("extensionAgreementHash")}
                               </span>
                             </div>
                             <p className="text-xs font-mono break-all text-muted-foreground">
@@ -341,7 +354,7 @@ export function BlockchainHistoryTimeline({
                         )}
                         {ext.notes && (
                           <p className="text-xs text-muted-foreground mt-2">
-                            Ghi chú: {ext.notes}
+                            {t("notes")}: {ext.notes}
                           </p>
                         )}
                       </div>
@@ -356,7 +369,7 @@ export function BlockchainHistoryTimeline({
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4 text-red-600" />
                     <h4 className="font-medium text-sm">
-                      Phạt ({value.penalties.length})
+                      {t("penalties")} ({value.penalties.length})
                     </h4>
                   </div>
                   <div className="space-y-2">

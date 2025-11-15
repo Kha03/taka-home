@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/ui/property-card";
 import { PropertyListCard } from "@/components/ui/property-list-card";
@@ -50,6 +51,8 @@ interface PropertyListResponse {
 }
 
 export function SearchResults() {
+  const t = useTranslations("search");
+  const tCommon = useTranslations("common");
   const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -174,7 +177,7 @@ export function SearchResults() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <p className="font-bold text-primary-foreground px-3 py-2 bg-secondary w-33 text-center rounded-[30px]">
-              Tất cả ({loading ? "..." : pagination.totalItems})
+              {t("results")} ({loading ? "..." : pagination.totalItems})
             </p>
           </div>
 
@@ -184,18 +187,24 @@ export function SearchResults() {
               <SelectTrigger className="w-[150px] gap-2 bg-[#E5E5E5] border-none hover:bg-[#E5E5E5] focus:ring-0 focus:ring-offset-0">
                 <SelectValue>
                   <span className="text-xs text-primary font-medium">
-                    {sortBy === "newest" && "Tin mới nhất"}
-                    {sortBy === "price-low" && "Giá thấp đến cao"}
-                    {sortBy === "price-high" && "Giá cao đến thấp"}
-                    {sortBy === "area-large" && "Diện tích lớn nhất"}
+                    {sortBy === "newest" && t("sortBy.newest")}
+                    {sortBy === "price-low" && t("sortBy.priceLow")}
+                    {sortBy === "price-high" && t("sortBy.priceHigh")}
+                    {sortBy === "area-large" && t("sortBy.areaLarge")}
                   </span>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-primary-foreground">
-                <SelectItem value="newest">Tin mới nhất</SelectItem>
-                <SelectItem value="price-low">Giá thấp đến cao</SelectItem>
-                <SelectItem value="price-high">Giá cao đến thấp</SelectItem>
-                <SelectItem value="area-large">Diện tích lớn nhất</SelectItem>
+                <SelectItem value="newest">{t("sortBy.newest")}</SelectItem>
+                <SelectItem value="price-low">
+                  {t("sortBy.priceLow")}
+                </SelectItem>
+                <SelectItem value="price-high">
+                  {t("sortBy.priceHigh")}
+                </SelectItem>
+                <SelectItem value="area-large">
+                  {t("sortBy.areaLarge")}
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -225,14 +234,14 @@ export function SearchResults() {
       {/* Loading State */}
       {loading && (
         <div className="text-center py-12">
-          <LoadingSpinner size="lg" text="Đang tải dữ liệu..." />
+          <LoadingSpinner size="lg" text={tCommon("loading")} />
         </div>
       )}
 
       {/* Empty State */}
       {!loading && properties.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">Không tìm thấy bất động sản phù hợp</p>
+          <p className="text-gray-500">{t("noResults")}</p>
         </div>
       )}
 

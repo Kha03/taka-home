@@ -3,6 +3,7 @@
 import { useAuth } from "@/contexts/auth-context";
 import { useRole } from "@/hooks/use-role";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +15,14 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WalletBalance } from "@/components/wallet/wallet-balance";
 import { LogOut, User, Plus, History, ShieldCheck } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 
 export function UserMenu() {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   const { isLandlord, isAdmin } = useRole();
+  const t = useTranslations("auth");
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
 
   // Show loading skeleton while checking auth
   if (isLoading) {
@@ -34,10 +38,10 @@ export function UserMenu() {
     return (
       <div className="flex items-center gap-2">
         <Button size="sm" asChild className="bg-accent hover:bg-accent/90">
-          <Link href="/signin">Đăng nhập</Link>
+          <Link href="/signin">{t("signin")}</Link>
         </Button>
         <Button size="sm" asChild>
-          <Link href="/signup">Đăng ký</Link>
+          <Link href="/signup">{t("signup")}</Link>
         </Button>
       </div>
     );
@@ -86,19 +90,19 @@ export function UserMenu() {
               <DropdownMenuItem asChild>
                 <Link href="/my-properties/new" className="cursor-pointer">
                   <Plus className="mr-2 h-4 w-4" />
-                  <span>Đăng tin mới</span>
+                  <span>{tNav("createProperty")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/my-properties" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>Bất động sản của tôi</span>
+                  <span>{tNav("myProperties")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/rental-requests" className="cursor-pointer">
                   <History className="mr-2 h-4 w-4" />
-                  <span>Yêu cầu thuê</span>
+                  <span>{tNav("rentalRequests")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -111,7 +115,7 @@ export function UserMenu() {
               <DropdownMenuItem asChild>
                 <Link href="/property-approval" className="cursor-pointer">
                   <ShieldCheck className="mr-2 h-4 w-4" />
-                  <span>Duyệt bất động sản</span>
+                  <span>{tNav("propertyApproval")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -122,13 +126,13 @@ export function UserMenu() {
           <DropdownMenuItem asChild>
             <Link href="/profile" className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
-              <span>Hồ sơ</span>
+              <span>{tNav("profile")}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/blockchain-history" className="cursor-pointer">
               <History className="mr-2 h-4 w-4" />
-              <span>Lịch sử hợp đồng</span>
+              <span>{tNav("blockchainHistory")}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -137,7 +141,7 @@ export function UserMenu() {
             className="cursor-pointer text-red-600"
           >
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Đăng xuất</span>
+            <span>{t("signout")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

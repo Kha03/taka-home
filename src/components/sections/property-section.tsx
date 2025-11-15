@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PropertyCard } from "@/components/ui/property-card";
 import { ArrowRight, LucideIcon } from "lucide-react";
 import { Button } from "../ui/button";
@@ -28,6 +29,7 @@ export function PropertySection({
   icon: Icon,
   properties,
 }: PropertySectionProps) {
+  const t = useTranslations("sections");
   return (
     <section className="pt-12 pb-5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,7 +67,7 @@ export function PropertySection({
             <div className="h-5 w-5 p-1 rounded-full bg-accent flex items-center justify-center">
               <ArrowRight />
             </div>
-            Xem tất cả
+            {t("viewAll")}
           </Button>
         </div>
       </div>

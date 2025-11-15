@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import {
@@ -33,6 +34,7 @@ export function SelectField({
   placeholder?: string;
   required?: boolean;
 }) {
+  const t = useTranslations("form");
   const {
     control,
     formState: { errors },
@@ -81,10 +83,10 @@ export function SelectField({
               <SelectValue
                 placeholder={
                   loading
-                    ? "Đang tải..."
+                    ? t("uploading")
                     : disabled
-                    ? "Vui lòng chọn mục trước"
-                    : placeholder || "Chọn"
+                    ? t("selectFirst")
+                    : placeholder || t("select")
                 }
               />
             </SelectTrigger>
@@ -102,7 +104,7 @@ export function SelectField({
         <p className="mt-1 text-xs text-destructive">
           {typeof error?.message === "string"
             ? error.message
-            : String(error?.message) || "Vui lòng chọn một tùy chọn"}
+            : String(error?.message) || t("selectOption")}
         </p>
       )}
     </div>

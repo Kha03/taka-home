@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -44,6 +45,7 @@ export function MoveRoomDialog({
   onOpenChange,
   onSuccess,
 }: MoveRoomDialogProps) {
+  const t = useTranslations("myProperties");
   const [loading, setLoading] = useState(false);
   const [moveMode, setMoveMode] = useState<"existing" | "new">("existing");
   const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>("");
@@ -321,8 +323,7 @@ export function MoveRoomDialog({
                   (rt) => rt.id && rt.id !== room.roomType?.id
                 ).length === 0 && (
                   <p className="text-sm text-amber-600">
-                    Không có loại phòng khác. Vui lòng chọn &quot;Tạo loại phòng
-                    mới&quot;.
+                    {t("noOtherRoomTypes")}
                   </p>
                 )}
               </div>
@@ -603,7 +604,7 @@ export function MoveRoomDialog({
                           <div className="text-center">
                             <Images className="w-6 h-6 mx-auto text-[#DCBB87]/50 mb-1" />
                             <p className="text-xs text-muted-foreground">
-                              Thêm ảnh
+                              {t("addImage")}
                             </p>
                           </div>
                         </div>

@@ -9,6 +9,7 @@ import { ChatListItemProps } from "@/types/chat";
 import { MessageCircle, Search } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface ChatListProps {
   chats: ChatListItemProps["chat"][];
@@ -145,6 +146,7 @@ export function ChatList({
   currentUserId,
   isLoading = false,
 }: ChatListProps) {
+  const t = useTranslations("chat");
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const filteredChats = React.useMemo(() => {
@@ -170,7 +172,7 @@ export function ChatList({
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <LoadingSpinner text="Đang tải..." />
+        <LoadingSpinner text={t("loading")} />
       </div>
     );
   }
@@ -182,7 +184,7 @@ export function ChatList({
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-[#DCBB87]" />
-            Tin nhắn
+            {t("messages")}
           </h2>
         </div>
 
@@ -191,7 +193,7 @@ export function ChatList({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             type="text"
-            placeholder="Tìm kiếm cuộc trò chuyện..."
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 border-gray-300 focus:border-[#DCBB87] focus:ring-[#DCBB87]"
@@ -206,9 +208,7 @@ export function ChatList({
             <div className="text-center">
               <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-2" />
               <p className="text-gray-500">
-                {searchQuery
-                  ? "Không tìm thấy cuộc trò chuyện nào"
-                  : "Chưa có cuộc trò chuyện nào"}
+                {searchQuery ? t("noSearchResults") : t("noConversations")}
               </p>
             </div>
           </div>

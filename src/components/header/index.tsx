@@ -2,6 +2,7 @@ import { Logo } from "./Logo";
 import { MainMenu } from "./MainMenu";
 import { IconActions } from "./IconActions";
 import { UserMenu } from "./UserMenu";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default function Header() {
   return (
@@ -12,6 +13,7 @@ export default function Header() {
           <MainMenu />
         </div>
         <div className="flex items-center gap-3 ml-auto">
+          <LanguageSwitcher />
           <IconActions />
           <UserMenu />
         </div>

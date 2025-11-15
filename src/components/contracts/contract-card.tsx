@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -63,55 +64,62 @@ function StatusBadge({
   status: ContractVM["status"];
   userRole?: string;
 }) {
+  const t = useTranslations("contract");
   const config = useMemo(() => {
     switch (status) {
       case "active":
         return {
           bg: "bg-[#00AE26]/20",
           icon: <CheckCircle className="w-6 h-6 text-green-600" />,
-          text: "Còn hiệu lực",
+          text: t("active"),
         };
       case "expired":
         return {
           bg: "bg-[#FA0000]/10",
           icon: <CheckCircle className="w-6 h-6 text-red-600" />,
-          text: "Hết hiệu lực",
+          text: t("expired"),
         };
       case "pending_signature":
         return {
           bg: "bg-[#FFA500]/20",
           icon: <Calendar className="w-6 h-6 text-orange-600" />,
-          text: "Chờ ký",
+          text: t("pendingSignature"),
         };
       case "pending_landlord":
         return {
           bg: "bg-[#818181]/10",
           icon: <Calendar className="w-6 h-6 text-gray-600" />,
-          text: userRole === "LANDLORD" ? "Chờ ký" : "Chờ duyệt",
+          text:
+            userRole === "LANDLORD"
+              ? t("pendingSignature")
+              : t("pendingLandlord"),
         };
       case "awaiting_deposit":
         return {
           bg: "bg-[#3B82F6]/20",
           icon: <AlertCircle className="w-6 h-6 text-blue-600" />,
-          text: "Chờ đặt cọc",
+          text: t("awaitingDeposit"),
         };
       case "awaiting_landlord_deposit":
         return {
           bg: "bg-[#9333EA]/20",
           icon: <AlertCircle className="w-6 h-6 text-purple-600" />,
-          text: userRole === "LANDLORD" ? "Chờ đặt cọc" : "Chờ chủ nhà",
+          text:
+            userRole === "LANDLORD"
+              ? t("awaitingDeposit")
+              : t("waitingLandlord"),
         };
       case "ready_for_handover":
         return {
           bg: "bg-[#10B981]/20",
           icon: <CheckCircle className="w-6 h-6 text-emerald-600" />,
-          text: "Sẵn sàng bàn giao",
+          text: t("readyForHandover"),
         };
       default:
         return {
           bg: "bg-gray-100",
           icon: <Calendar className="w-6 h-6 text-gray-600" />,
-          text: "Không xác định",
+          text: t("undefined"),
         };
     }
   }, [status, userRole]);
@@ -139,25 +147,26 @@ function SigningDialog({
   onConfirm: () => void;
   signingMethod: signingOption;
 }) {
+  const t = useTranslations("contract");
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {step === "confirm"
-              ? "Xác nhận ký hợp đồng"
+              ? t("confirmSigningTitle")
               : step === "signing"
-              ? "Đang xử lý yêu cầu ký..."
-              : "Ký hợp đồng thành công"}
+              ? t("processingSignRequest")
+              : t("signedSuccessfully")}
           </DialogTitle>
           <DialogDescription>
             {step === "confirm"
-              ? "Vui lòng xác nhận để tiếp tục"
+              ? t("confirmSigningDescription")
               : step === "signing"
               ? signingMethod === signingOption.VNPT
-                ? "Vui lòng kiểm tra điện thoại"
-                : "Đang ký hợp đồng"
-              : "Thông tin quan trọng"}
+                ? t("pleaseCheckPhone")
+                : t("signing")
+              : t("importantInfo")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -169,11 +178,10 @@ function SigningDialog({
                     <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
                     <div className="space-y-2">
                       <p className="font-medium text-orange-900">
-                        Xác nhận ký hợp đồng
+                        {t("confirmSigningTitle")}
                       </p>
                       <p className="text-sm text-orange-800">
-                        Bạn có chắc chắn muốn ký hợp đồng này? Sau khi xác nhận,
-                        hệ thống sẽ gửi yêu cầu ký đến điện thoại của bạn.
+                        {t("confirmSigningMessage")}
                       </p>
                     </div>
                   </div>
@@ -185,9 +193,9 @@ function SigningDialog({
                   onClick={onClose}
                   className="text-primary"
                 >
-                  Hủy
+                  {t("cancelButton")}
                 </Button>
-                <Button onClick={onConfirm}>Xác nhận ký</Button>
+                <Button onClick={onConfirm}>{t("confirmSign")}</Button>
               </div>
             </>
           )}
@@ -203,13 +211,13 @@ function SigningDialog({
                     <div className="space-y-2">
                       <p className="font-medium text-blue-900">
                         {signingMethod === signingOption.VNPT
-                          ? "Vui lòng kiểm tra điện thoại"
-                          : "Đang ký hợp đồng"}
+                          ? t("pleaseCheckPhone")
+                          : t("signing")}
                       </p>
                       <p className="text-sm text-blue-800">
                         {signingMethod === signingOption.VNPT
-                          ? "Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của bạn. Vui lòng mở ứng dụng VNPT SmartCA để ký xác nhận."
-                          : "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát..."}
+                          ? t("vnptSigningInstructions")
+                          : t("autoSigningInstructions")}
                       </p>
                     </div>
                   </div>
@@ -225,18 +233,17 @@ function SigningDialog({
                     <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                     <div className="space-y-2">
                       <p className="font-medium text-green-900">
-                        Đã ký thành công!
+                        {t("signedSuccessMessage")}
                       </p>
                       <p className="text-sm text-green-800">
-                        Bạn và chủ nhà hãy đặt cọc cho hợp đồng. Hệ thống sẽ tự
-                        động cập nhật trạng thái sau khi hoàn tất.
+                        {t("bothPartiesDepositMessage")}
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               <div className="flex justify-end">
-                <Button onClick={onClose}>Đóng</Button>
+                <Button onClick={onClose}>{t("close")}</Button>
               </div>
             </>
           )}
@@ -250,6 +257,7 @@ export default function ContractCard({
   contract,
   userRole,
 }: ContractCardProps) {
+  const t = useTranslations("contract");
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [page, setPage] = useState(1);
@@ -366,7 +374,7 @@ export default function ContractCard({
                 </span>
                 <span className="text-[#4F4F4F]">•</span>
                 <span className="text-[#4F4F4F] text-sm">
-                  Người thuê:
+                  {t("tenant2")}:
                   <span className="text-secondary font-bold text-sm ml-1">
                     {contract.tenant}
                   </span>
@@ -377,7 +385,7 @@ export default function ContractCard({
                   <Calendar className="w-4 h-4 text-primary" />
                 </div>
                 <span>
-                  Thời hạn hợp đồng:
+                  {t("contractPeriod")}:
                   <strong className="ml-1">
                     {contract.startDate} - {contract.endDate}
                   </strong>
@@ -394,28 +402,34 @@ export default function ContractCard({
           <div className="text-right">
             <div className="flex items-center gap-3 mb-2">
               <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
-                <div className="text-xs text-[#8d8d8d]">Mã bất động sản</div>
+                <div className="text-xs text-[#8d8d8d]">
+                  {t("propertyCode")}
+                </div>
                 <div className="font-medium text-primary">
                   {contract.propertyCode}
                 </div>
               </div>
               <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
                 <div className="text-xs text-[#8d8d8d]">
-                  Tình trạng nội thất
+                  {t("furnitureStatus")}
                 </div>
                 <div className="font-medium text-primary">
                   {contract.propertyType}
                 </div>
               </div>
               <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
-                <div className="text-xs text-[#8d8d8d]">Danh mục</div>
+                <div className="text-xs text-[#8d8d8d]">
+                  {t("categoryLabel")}
+                </div>
                 <div className="font-medium text-primary">
                   {contract.category}
                 </div>
               </div>
             </div>
             <div className="flex bg-[#f5f5f5] rounded-2xl py-2 justify-center">
-              <div className="text-sm text-muted-foreground">Giá thuê:</div>
+              <div className="text-sm text-muted-foreground">
+                {t("rentPrice")}:
+              </div>
               <div className="text-sm font-bold text-secondary ml-1">
                 {contract.price.toLocaleString("vi-VN")} VND
               </div>
@@ -432,7 +446,7 @@ export default function ContractCard({
           className="text-primary hover:text-primary/80"
         >
           <ExternalLink className="w-4 h-4 mr-2" />
-          Xem chi tiết hợp đồng
+          {t("viewDetail")}
         </Button>
       </div>
 
@@ -445,14 +459,14 @@ export default function ContractCard({
             onClick={() => contract.onViewContract?.(contract.contractId!)}
           >
             <Eye className="w-4 h-4 mr-2" />
-            Xem hợp đồng
+            {t("viewContract")}
           </Button>
           <Button
             className="flex-1"
             onClick={() => setSigningMethodDialog(true)}
           >
             <CheckCircle className="w-4 h-4 mr-2" />
-            Ký hợp đồng
+            {t("signContract")}
           </Button>
         </div>
       )}
@@ -466,13 +480,13 @@ export default function ContractCard({
                 <div className="space-y-2 flex-1">
                   <p className="text-sm font-semibold text-yellow-900">
                     {userRole === "LANDLORD"
-                      ? "Yêu cầu ký hợp đồng"
-                      : "Chờ duyệt"}
+                      ? t("signContractRequest")
+                      : t("waitingApproval")}
                   </p>
                   <p className="text-sm text-yellow-800">
                     {userRole === "LANDLORD"
-                      ? "Người thuê đã gửi yêu cầu thuê. Vui lòng xem xét và ký hợp đồng."
-                      : "Đang chờ chủ nhà duyệt yêu cầu thuê."}
+                      ? t("tenantSentRequest")
+                      : t("waitingLandlordApproval")}
                   </p>
                   {userRole === "LANDLORD" &&
                     contract.bookingId &&
@@ -488,7 +502,7 @@ export default function ContractCard({
                             }
                           >
                             <Eye className="w-4 h-4 mr-2" />
-                            Xem hợp đồng
+                            {t("viewContract")}
                           </Button>
                         )}
                         <Button
@@ -496,7 +510,7 @@ export default function ContractCard({
                           onClick={() => setSigningMethodDialog(true)}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          Ký hợp đồng
+                          {t("signContract")}
                         </Button>
                       </div>
                     )}
@@ -515,11 +529,10 @@ export default function ContractCard({
                 <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div className="space-y-2 flex-1">
                   <p className="text-sm font-semibold text-blue-900">
-                    Yêu cầu đặt cọc
+                    {t("depositRequired")}
                   </p>
                   <p className="text-sm text-blue-800">
-                    Bạn và chủ nhà cần đặt cọc để kích hoạt hợp đồng. Vui lòng
-                    hoàn tất việc đặt cọc trong thời gian quy định.
+                    {t("bothPartiesDeposit")}
                   </p>
                   <div className="flex gap-2 mt-2">
                     {contract.contractId && (
@@ -543,7 +556,7 @@ export default function ContractCard({
                         }
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Đặt cọc ngay
+                        {t("depositNow")}
                       </Button>
                     )}
                   </div>
@@ -562,12 +575,14 @@ export default function ContractCard({
                 <AlertCircle className="w-5 h-5 text-purple-600 mt-0.5" />
                 <div className="space-y-2 flex-1">
                   <p className="text-sm font-semibold text-purple-900">
-                    {userRole === "LANDLORD" ? "Yêu cầu đặt cọc" : "Đã đặt cọc"}
+                    {userRole === "LANDLORD"
+                      ? t("depositRequired")
+                      : t("deposited")}
                   </p>
                   <p className="text-sm text-purple-800">
                     {userRole === "LANDLORD"
-                      ? "Người thuê đã đặt cọc. Đến lượt bạn đặt cọc để kích hoạt hợp đồng."
-                      : "Bạn đã hoàn tất đặt cọc. Đang chờ chủ nhà đặt cọc để kích hoạt hợp đồng."}
+                      ? t("tenantDeposited2")
+                      : t("waitingLandlordDeposit")}
                   </p>
                   <div className="flex gap-2 mt-2">
                     {contract.contractId && (
@@ -593,7 +608,7 @@ export default function ContractCard({
                           }
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          Đặt cọc ngay
+                          {t("depositNow")}
                         </Button>
                       )}
                   </div>
@@ -613,13 +628,13 @@ export default function ContractCard({
                 <div className="space-y-2 flex-1">
                   <p className="text-sm font-semibold text-emerald-900">
                     {userRole === "LANDLORD"
-                      ? "Sẵn sàng bàn giao"
-                      : "Chờ bàn giao"}
+                      ? t("readyForHandover")
+                      : t("waitingHandover")}
                   </p>
                   <p className="text-sm text-emerald-800">
                     {userRole === "LANDLORD"
-                      ? "Cả hai bên đã hoàn tất đặt cọc. Vui lòng xác nhận bàn giao để kích hoạt hợp đồng."
-                      : "Cả hai bên đã hoàn tất đặt cọc. Đang chờ chủ nhà xác nhận bàn giao để kích hoạt hợp đồng."}
+                      ? t("bothPartiesDepositedLandlord")
+                      : t("bothPartiesDepositedTenant")}
                   </p>
                   <div className="flex gap-2 mt-2">
                     {contract.contractId && (
@@ -645,7 +660,7 @@ export default function ContractCard({
                           }
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
-                          Xác nhận bàn giao
+                          {t("confirmHandover")}
                         </Button>
                       )}
                   </div>
@@ -675,7 +690,7 @@ export default function ContractCard({
             className="text-primary"
           >
             <Eye className="w-4 h-4 mr-2" />
-            Xem hợp đồng
+            {t("viewContract")}
           </Button>
         </div>
       )}
@@ -709,10 +724,10 @@ export default function ContractCard({
                 <FileText className="w-5 h-5 text-gray-500" />
                 <div>
                   <div className="font-semibold text-foreground">
-                    Hóa đơn thanh toán
+                    {t("invoice")}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Xem chi tiết hóa đơn của bạn
+                    {t("detail")}
                   </div>
                 </div>
               </div>
@@ -722,7 +737,7 @@ export default function ContractCard({
                 className="bg-[#D4A574] hover:bg-[#D4A574]/90"
               >
                 <Eye className="w-4 h-4 mr-2" />
-                Xem hóa đơn
+                {t("viewContract")}
               </Button>
             </div>
           </CardContent>
@@ -732,14 +747,14 @@ export default function ContractCard({
         <CardContent className="ml-35 relative rounded-2xl border border-dashed border-[#E5E5E5] p-6">
           <Collapsible open={isExpanded} onOpenChange={toggle}>
             <span className="absolute -top-3 left-6 inline-flex items-center rounded-full bg-[#13337A] px-3 py-1 text-xs font-semibold text-white shadow-sm">
-              Lịch sử hóa đơn ({contract.invoices.length})
+              {t("invoiceHistory")} ({contract.invoices.length})
             </span>
             <Button
               size="sm"
               variant="ghost"
               className="absolute -top-3 right-6 rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85 hover:text-primary"
             >
-              Nhắn tin
+              {t("sendMessage")}
             </Button>
 
             {/* most recent */}
@@ -760,16 +775,16 @@ export default function ContractCard({
                   </div>
                   <div>
                     <div className="font-bold text-foreground">
-                      Hóa đơn {mostRecentInvoice.month}
+                      {t("invoice")} {mostRecentInvoice.month}
                     </div>
                     <div className="text-xs text-[#4f4f4f]">
-                      Hạn thanh toán:
+                      {t("paymentDeadline")}:
                       <strong> {mostRecentInvoice.dueDate}</strong>
                       <span className="text-red-400 font-bold">
                         {isPaymentOverdue(
                           mostRecentInvoice.dueDate,
                           mostRecentInvoice.status
-                        ) && " (Quá hạn)"}
+                        ) && ` (${t("overdueLabel")})`}
                       </span>
                     </div>
                   </div>
@@ -790,7 +805,7 @@ export default function ContractCard({
                         }
                       >
                         <Eye className="w-3 h-3 mr-1" />
-                        Chi tiết
+                        {t("detail")}
                       </Button>
                     )}
                   {mostRecentInvoice.status === "PAID" ? (
@@ -798,7 +813,7 @@ export default function ContractCard({
                       <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
                         <Check className="h-3 w-3 text-primary-foreground" />
                       </div>
-                      <span>Đã thanh toán</span>
+                      <span>{t("paidLabel")}</span>
                     </div>
                   ) : mostRecentInvoice.status === "PENDING" ? (
                     userRole === "TENANT" ? (
@@ -809,14 +824,14 @@ export default function ContractCard({
                           contract.onPayInvoice?.(mostRecentInvoice.invoiceId)
                         }
                       >
-                        Thanh toán
+                        {t("payButton")}
                       </Button>
                     ) : (
                       <div className="flex items-center gap-2 text-xs text-foreground">
                         <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
                           <AlertCircle className="h-3 w-3 text-white" />
                         </div>
-                        <span>Chờ thanh toán</span>
+                        <span>{t("pendingPayment")}</span>
                       </div>
                     )
                   ) : (
@@ -824,7 +839,7 @@ export default function ContractCard({
                       <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
                         <AlertCircle className="h-3 w-3 text-white" />
                       </div>
-                      <span>Quá hạn</span>
+                      <span>{t("overdueStatus")}</span>
                     </div>
                   )}
                 </div>
@@ -853,13 +868,14 @@ export default function ContractCard({
                     </div>
                     <div>
                       <div className="font-bold text-foreground">
-                        Hóa đơn {invoice.month}
+                        {t("invoice")} {invoice.month}
                       </div>
                       <div className="text-xs text-[#4f4f4f]">
-                        Hạn thanh toán: <strong>{invoice.dueDate}</strong>
+                        {t("paymentDeadline")}:{" "}
+                        <strong>{invoice.dueDate}</strong>
                         <span className="text-red-400 font-bold">
                           {isPaymentOverdue(invoice.dueDate, invoice.status) &&
-                            " (Quá hạn)"}
+                            ` (${t("overdueLabel")})`}
                         </span>
                       </div>
                     </div>
@@ -880,7 +896,7 @@ export default function ContractCard({
                           }
                         >
                           <Eye className="w-3 h-3 mr-1" />
-                          Chi tiết
+                          {t("detail")}
                         </Button>
                       )}
                     {invoice.status === "PAID" ? (
@@ -888,7 +904,7 @@ export default function ContractCard({
                         <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
                           <Check className="h-3 w-3 text-primary-foreground" />
                         </div>
-                        <span>Đã thanh toán</span>
+                        <span>{t("paidLabel")}</span>
                       </div>
                     ) : invoice.status === "PENDING" ? (
                       userRole === "TENANT" ? (
@@ -899,14 +915,14 @@ export default function ContractCard({
                             contract.onPayInvoice?.(invoice.invoiceId)
                           }
                         >
-                          Thanh toán
+                          {t("payButton")}
                         </Button>
                       ) : (
                         <div className="flex items-center gap-2 text-xs text-foreground">
                           <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
                             <AlertCircle className="h-3 w-3 text-white" />
                           </div>
-                          <span>Chờ thanh toán</span>
+                          <span>{t("pendingPayment")}</span>
                         </div>
                       )
                     ) : (
@@ -914,7 +930,7 @@ export default function ContractCard({
                         <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
                           <AlertCircle className="h-3 w-3 text-white" />
                         </div>
-                        <span>Quá hạn</span>
+                        <span>{t("overdueStatus")}</span>
                       </div>
                     )}
                   </div>
@@ -936,7 +952,7 @@ export default function ContractCard({
                           <div className="h-5 w-5 bg-secondary rounded-full flex items-center justify-center">
                             <ChevronUp className="h-4 w-4 text-primary-foreground" />
                           </div>
-                          <span>Ẩn bớt</span>
+                          <span>{t("hideInvoices")}</span>
                         </>
                       ) : (
                         <>
@@ -944,7 +960,9 @@ export default function ContractCard({
                             <ChevronDown className="w-4 h-4 text-primary-foreground" />
                           </div>
                           <span>
-                            Xem thêm {remainingInvoices.length} hóa đơn
+                            {t("viewMoreInvoices", {
+                              count: remainingInvoices.length,
+                            })}
                           </span>
                         </>
                       )}

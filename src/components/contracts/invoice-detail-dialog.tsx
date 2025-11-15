@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -27,14 +28,15 @@ export default function InvoiceDetailDialog({
   invoice,
   onPayInvoice,
 }: InvoiceDetailDialogProps) {
+  const t = useTranslations("contract");
   // Don't render anything if invoice is null/undefined
   if (!invoice) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Chi tiết hóa đơn</DialogTitle>
-            <DialogDescription>Không có thông tin hóa đơn</DialogDescription>
+            <DialogTitle>{t("details")}</DialogTitle>
+            <DialogDescription>{t("noInvoiceInfo")}</DialogDescription>
           </DialogHeader>
         </DialogContent>
       </Dialog>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import {
@@ -30,6 +31,7 @@ export function ContractTerminationList({
   contractId,
   currentUserId,
 }: ContractTerminationListProps) {
+  const t = useTranslations("contract");
   const [terminations, setTerminations] = useState<ContractTermination[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,7 +132,7 @@ export function ContractTerminationList({
     return (
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Chưa có yêu cầu hủy hợp đồng nào.</AlertDescription>
+        <AlertDescription>{t("noTerminationRequests")}</AlertDescription>
       </Alert>
     );
   }

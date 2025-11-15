@@ -1,35 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
-import { handleGoogleAuth, isGoogleOAuthConfigured } from "@/lib/auth/google-oauth";
+import {
+  handleGoogleAuth,
+  isGoogleOAuthConfigured,
+} from "@/lib/auth/google-oauth";
 
 type SignInFormProps = {
   errorFromUrl?: string;
 };
 
-const getErrorMessage = (errorCode?: string): string => {
-  switch (errorCode) {
-    case "no_code":
-      return "Bạn đã hủy đăng nhập bằng Google. Vui lòng thử lại hoặc đăng nhập bằng email.";
-    case "access_denied":
-      return "Bạn đã từ chối cấp quyền truy cập. Vui lòng thử lại và chấp nhận để tiếp tục.";
-    case "invalid_token":
-      return "Phiên đăng nhập không hợp lệ. Vui lòng thử lại.";
-    case "server_error":
-      return "Đã xảy ra lỗi từ phía máy chủ. Vui lòng thử lại sau.";
-    default:
-      return errorCode ? "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng thử lại." : "";
-  }
-};
-
 export function SignInForm({ errorFromUrl }: SignInFormProps) {
+  const t = useTranslations("auth");
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
@@ -38,9 +28,14 @@ export function SignInForm({ errorFromUrl }: SignInFormProps) {
   // Handle error from URL params (from Google OAuth callback)
   useEffect(() => {
     if (errorFromUrl) {
-      const errorMessage = getErrorMessage(errorFromUrl);
+      const errorMessages: Record<string, string> = {
+        no_code: t("canceledGoogleLogin"),
+        invalid_token: t("invalidSession"),
+        default: t("loginError"),
+      };
+      const errorMessage = errorMessages[errorFromUrl] || errorMessages.default;
       setError(errorMessage);
-      
+
       // Clear the error from URL after displaying it
       if (window.history.replaceState) {
         window.history.replaceState(null, "", "/signin");
@@ -94,7 +89,7 @@ export function SignInForm({ errorFromUrl }: SignInFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">Mật khẩu</Label>
+          <Label htmlFor="password">{t("password")}</Label>
           <Input
             id="password"
             name="password"
@@ -116,19 +111,19 @@ export function SignInForm({ errorFromUrl }: SignInFormProps) {
               onCheckedChange={(v) => setRememberMe(!!v)}
             />
             <Label htmlFor="remember" className="text-sm">
-              Ghi nhớ đăng nhập
+              {t("rememberMe")}
             </Label>
           </div>
           <Link
             href="/forgot-password"
             className="text-sm text-primary hover:underline"
           >
-            Quên mật khẩu?
+            {t("forgotPassword")}
           </Link>
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+          {isLoading ? t("loggingIn") : t("signin")}
         </Button>
       </div>
 
@@ -140,7 +135,7 @@ export function SignInForm({ errorFromUrl }: SignInFormProps) {
             variant="outline"
             className="w-full text-primary text-xs"
             size="sm"
-            onClick={() => handleGoogleAuth('signin')}
+            onClick={() => handleGoogleAuth("signin")}
             disabled={!isGoogleOAuthConfigured()}
           >
             {/* Inline Google icon */}
@@ -182,12 +177,12 @@ export function SignInForm({ errorFromUrl }: SignInFormProps) {
           </Button>
         </div>
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Chưa có tài khoản?
+          {t("noAccount")}
           <Link
             href="/signup"
             className="font-medium text-primary hover:underline"
           >
-            Đăng ký ngay
+            {t("registerNow")}
           </Link>
         </p>
       </div>

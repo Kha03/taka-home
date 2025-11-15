@@ -28,6 +28,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/types/**/*.d.ts"
-  ],
+, "i18n.config.js"  ],
   "exclude": ["node_modules"]
 }

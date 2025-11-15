@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +39,7 @@ export function ContractDetailInvoices({
   userRole,
   propertyType = "APARTMENT",
 }: ContractDetailInvoicesProps) {
+  const t = useTranslations("contract");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -133,7 +135,7 @@ export function ContractDetailInvoices({
     return (
       <Card className="bg-primary-foreground shadow-sm rounded-2xl border-none">
         <CardContent className="py-12 text-center">
-          <LoadingSpinner size="lg" text="Đang tải hóa đơn..." />
+          <LoadingSpinner size="lg" text={t("loadingInvoices")} />
         </CardContent>
       </Card>
     );
@@ -182,7 +184,7 @@ export function ContractDetailInvoices({
           <CardContent>
             <div className="text-center py-8">
               <FileText className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-              <p className="text-muted-foreground">Chưa có hóa đơn nào</p>
+              <p className="text-muted-foreground">{t("noInvoices")}</p>
             </div>
           </CardContent>
         </Card>

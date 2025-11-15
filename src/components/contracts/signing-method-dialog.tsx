@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ export function SigningMethodDialog({
   onConfirm,
   loading = false,
 }: SigningMethodDialogProps) {
+  const t = useTranslations("contract");
   const [selectedMethod, setSelectedMethod] = useState<signingOption>(
     signingOption.VNPT
   );
@@ -151,8 +153,8 @@ export function SigningMethodDialog({
           <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
             <p className="text-xs text-amber-800 dark:text-amber-200">
               <span className="font-medium">Lưu ý:</span> Bằng việc ký hợp đồng,
-              bạn xác nhận đã đọc và đồng ý với tất cả các điều khoản. Hãy chọn
-              phương thức ký phù hợp với nhu cầu của bạn.
+              {t("confirmReadTerms")}. Hãy chọn phương thức ký phù hợp với nhu
+              cầu của bạn.
             </p>
           </div>
         </div>

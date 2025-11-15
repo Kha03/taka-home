@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ export function ContractFileSelectorDialog({
   onOpenChange,
   contractId,
 }: ContractFileSelectorDialogProps) {
+  const t = useTranslations("contract");
   const [loading, setLoading] = useState(false);
   const [mainFileUrl, setMainFileUrl] = useState<string | null>(null);
   const [extensionFiles, setExtensionFiles] = useState<ExtensionFileUrl[]>([]);
@@ -175,7 +177,7 @@ export function ContractFileSelectorDialog({
 
               {!mainFileUrl && extensionFiles.length === 0 && !loading && (
                 <div className="text-center py-8 text-muted-foreground">
-                  Không tìm thấy file hợp đồng
+                  {t("noContractFile")}
                 </div>
               )}
             </>

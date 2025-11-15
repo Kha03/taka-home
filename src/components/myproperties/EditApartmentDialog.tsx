@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,7 @@ export function EditApartmentDialog({
   onOpenChange,
   onSuccess,
 }: EditApartmentDialogProps) {
+  const t = useTranslations("myProperties");
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -109,7 +111,7 @@ export function EditApartmentDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-[#FFF7E9]">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle className="text-2xl font-bold text-primary">
-            Chỉnh sửa thông tin căn hộ
+            {t("editApartment")}
           </DialogTitle>
         </DialogHeader>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,8 @@ export function SignatureDialog({
   userRole,
   onSuccess,
 }: SignatureDialogProps) {
+  const t = useTranslations("contract");
+  const tCommon = useTranslations("common");
   const [showSigningMethod, setShowSigningMethod] = useState(false);
   const [signingLoading, setSigningLoading] = useState(false);
   const [signingStep, setSigningStep] = useState<
@@ -147,7 +150,7 @@ export function SignatureDialog({
         }
       }
 
-      toast.error("Lỗi", "Không tìm thấy file hợp đồng");
+      toast.error(tCommon("error"), t("noContractFile"));
     } catch (error) {
       console.error("Error fetching contract file:", error);
       toast.error("Lỗi", "Không thể tải file hợp đồng");
@@ -270,8 +273,7 @@ export function SignatureDialog({
           <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
             <p className="text-xs text-amber-800 dark:text-amber-200">
               <span className="font-medium">Lưu ý:</span> Bằng việc ký hợp đồng,
-              bạn xác nhận đã đọc và đồng ý với tất cả các điều khoản trong hợp
-              đồng gia hạn.
+              {t("confirmReadTerms")} trong hợp đồng gia hạn.
             </p>
           </div>
         </div>

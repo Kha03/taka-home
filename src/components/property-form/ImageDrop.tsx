@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Upload } from "lucide-react";
 import { DottedBox } from "./DottedBox";
 
@@ -13,6 +14,7 @@ export function ImageDrop({
   onPick: (src: string) => void;
   onError?: (error: string) => void;
 }) {
+  const t = useTranslations("form");
   const [isUploading, setIsUploading] = React.useState(false);
   const inputId = React.useId();
 
@@ -73,7 +75,7 @@ export function ImageDrop({
         className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground"
       >
         <Upload className="h-5 w-5" />
-        <span>{isUploading ? "Đang tải..." : label}</span>
+        <span>{isUploading ? t("uploading") : label}</span>
       </label>
     </DottedBox>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ export function ContractTerminationRespondDialog({
   termination,
   onSuccess,
 }: ContractTerminationRespondDialogProps) {
+  const t = useTranslations("contract");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseNote, setResponseNote] = useState("");
   const [selectedAction, setSelectedAction] = useState<
@@ -79,10 +81,11 @@ export function ContractTerminationRespondDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Phản hồi yêu cầu hủy hợp đồng</DialogTitle>
+          <DialogTitle>{t("respondToTermination")}</DialogTitle>
           <DialogDescription>
-            Xem xét và phản hồi yêu cầu hủy hợp đồng trước hạn từ{" "}
-            {termination.requestedBy.fullName}
+            {t("respondDescription", {
+              name: termination.requestedBy.fullName,
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -109,16 +112,16 @@ export function ContractTerminationRespondDialog({
 
           {/* Response Note */}
           <div className="flex flex-col space-y-2">
-            <Label>Ghi chú phản hồi (không bắt buộc)</Label>
+            <Label>{t("responseNote")}</Label>
             <Textarea
-              placeholder="Thêm ghi chú về quyết định của bạn..."
+              placeholder={t("responseNotePlaceholder")}
               className="min-h-[100px] resize-none"
               value={responseNote}
               onChange={(e) => setResponseNote(e.target.value)}
               maxLength={500}
             />
             <p className="text-sm text-muted-foreground">
-              Bạn có thể thêm ghi chú để giải thích quyết định của mình
+              {t("responseNoteHelp")}
             </p>
           </div>
 
@@ -131,7 +134,7 @@ export function ContractTerminationRespondDialog({
               disabled={isSubmitting}
             >
               <XCircle className="mr-2 h-4 w-4" />
-              Từ chối
+              {t("reject")}
             </Button>
             <Button
               variant="outline"
@@ -140,7 +143,7 @@ export function ContractTerminationRespondDialog({
               disabled={isSubmitting}
             >
               <CheckCircle2 className="mr-2 h-4 w-4" />
-              Chấp nhận
+              {t("accept")}
             </Button>
           </div>
 
@@ -155,20 +158,16 @@ export function ContractTerminationRespondDialog({
               <AlertDescription>
                 {selectedAction === "APPROVED" ? (
                   <>
-                    Bạn có chắc chắn muốn <strong>chấp nhận</strong> yêu cầu hủy
-                    hợp đồng này? Hợp đồng sẽ kết thúc vào tháng{" "}
-                    {format(
-                      new Date(termination.requestedEndMonth + "-01"),
-                      "MM/yyyy",
-                      { locale: vi }
-                    )}
-                    .
+                    {t("confirmAccept", {
+                      month: format(
+                        new Date(termination.requestedEndMonth + "-01"),
+                        "MM/yyyy",
+                        { locale: vi }
+                      ),
+                    })}
                   </>
                 ) : (
-                  <>
-                    Bạn có chắc chắn muốn <strong>từ chối</strong> yêu cầu hủy
-                    hợp đồng này? Hợp đồng sẽ tiếp tục theo thời hạn ban đầu.
-                  </>
+                  <>{t("confirmReject")}</>
                 )}
               </AlertDescription>
             </Alert>
@@ -196,10 +195,10 @@ export function ContractTerminationRespondDialog({
               }
             >
               {isSubmitting
-                ? "Đang xử lý..."
+                ? t("processing")
                 : selectedAction === "APPROVED"
-                ? "Xác nhận chấp nhận"
-                : "Xác nhận từ chối"}
+                ? t("confirmAcceptButton")
+                : t("confirmRejectButton")}
             </Button>
           )}
         </DialogFooter>

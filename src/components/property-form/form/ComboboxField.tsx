@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Controller } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -40,11 +41,12 @@ export function ComboboxField({
   options,
   loading = false,
   disabled = false,
-  placeholder = "Chọn...",
+  placeholder,
   required = false,
-  searchPlaceholder = "Tìm kiếm...",
-  emptyText = "Không tìm thấy kết quả",
+  searchPlaceholder,
+  emptyText,
 }: ComboboxFieldProps) {
+  const t = useTranslations("form");
   const {
     control,
     formState: { errors },
@@ -89,14 +91,14 @@ export function ComboboxField({
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Đang tải...</span>
+                    <span>{t("uploading")}</span>
                   </div>
                 ) : (
                   <>
                     {field.value
                       ? options.find((option) => option.value === field.value)
                           ?.label || field.value
-                      : placeholder}
+                      : placeholder || t("select")}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </>
                 )}
@@ -104,9 +106,12 @@ export function ComboboxField({
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
               <Command>
-                <CommandInput placeholder={searchPlaceholder} className="h-9" />
+                <CommandInput
+                  placeholder={searchPlaceholder || t("search")}
+                  className="h-9"
+                />
                 <CommandList>
-                  <CommandEmpty>{emptyText}</CommandEmpty>
+                  <CommandEmpty>{emptyText || t("noResults")}</CommandEmpty>
                   <CommandGroup>
                     {options.map((option) => (
                       <CommandItem

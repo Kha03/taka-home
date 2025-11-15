@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Calendar, Clock, Info } from "lucide-react";
@@ -18,6 +19,7 @@ export function ContractExpiryAlert({
   onExtendClick,
   className,
 }: ContractExpiryAlertProps) {
+  const t = useTranslations("contract");
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -37,7 +39,7 @@ export function ContractExpiryAlert({
     if (daysRemaining <= 30) {
       return {
         icon: <Clock className="h-5 w-5" />,
-        title: "Hợp đồng sắp hết hạn!",
+        title: t("contractExpiring"),
         bgClass: "bg-red-50 border-red-200",
         textClass: "text-red-800 dark:text-red-200",
         buttonClass: "bg-red-600 hover:bg-red-700 text-primary-foreground",
@@ -46,7 +48,7 @@ export function ContractExpiryAlert({
     if (daysRemaining <= 45) {
       return {
         icon: <Calendar className="h-5 w-5" />,
-        title: "Nhắc nhở gia hạn hợp đồng",
+        title: t("extensionReminder"),
         bgClass:
           "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800",
         textClass: "text-amber-800 dark:text-amber-200",
@@ -55,7 +57,7 @@ export function ContractExpiryAlert({
     }
     return {
       icon: <Info className="h-5 w-5" />,
-      title: "Thông tin gia hạn",
+      title: t("extensionInfo"),
       bgClass: "bg-primary/10 border-primary",
       textClass: "text-primary",
       buttonClass: "bg-primary hover:bg-primary/80 text-primary-foreground",
@@ -80,14 +82,12 @@ export function ContractExpiryAlert({
             className={cn("text-sm space-y-1", config.textClass)}
           >
             <p>
-              Hợp đồng của bạn sẽ hết hạn vào ngày
-              <span className="font-semibold"> {formatDate(endDate)}</span> (
-              {daysRemaining} ngày nữa).
+              {t("contractExpiresOn", {
+                date: formatDate(endDate),
+                days: daysRemaining,
+              })}
             </p>
-            <p>
-              Bạn có muốn gửi yêu cầu gia hạn hợp đồng không? Chủ nhà sẽ xem xét
-              và phản hồi yêu cầu của bạn.
-            </p>
+            <p>{t("wantToExtend")}</p>
           </AlertDescription>
           <div className="pt-1">
             <Button
@@ -96,7 +96,7 @@ export function ContractExpiryAlert({
               className={cn(config.buttonClass, "gap-2")}
             >
               <Calendar className="h-4 w-4" />
-              Gửi yêu cầu gia hạn
+              {t("sendExtensionRequest")}
             </Button>
           </div>
         </div>

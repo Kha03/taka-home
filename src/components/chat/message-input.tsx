@@ -6,13 +6,15 @@ import { cn } from "@/lib/utils/utils";
 import { MessageInputProps } from "@/types/chat";
 import { Image as ImageIcon, Send } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function MessageInput({
   onSend,
   onTyping,
   disabled = false,
-  placeholder = "Nhập tin nhắn...",
+  placeholder,
 }: MessageInputProps) {
+  const t = useTranslations("chat");
   const [message, setMessage] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -97,9 +99,9 @@ export function MessageInput({
       const isImage = file.type.startsWith("image/");
 
       if (isImage) {
-        onSend(`Đã gửi hình ảnh: ${file.name}`, "image");
+        onSend(`${t("sentImage")}: ${file.name}`, "image");
       } else {
-        onSend(`Đã gửi tệp: ${file.name}`, "file");
+        onSend(`${t("sentFile")}: ${file.name}`, "file");
       }
 
       setIsUploading(false);
@@ -178,7 +180,7 @@ export function MessageInput({
             value={message}
             onChange={handleMessageChange}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={placeholder || t("inputPlaceholder")}
             disabled={disabled || isUploading}
             className={cn(
               "resize-none rounded-lg",
@@ -194,7 +196,7 @@ export function MessageInput({
           {/* Character count or status */}
           {isUploading && (
             <div className="absolute bottom-2 right-2 text-xs text-gray-500">
-              Đang tải lên...
+              {t("uploading")}
             </div>
           )}
         </div>

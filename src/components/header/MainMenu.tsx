@@ -1,41 +1,42 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/utils";
 import { useRole } from "@/hooks/use-role";
 import { useAuth } from "@/contexts/auth-context";
 import { isTenant } from "@/lib/auth/roles";
+import { useTranslations } from "next-intl";
 
 export function MainMenu() {
   const pathname = usePathname();
   const { isLandlord, isAdmin } = useRole();
   const { isAuthenticated } = useAuth();
+  const t = useTranslations("nav");
 
   const menuItems = [
     {
-      label: "Trang chủ",
+      label: t("home"),
       href: "/",
       show: true,
     },
     {
-      label: "Hợp đồng của tôi",
+      label: t("contracts"),
       href: "/contracts",
       show: isLandlord || isTenant, // Cả Tenant và Landlord đều có thể xem
     },
     {
-      label: "Bất động sản của tôi",
+      label: t("myProperties"),
       href: "/my-properties",
       show: isLandlord, // Chỉ Landlord
     },
     {
-      label: "Yêu cầu thuê",
+      label: t("rentalRequests"),
       href: "/rental-requests",
       show: isLandlord, // Chỉ Landlord
     },
 
     {
-      label: "Quản lý & Thống kê",
+      label: t("statistics"),
       href: "/admin/statistics",
       show: isAdmin, // Chỉ Admin
     },

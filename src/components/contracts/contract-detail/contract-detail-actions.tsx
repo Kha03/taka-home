@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +39,7 @@ export function ContractDetailActions({
   userRole,
   onRefresh,
 }: ContractDetailActionsProps) {
+  const t = useTranslations("contract");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [signingMethodDialog, setSigningMethodDialog] = useState(false);
@@ -62,7 +64,7 @@ export function ContractDetailActions({
     try {
       await navigator.clipboard.writeText(booking.contract.contractCode);
       setCopiedContractCode(true);
-      toast.success("Đã sao chép mã hợp đồng");
+      toast.success(t("copiedContractCode"));
 
       // Reset icon after 2 seconds
       setTimeout(() => {
@@ -70,7 +72,7 @@ export function ContractDetailActions({
       }, 2000);
     } catch (error) {
       console.error("Failed to copy:", error);
-      toast.error("Không thể sao chép mã hợp đồng");
+      toast.error(t("cannotCopyContractCode"));
     }
   };
 
@@ -92,7 +94,7 @@ export function ContractDetailActions({
       console.error(error);
       setSigningDialog(false);
       setSigningStep("signing");
-      toast.error("Không thể ký hợp đồng. Vui lòng thử lại");
+      toast.error(t("cannotSignContract"));
     } finally {
       setSigningLoading(false);
     }
@@ -126,38 +128,38 @@ export function ContractDetailActions({
 
       if (method === "WALLET") {
         if (response.data?.status === "PAID") {
-          toast.success("Thanh toán thành công!");
+          toast.success(t("paymentSuccess"));
           onRefresh();
         } else {
-          toast.error("Thanh toán thất bại. Vui lòng kiểm tra số dư ví");
+          toast.error(t("paymentFailed"));
         }
       } else {
         if (response.data?.paymentUrl) {
-          toast.success("Đang chuyển đến trang thanh toán...");
+          toast.success(t("redirectingToPayment"));
           window.location.href = response.data.paymentUrl;
         } else {
-          toast.error("Không thể tạo thanh toán");
+          toast.error(t("cannotCreatePayment"));
         }
       }
 
       setShowPaymentModal(false);
     } catch (error) {
       console.error(error);
-      toast.error("Không thể tạo thanh toán. Vui lòng thử lại");
+      toast.error(t("cannotCreatePaymentRetry"));
     }
   };
 
   const handleHandover = async () => {
     try {
-      toast.loading("Đang xác nhận bàn giao...");
+      toast.loading(t("confirmingHandover"));
       await bookingService.handover(booking.id);
       toast.dismiss();
-      toast.success("Bàn giao thành công! Hợp đồng đã được kích hoạt.");
+      toast.success(t("handoverSuccess"));
       onRefresh();
     } catch (error) {
       console.error(error);
       toast.dismiss();
-      toast.error("Không thể xác nhận bàn giao. Vui lòng thử lại");
+      toast.error(t("cannotConfirmHandover"));
     }
   };
 
@@ -174,11 +176,10 @@ export function ContractDetailActions({
                   <div className="space-y-3 flex-1">
                     <div>
                       <p className="font-semibold text-yellow-900">
-                        Yêu cầu ký hợp đồng
+                        {t("signContractRequest")}
                       </p>
                       <p className="text-sm text-yellow-800 mt-1">
-                        Người thuê đã gửi yêu cầu thuê. Vui lòng xem xét và ký
-                        hợp đồng.
+                        {t("tenantSentRequest")}
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -190,7 +191,7 @@ export function ContractDetailActions({
                           onClick={handleViewContract}
                         >
                           <Eye className="w-4 h-4 mr-2" />
-                          Xem hợp đồng
+                          {t("viewContract")}
                         </Button>
                       )}
                       <Button
@@ -198,7 +199,7 @@ export function ContractDetailActions({
                         onClick={() => setSigningMethodDialog(true)}
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Ký hợp đồng
+                        {t("signContract")}
                       </Button>
                     </div>
                   </div>
@@ -213,9 +214,11 @@ export function ContractDetailActions({
                 <div className="flex items-start gap-3">
                   <Calendar className="w-5 h-5 text-yellow-600 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-yellow-900">Chờ duyệt</p>
+                    <p className="font-semibold text-yellow-900">
+                      {t("waitingApproval")}
+                    </p>
                     <p className="text-sm text-yellow-800 mt-1">
-                      Đang chờ chủ nhà duyệt yêu cầu thuê.
+                      {t("waitingLandlordApproval")}
                     </p>
                   </div>
                 </div>
@@ -233,10 +236,10 @@ export function ContractDetailActions({
                 <div className="space-y-3 flex-1">
                   <div>
                     <p className="font-semibold text-orange-900">
-                      Chờ ký hợp đồng
+                      {t("waitingSignature")}
                     </p>
                     <p className="text-sm text-orange-800 mt-1">
-                      Vui lòng xem xét và ký hợp đồng để tiếp tục.
+                      {t("pleaseReviewAndSign")}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -248,7 +251,7 @@ export function ContractDetailActions({
                         onClick={handleViewContract}
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        Xem hợp đồng
+                        {t("viewContract")}
                       </Button>
                     )}
                     <Button
@@ -256,7 +259,7 @@ export function ContractDetailActions({
                       onClick={() => setSigningMethodDialog(true)}
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Ký hợp đồng
+                      {t("signContract")}
                     </Button>
                   </div>
                 </div>
@@ -274,11 +277,10 @@ export function ContractDetailActions({
                 <div className="space-y-3 flex-1">
                   <div>
                     <p className="font-semibold text-blue-900">
-                      Yêu cầu đặt cọc
+                      {t("depositRequired")}
                     </p>
                     <p className="text-sm text-blue-800 mt-1">
-                      Bạn và chủ nhà cần đặt cọc để kích hoạt hợp đồng. Vui lòng
-                      hoàn tất việc đặt cọc trong thời gian quy định.
+                      {t("bothPartiesDeposit")}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -290,12 +292,12 @@ export function ContractDetailActions({
                         onClick={handleViewContract}
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        Xem hợp đồng
+                        {t("viewContract")}
                       </Button>
                     )}
                     <Button size="sm" onClick={handleDepositPayment}>
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Đặt cọc ngay
+                      {t("depositNow")}
                     </Button>
                   </div>
                 </div>
@@ -314,13 +316,13 @@ export function ContractDetailActions({
                   <div>
                     <p className="font-semibold text-purple-900">
                       {userRole === "LANDLORD"
-                        ? "Yêu cầu đặt cọc"
-                        : "Đã đặt cọc"}
+                        ? t("depositRequired")
+                        : t("deposited")}
                     </p>
                     <p className="text-sm text-purple-800 mt-1">
                       {userRole === "LANDLORD"
-                        ? "Người thuê đã đặt cọc. Đến lượt bạn đặt cọc để kích hoạt hợp đồng."
-                        : "Bạn đã hoàn tất đặt cọc. Đang chờ chủ nhà đặt cọc để kích hoạt hợp đồng."}
+                        ? t("tenantDeposited2")
+                        : t("waitingLandlordDeposit")}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -332,13 +334,13 @@ export function ContractDetailActions({
                         onClick={handleViewContract}
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        Xem hợp đồng
+                        {t("viewContract")}
                       </Button>
                     )}
                     {userRole === "LANDLORD" && (
                       <Button size="sm" onClick={handleDepositPayment}>
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Đặt cọc ngay
+                        {t("depositNow")}
                       </Button>
                     )}
                   </div>
@@ -358,13 +360,13 @@ export function ContractDetailActions({
                   <div>
                     <p className="font-semibold text-emerald-900">
                       {userRole === "LANDLORD"
-                        ? "Sẵn sàng bàn giao"
-                        : "Chờ bàn giao"}
+                        ? t("readyForHandover")
+                        : t("waitingHandover")}
                     </p>
                     <p className="text-sm text-emerald-800 mt-1">
                       {userRole === "LANDLORD"
-                        ? "Cả hai bên đã hoàn tất đặt cọc. Vui lòng xác nhận bàn giao để kích hoạt hợp đồng."
-                        : "Cả hai bên đã hoàn tất đặt cọc. Đang chờ chủ nhà xác nhận bàn giao để kích hoạt hợp đồng."}
+                        ? t("bothPartiesDepositedLandlord")
+                        : t("bothPartiesDepositedTenant")}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -376,13 +378,13 @@ export function ContractDetailActions({
                         onClick={handleViewContract}
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        Xem hợp đồng
+                        {t("viewContract")}
                       </Button>
                     )}
                     {userRole === "LANDLORD" && (
                       <Button size="sm" onClick={handleHandover}>
                         <CheckCircle className="w-4 h-4 mr-2" />
-                        Xác nhận bàn giao
+                        {t("confirmHandover")}
                       </Button>
                     )}
                   </div>
@@ -412,11 +414,11 @@ export function ContractDetailActions({
                       <FileText className="w-5 h-5 text-primary" />
                       <div>
                         <p className="font-semibold text-foreground">
-                          Hợp đồng thuê nhà
+                          {t("rentalContract")}
                         </p>
                         {booking.contract.contractCode && (
                           <p className="text-sm text-muted-foreground">
-                            Mã:{" "}
+                            {t("contractCode")}:{" "}
                             <span className="font-mono font-medium text-foreground">
                               {booking.contract.contractCode}
                             </span>
@@ -434,12 +436,12 @@ export function ContractDetailActions({
                           {copiedContractCode ? (
                             <>
                               <Check className="w-4 h-4 mr-1" />
-                              Đã sao chép
+                              {t("copied")}
                             </>
                           ) : (
                             <>
                               <Copy className="w-4 h-4 mr-1" />
-                              Sao chép
+                              {t("copy")}
                             </>
                           )}
                         </Button>
@@ -450,7 +452,7 @@ export function ContractDetailActions({
                         className="text-primary"
                       >
                         <Eye className="w-4 h-4 mr-2" />
-                        Xem hợp đồng
+                        {t("viewContract")}
                       </Button>
                     </div>
                   </div>
@@ -510,15 +512,15 @@ export function ContractDetailActions({
           <DialogHeader>
             <DialogTitle>
               {signingStep === "signing"
-                ? "Đang xử lý yêu cầu ký..."
-                : "Ký hợp đồng thành công"}
+                ? t("processingSignRequest")
+                : t("signedSuccessfully")}
             </DialogTitle>
             <DialogDescription>
               {signingStep === "signing"
                 ? selectedSigningMethod === signingOption.VNPT
-                  ? "Vui lòng kiểm tra điện thoại"
-                  : "Đang xử lý yêu cầu ký"
-                : "Thông tin quan trọng"}
+                  ? t("pleaseCheckPhone")
+                  : t("processingSigning")
+                : t("importantInfo")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -534,13 +536,13 @@ export function ContractDetailActions({
                       <div className="space-y-2">
                         <p className="font-medium text-blue-900">
                           {selectedSigningMethod === signingOption.VNPT
-                            ? "Vui lòng kiểm tra điện thoại"
-                            : "Đang ký hợp đồng"}
+                            ? t("pleaseCheckPhone")
+                            : t("signing")}
                         </p>
                         <p className="text-sm text-blue-800">
                           {selectedSigningMethod === signingOption.VNPT
-                            ? "Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của bạn. Vui lòng mở ứng dụng VNPT SmartCA để ký xác nhận."
-                            : "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát..."}
+                            ? t("vnptSigningInstructions")
+                            : t("autoSigningInstructions")}
                         </p>
                       </div>
                     </div>
@@ -556,11 +558,10 @@ export function ContractDetailActions({
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
                       <div className="space-y-2">
                         <p className="font-medium text-green-900">
-                          Đã ký thành công!
+                          {t("signedSuccessMessage")}
                         </p>
                         <p className="text-sm text-green-800">
-                          Bạn và chủ nhà hãy đặt cọc cho hợp đồng. Hệ thống sẽ
-                          tự động cập nhật trạng thái sau khi hoàn tất.
+                          {t("bothPartiesDepositMessage")}
                         </p>
                       </div>
                     </div>
@@ -574,7 +575,7 @@ export function ContractDetailActions({
                       onRefresh();
                     }}
                   >
-                    Đóng
+                    {t("close")}
                   </Button>
                 </div>
               </>

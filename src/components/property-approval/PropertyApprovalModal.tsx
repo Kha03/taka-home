@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
   Dialog,
@@ -58,6 +59,7 @@ export function PropertyApprovalModal({
   onApprove,
   onReject,
 }: PropertyApprovalModalProps) {
+  const t = useTranslations("propertyDetail");
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Early return after hooks
@@ -65,9 +67,7 @@ export function PropertyApprovalModal({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[98vw] sm:w-[95vw] max-w-[1400px] p-6 bg-[#FFF7E9]">
-          <p className="text-center text-muted-foreground">
-            Không có dữ liệu property
-          </p>
+          <p className="text-center text-muted-foreground">{t("noData")}</p>
         </DialogContent>
       </Dialog>
     );
@@ -116,10 +116,10 @@ export function PropertyApprovalModal({
     >
       <Building2 className="w-3 h-3 mr-1" />
       {isBoarding
-        ? "Phòng trọ"
+        ? t("category.boarding")
         : property && "type" in property && property.type === "HOUSING"
-        ? "Nhà riêng"
-        : "Chung cư"}
+        ? t("category.housing")
+        : t("category.apartment")}
     </Badge>
   );
 
@@ -172,7 +172,7 @@ export function PropertyApprovalModal({
                 <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-amber-100 to-amber-50">
                   <div className="flex items-center gap-2 text-amber-700">
                     <Images className="w-5 h-5" />
-                    <span>Chưa có hình ảnh</span>
+                    <span>{t("noImages")}</span>
                   </div>
                 </div>
               )}
@@ -193,7 +193,7 @@ export function PropertyApprovalModal({
                       : "bg-amber-100 text-amber-700"
                   } border-none pointer-events-none`}
                 >
-                  {isApproved ? "Đã duyệt" : "Chờ duyệt"}
+                  {isApproved ? t("approved") : t("pending")}
                 </Badge>
               </div>
             </div>

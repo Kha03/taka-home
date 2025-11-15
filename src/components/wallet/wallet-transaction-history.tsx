@@ -6,6 +6,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -33,6 +34,7 @@ export interface WalletTransactionHistoryProps {
 export function WalletTransactionHistory({
   className = "",
 }: WalletTransactionHistoryProps) {
+  const t = useTranslations("wallet");
   const [transactions, setTransactions] = useState<WalletHistoryResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +47,11 @@ export function WalletTransactionHistory({
       if (response.code === 200 && response.data) {
         setTransactions(response.data);
       } else {
-        setError("Không thể tải lịch sử giao dịch");
+        setError(t("errorLoading"));
       }
     } catch {
-      setError("Lỗi khi tải dữ liệu");
-      toast.error("Lỗi", "Không thể tải lịch sử giao dịch");
+      setError(t("errorLoading"));
+      toast.error(t("errorLoading"), t("errorLoading"));
     } finally {
       setLoading(false);
     }
@@ -96,9 +98,9 @@ export function WalletTransactionHistory({
 
   const getTransactionTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      TOPUP: "Nạp tiền",
-      CONTRACT_PAYMENT: "Thanh toán hợp đồng",
-      REFUND: "Hoàn tiền",
+      TOPUP: t("transactionType.TOPUP"),
+      CONTRACT_PAYMENT: t("transactionType.CONTRACT_PAYMENT"),
+      REFUND: t("transactionType.REFUND"),
     };
     return labels[type] || type;
   };
@@ -109,17 +111,17 @@ export function WalletTransactionHistory({
       { label: string; className: string; icon: React.ReactNode }
     > = {
       COMPLETED: {
-        label: "Hoàn thành",
+        label: t("status.COMPLETED"),
         className: "bg-green-100 text-green-700 border-green-200",
         icon: <CheckCircle className="w-3 h-3" />,
       },
       PENDING: {
-        label: "Đang xử lý",
+        label: t("status.PENDING"),
         className: "bg-orange-100 text-orange-700 border-orange-200",
         icon: <Clock className="w-3 h-3" />,
       },
       FAILED: {
-        label: "Thất bại",
+        label: t("status.FAILED"),
         className: "bg-red-100 text-red-700 border-red-200",
         icon: <XCircle className="w-3 h-3" />,
       },
@@ -146,10 +148,10 @@ export function WalletTransactionHistory({
         className={cn("border-none shadow-sm bg-primary-foreground", className)}
       >
         <CardHeader>
-          <CardTitle>Lịch sử giao dịch</CardTitle>
+          <CardTitle>{t("transactionHistory")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <LoadingSpinner text="Đang tải lịch sử giao dịch" />
+          <LoadingSpinner text={t("loading")} />
         </CardContent>
       </Card>
     );
@@ -161,7 +163,7 @@ export function WalletTransactionHistory({
         className={cn("border-none shadow-sm bg-primary-foreground", className)}
       >
         <CardHeader>
-          <CardTitle>Lịch sử giao dịch</CardTitle>
+          <CardTitle>{t("transactionHistory")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-12 gap-4">
@@ -169,7 +171,7 @@ export function WalletTransactionHistory({
             <p className="text-gray-600">{error}</p>
             <Button onClick={fetchHistory} variant="outline">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Thử lại
+              {t("tryAgain")}
             </Button>
           </div>
         </CardContent>
@@ -184,7 +186,7 @@ export function WalletTransactionHistory({
       >
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Lịch sử giao dịch</CardTitle>
+            <CardTitle>{t("transactionHistory")}</CardTitle>
             <Button
               onClick={fetchHistory}
               variant="ghost"
@@ -202,11 +204,9 @@ export function WalletTransactionHistory({
             </div>
             <div className="text-center">
               <p className="font-semibold text-gray-900 mb-1">
-                Chưa có giao dịch
+                {t("noTransactions")}
               </p>
-              <p className="text-sm text-gray-500">
-                Lịch sử giao dịch của bạn sẽ hiển thị tại đây
-              </p>
+              <p className="text-sm text-gray-500">{t("transactionHistory")}</p>
             </div>
           </div>
         </CardContent>
@@ -220,7 +220,7 @@ export function WalletTransactionHistory({
     >
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Lịch sử giao dịch</CardTitle>
+          <CardTitle>{t("transactionHistory")}</CardTitle>
           <Button
             onClick={fetchHistory}
             variant="ghost"
@@ -288,7 +288,7 @@ export function WalletTransactionHistory({
                   </span>
                   {transaction.refId && (
                     <span className="text-xs text-gray-500">
-                      Mã GD: {transaction.refId}
+                      {t("transactionId")}: {transaction.refId}
                     </span>
                   )}
                 </div>
@@ -301,7 +301,7 @@ export function WalletTransactionHistory({
         {transactions.length >= 10 && (
           <div className="mt-6 text-center">
             <Button variant="outline" disabled className="text-primary">
-              Xem thêm
+              {t("loadMore")}
             </Button>
           </div>
         )}

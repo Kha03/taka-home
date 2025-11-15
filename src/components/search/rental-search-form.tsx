@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { ArrowRight, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function RentalSearchForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("search.filters");
 
   const [priceRange, setPriceRange] = useState([0, 1000000000]); // 0 to 1 billion VND
   const [minPrice, setMinPrice] = useState("");
@@ -54,10 +56,12 @@ export function RentalSearchForm() {
   };
 
   const formatPrice = (price: number) => {
-    if (price === 0) return "0 VND";
-    if (price >= 1000000) return `${(price / 1000000).toFixed(1)} Triệu`;
-    if (price >= 1000) return `${(price / 1000).toFixed(0)}K`;
-    return `${price} VND`;
+    if (price === 0) return `0 ${t("priceUnit")}`;
+    if (price >= 1000000)
+      return `${(price / 1000000).toFixed(1)} ${t("priceMillions")}`;
+    if (price >= 1000)
+      return `${(price / 1000).toFixed(0)}${t("priceThousands")}`;
+    return `${price} ${t("priceUnit")}`;
   };
 
   const handleApplyFilters = () => {
@@ -141,7 +145,7 @@ export function RentalSearchForm() {
       <CardContent className="p-0 space-y-3">
         {/* Price Range Section */}
         <div className="space-y-4">
-          <p className="text-sm font-bold text-primary">Giá thuê</p>
+          <p className="text-sm font-bold text-primary">{t("priceRange")}</p>
 
           <div className="space-y-3">
             <div className="relative">
@@ -154,8 +158,8 @@ export function RentalSearchForm() {
                 className="w-full"
               />
               <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                <span>0 VND</span>
-                <span>100 Triệu</span>
+                <span>0 {t("priceUnit")}</span>
+                <span>100 {t("priceMillions")}</span>
               </div>
             </div>
 
@@ -174,45 +178,45 @@ export function RentalSearchForm() {
 
         {/* Bedrooms Section */}
         <div className="space-y-3">
-          <p className="text-sm font-bold text-primary">Số phòng ngủ</p>
+          <p className="text-sm font-bold text-primary">{t("bedrooms")}</p>
           <Select value={bedrooms} onValueChange={setBedrooms}>
             <SelectTrigger className="w-full bg-[#F4F4F4] rounded-[30px] text-xs data-[placeholder]:text-[#A1A1A1]">
-              <SelectValue placeholder="Số phòng ngủ" />
+              <SelectValue placeholder={t("bedroomsPlaceholder")} />
             </SelectTrigger>
             <SelectContent className="bg-primary-foreground">
-              <SelectItem value="1">1 phòng ngủ</SelectItem>
-              <SelectItem value="2">2 phòng ngủ</SelectItem>
-              <SelectItem value="3">3 phòng ngủ</SelectItem>
-              <SelectItem value="4">4 phòng ngủ</SelectItem>
-              <SelectItem value="5+">5+ phòng ngủ</SelectItem>
+              <SelectItem value="1">{t("bedroomOptions.1")}</SelectItem>
+              <SelectItem value="2">{t("bedroomOptions.2")}</SelectItem>
+              <SelectItem value="3">{t("bedroomOptions.3")}</SelectItem>
+              <SelectItem value="4">{t("bedroomOptions.4")}</SelectItem>
+              <SelectItem value="5+">{t("bedroomOptions.5+")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Bathrooms Section */}
         <div className="space-y-3">
-          <p className="text-sm font-bold text-primary">Số nhà vệ sinh</p>
+          <p className="text-sm font-bold text-primary">{t("bathrooms")}</p>
           <Select value={bathrooms} onValueChange={setBathrooms}>
             <SelectTrigger className="w-full bg-[#F4F4F4] rounded-[30px] text-xs data-[placeholder]:text-[#A1A1A1]">
-              <SelectValue placeholder="Số nhà vệ sinh" />
+              <SelectValue placeholder={t("bathroomsPlaceholder")} />
             </SelectTrigger>
             <SelectContent className="bg-primary-foreground">
-              <SelectItem value="1">1 nhà vệ sinh</SelectItem>
-              <SelectItem value="2">2 nhà vệ sinh</SelectItem>
-              <SelectItem value="3">3 nhà vệ sinh</SelectItem>
-              <SelectItem value="4">4 nhà vệ sinh</SelectItem>
-              <SelectItem value="5+">5+ nhà vệ sinh</SelectItem>
+              <SelectItem value="1">{t("bathroomOptions.1")}</SelectItem>
+              <SelectItem value="2">{t("bathroomOptions.2")}</SelectItem>
+              <SelectItem value="3">{t("bathroomOptions.3")}</SelectItem>
+              <SelectItem value="4">{t("bathroomOptions.4")}</SelectItem>
+              <SelectItem value="5+">{t("bathroomOptions.5+")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Area Section */}
         <div className="space-y-3">
-          <p className="text-sm font-bold text-primary">Diện tích (m²)</p>
+          <p className="text-sm font-bold text-primary">{t("area")}</p>
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
               <Input
-                placeholder="Diện tích tối thiểu"
+                placeholder={t("minArea")}
                 value={minArea}
                 onChange={(e) => setMinArea(e.target.value)}
                 className="bg-[#F4F4F4] placeholder:text-xs placeholder:text-[#A1A1A1] rounded-[30px] "
@@ -221,7 +225,7 @@ export function RentalSearchForm() {
             <ArrowRight className="h-3 w-3 text-muted-foreground" />
             <div className="flex-1 relative">
               <Input
-                placeholder="Diện tích tối đa"
+                placeholder={t("maxArea")}
                 value={maxArea}
                 onChange={(e) => setMaxArea(e.target.value)}
                 className="bg-[#F4F4F4] placeholder:text-xs placeholder:text-[#A1A1A1] rounded-[30px]"
@@ -232,18 +236,24 @@ export function RentalSearchForm() {
 
         {/* Furniture Condition Section */}
         <div className="space-y-3">
-          <p className="text-sm font-bold text-primary">Tình trạng nội thất</p>
+          <p className="text-sm font-bold text-primary">{t("furnishing")}</p>
           <Select
             value={furnitureCondition}
             onValueChange={setFurnitureCondition}
           >
             <SelectTrigger className="w-full bg-[#F4F4F4] rounded-[30px] text-xs data-[placeholder]:text-[#A1A1A1]">
-              <SelectValue placeholder="Tình trạng nội thất" />
+              <SelectValue placeholder={t("furnishingPlaceholder")} />
             </SelectTrigger>
             <SelectContent className="bg-primary-foreground">
-              <SelectItem value="Đầy đủ">Đầy đủ</SelectItem>
-              <SelectItem value="Cơ bản">Cơ bản</SelectItem>
-              <SelectItem value="Không">Không</SelectItem>
+              <SelectItem value="Đầy đủ">
+                {t("furnishingOptions.full")}
+              </SelectItem>
+              <SelectItem value="Cơ bản">
+                {t("furnishingOptions.basic")}
+              </SelectItem>
+              <SelectItem value="Không">
+                {t("furnishingOptions.none")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -255,14 +265,14 @@ export function RentalSearchForm() {
             className="flex-1 bg-primary hover:bg-primary/90 text-white rounded-[30px]"
           >
             <Search className="h-4 w-4 mr-2" />
-            Áp dụng bộ lọc
+            {t("applyFilters")}
           </Button>
           <Button
             onClick={handleResetFilters}
             variant="outline"
             className="flex-1 rounded-[30px] border-primary text-primary hover:bg-primary/10"
           >
-            Đặt lại
+            {t("resetFilters")}
           </Button>
         </div>
       </CardContent>

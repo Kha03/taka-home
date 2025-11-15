@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils/utils";
 import { Chat, Message, TypingUser, User } from "@/types/chat";
 import { ArrowLeft, Info, MessageCircle, MoreVertical } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { MessageBubble } from "./message-bubble";
 import { MessageInput } from "./message-input";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 
 interface ChatWindowProps {
   chat: Chat | null;
@@ -35,6 +36,7 @@ export function ChatWindow({
   isLoading = false,
   className,
 }: ChatWindowProps) {
+  const t = useTranslations("chat");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -74,11 +76,9 @@ export function ChatWindow({
             </div>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Chọn một cuộc trò chuyện
+            {t("selectChat")}
           </h3>
-          <p className="text-gray-500">
-            Chọn một cuộc trò chuyện từ danh sách để bắt đầu nhắn tin
-          </p>
+          <p className="text-gray-500">{t("selectChatDescription")}</p>
         </div>
       </div>
     );
@@ -136,11 +136,11 @@ export function ChatWindow({
                   )}
                 >
                   {otherParticipant?.role === "landlord"
-                    ? "Chủ nhà"
-                    : "Người thuê"}
+                    ? t("landlord")
+                    : t("tenant")}
                 </Badge>
               </div>
-              <p className="text-sm text-green-500">Đang hoạt động</p>
+              <p className="text-sm text-green-500">{t("online")}</p>
             </div>
           </div>
 
@@ -169,7 +169,7 @@ export function ChatWindow({
                     size="sm"
                     className="border-[#DCBB87] text-[#DCBB87]"
                   >
-                    Xem chi tiết
+                    {t("viewDetail")}
                   </Button>
                 </Link>
               </div>
@@ -185,7 +185,7 @@ export function ChatWindow({
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <LoadingSpinner text="Đang tải tin nhắn..." />
+            <LoadingSpinner text={t("loadingMessages")} />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
@@ -194,11 +194,10 @@ export function ChatWindow({
                 <div className="text-2xl">👋</div>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Bắt đầu cuộc trò chuyện
+                {t("startConversation")}
               </h3>
               <p className="text-gray-500">
-                Gửi tin nhắn đầu tiên để bắt đầu trò chuyện với{" "}
-                {otherParticipant?.name}
+                {t("sendFirstMessage")} {otherParticipant?.name}
               </p>
             </div>
           </div>
@@ -255,7 +254,7 @@ export function ChatWindow({
                       ></span>
                     </div>
                     <span className="text-xs text-gray-500 ml-2">
-                      {typingUsers[0].fullName} đang nhập...
+                      {typingUsers[0].fullName} {t("typing")}
                     </span>
                   </div>
                 </div>
@@ -273,7 +272,7 @@ export function ChatWindow({
           onSend={onSendMessage}
           onTyping={onTyping}
           disabled={isLoading}
-          placeholder={`Nhắn tin cho ${otherParticipant?.name}...`}
+          placeholder={`${t("messageTo")} ${otherParticipant?.name}...`}
         />
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { CalendarIcon, AlertCircle } from "lucide-react";
@@ -42,6 +43,7 @@ export function ContractTerminationDialog({
   contractEndDate,
   onSuccess,
 }: ContractTerminationDialogProps) {
+  const t = useTranslations("contract");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [reason, setReason] = useState("");
@@ -75,15 +77,15 @@ export function ContractTerminationDialog({
     const newErrors: { date?: string; reason?: string } = {};
 
     if (!selectedDate) {
-      newErrors.date = "Vui lòng chọn tháng kết thúc";
+      newErrors.date = t("pleaseSelectEndMonth");
     } else if (!isDateValid(selectedDate)) {
-      newErrors.date = "Thời gian kết thúc không hợp lệ";
+      newErrors.date = t("invalidEndMonth");
     }
 
     if (!reason || reason.trim().length < 10) {
-      newErrors.reason = "Lý do phải có ít nhất 10 ký tự";
+      newErrors.reason = t("reasonTooShort");
     } else if (reason.length > 500) {
-      newErrors.reason = "Lý do không được vượt quá 500 ký tự";
+      newErrors.reason = t("reasonTooLong");
     }
 
     setErrors(newErrors);
@@ -136,11 +138,8 @@ export function ContractTerminationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] overflow-visible">
         <DialogHeader>
-          <DialogTitle>Yêu cầu hủy hợp đồng trước hạn</DialogTitle>
-          <DialogDescription>
-            Gửi yêu cầu hủy hợp đồng trước thời hạn. Bên còn lại sẽ nhận được
-            thông báo và có thể chấp nhận hoặc từ chối yêu cầu của bạn.
-          </DialogDescription>
+          <DialogTitle>{t("terminationRequest")}</DialogTitle>
+          <DialogDescription>{t("terminationDescription")}</DialogDescription>
         </DialogHeader>
 
         <Alert>
@@ -156,7 +155,8 @@ export function ContractTerminationDialog({
           {/* Date Picker */}
           <div className="flex flex-col space-y-2">
             <Label>
-              Tháng kết thúc mong muốn <span className="text-red-500">*</span>
+              {t("desiredEndMonth")}{" "}
+              <span className="text-red-500">{t("required")}</span>
             </Label>
             <Popover
               open={isCalendarOpen}
@@ -177,7 +177,7 @@ export function ContractTerminationDialog({
                   {selectedDate ? (
                     format(selectedDate, "MMMM yyyy", { locale: vi })
                   ) : (
-                    <span>Chọn tháng kết thúc</span>
+                    <span>{t("selectEndMonth")}</span>
                   )}
                 </Button>
               </PopoverTrigger>
@@ -264,10 +264,10 @@ export function ContractTerminationDialog({
               disabled={isSubmitting}
               className="text-primary"
             >
-              Hủy
+              {t("cancel")}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Đang gửi..." : "Gửi yêu cầu"}
+              {isSubmitting ? t("sending") : t("sendRequest")}
             </Button>
           </DialogFooter>
         </form>

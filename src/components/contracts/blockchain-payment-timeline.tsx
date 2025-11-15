@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { BlockchainPaymentValue } from "@/types/contracts";
 import {
   Card,
@@ -25,7 +26,7 @@ interface BlockchainPaymentTimelineProps {
   contractId?: string; // Optional filter by contract ID
 }
 
-const getStatusBadge = (status: string) => {
+const getStatusBadge = (status: string, t: (key: string) => string) => {
   const statusMap: Record<
     string,
     {
@@ -33,9 +34,9 @@ const getStatusBadge = (status: string) => {
       variant: "default" | "secondary" | "destructive" | "outline";
     }
   > = {
-    PAID: { label: "Đã thanh toán", variant: "default" },
-    SCHEDULED: { label: "Đã lên lịch", variant: "secondary" },
-    OVERDUE: { label: "Quá hạn", variant: "destructive" },
+    PAID: { label: t("paidLabel"), variant: "default" },
+    SCHEDULED: { label: t("waitingPayment"), variant: "secondary" },
+    OVERDUE: { label: t("overdueLabel"), variant: "destructive" },
   };
 
   const config = statusMap[status] || {
@@ -77,6 +78,8 @@ export function BlockchainPaymentTimeline({
   history,
   contractId,
 }: BlockchainPaymentTimelineProps) {
+  const t = useTranslations("contract");
+
   // Debug: Log để xem cấu trúc dữ liệu
   console.log("Payment History:", history);
   console.log("Filter ContractId:", contractId);
@@ -97,8 +100,8 @@ export function BlockchainPaymentTimeline({
     return (
       <div className="text-center py-8 text-muted-foreground">
         {contractId
-          ? `Không tìm thấy thanh toán cho hợp đồng ${contractId}`
-          : "Không có dữ liệu thanh toán"}
+          ? `${t("noPaymentFound")} ${contractId}`
+          : t("noPaymentData2")}
       </div>
     );
   }
@@ -117,7 +120,7 @@ export function BlockchainPaymentTimeline({
                   <div className="flex items-center gap-2">
                     {getStatusIcon(payment.status)}
                     <CardTitle className="text-lg">
-                      Thanh toán kỳ {payment.period}
+                      {t("paymentPeriod")} {payment.period}
                     </CardTitle>
                   </div>
                   <CardDescription className="space-y-1">
@@ -126,11 +129,11 @@ export function BlockchainPaymentTimeline({
                       <span>{formatDateTime(payment.createdAt)}</span>
                     </div>
                     <div className="font-mono text-xs text-muted-foreground break-all">
-                      ID: {payment.paymentId}
+                      {t("paymentId")}: {payment.paymentId}
                     </div>
                   </CardDescription>
                 </div>
-                <div>{getStatusBadge(payment.status)}</div>
+                <div>{getStatusBadge(payment.status, t)}</div>
               </div>
             </CardHeader>
 
@@ -140,7 +143,7 @@ export function BlockchainPaymentTimeline({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Mã thanh toán:</span>
+                    <span className="font-medium">{t("paymentId")}:</span>
                     <span className="font-mono text-xs">
                       {payment.paymentId || "N/A"}
                     </span>
@@ -149,14 +152,14 @@ export function BlockchainPaymentTimeline({
                   {payment.contractId && (
                     <div className="flex items-center gap-2 text-sm">
                       <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Hợp đồng:</span>
+                      <span className="font-medium">{t("title")}:</span>
                       <span className="font-mono">{payment.contractId}</span>
                     </div>
                   )}
 
                   <div className="flex items-center gap-2 text-sm">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Số tiền:</span>
+                    <span className="font-medium">{t("amount")}:</span>
                     <span className="font-semibold text-primary">
                       {formatCurrency(payment.amount)}
                     </span>
@@ -165,7 +168,7 @@ export function BlockchainPaymentTimeline({
                   {payment.paidAmount && (
                     <div className="flex items-center gap-2 text-sm">
                       <DollarSign className="h-4 w-4 text-green-600" />
-                      <span className="font-medium">Đã thanh toán:</span>
+                      <span className="font-medium">{t("paidLabel")}:</span>
                       <span className="font-semibold text-green-600">
                         {formatCurrency(payment.paidAmount)}
                       </span>
@@ -176,14 +179,14 @@ export function BlockchainPaymentTimeline({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">Hạn thanh toán:</span>
+                    <span className="font-medium">{t("paymentDeadline")}:</span>
                     <span>{formatDateTime(payment.dueDate)}</span>
                   </div>
 
                   {payment.paidAt && (
                     <div className="flex items-center gap-2 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span className="font-medium">Đã thanh toán:</span>
+                      <span className="font-medium">{t("paidLabel")}:</span>
                       <span>{formatDateTime(payment.paidAt)}</span>
                     </div>
                   )}
@@ -191,7 +194,7 @@ export function BlockchainPaymentTimeline({
                   {payment.overdueAt && (
                     <div className="flex items-center gap-2 text-sm">
                       <AlertCircle className="h-4 w-4 text-red-600" />
-                      <span className="font-medium">Quá hạn lúc:</span>
+                      <span className="font-medium">{t("overdueAt")}:</span>
                       <span>{formatDateTime(payment.overdueAt)}</span>
                     </div>
                   )}
@@ -203,7 +206,9 @@ export function BlockchainPaymentTimeline({
                 <div className="p-3 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium text-sm">Order Reference</span>
+                    <span className="font-medium text-sm">
+                      {t("orderReference")}
+                    </span>
                   </div>
                   <p className="text-xs font-mono break-all text-muted-foreground">
                     {payment.orderRef}
@@ -217,7 +222,7 @@ export function BlockchainPaymentTimeline({
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4 text-red-600" />
                     <h4 className="font-medium text-sm">
-                      Phạt ({payment.penalties.length})
+                      {t("penalties")} ({payment.penalties.length})
                     </h4>
                   </div>
                   <div className="space-y-2">
@@ -236,7 +241,9 @@ export function BlockchainPaymentTimeline({
                         </div>
                         <p className="text-xs mb-1">{penalty.reason}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>Áp dụng bởi: {penalty.appliedBy}</span>
+                          <span>
+                            {t("appliedBy")}: {penalty.appliedBy}
+                          </span>
                           <span>•</span>
                           <span>{formatDateTime(penalty.appliedAt)}</span>
                         </div>
@@ -249,11 +256,11 @@ export function BlockchainPaymentTimeline({
               {/* Timestamps */}
               <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                 <div>
-                  <span className="font-medium">Tạo lúc:</span>{" "}
+                  <span className="font-medium">{t("createdAt")}:</span>{" "}
                   {formatDateTime(payment.createdAt)}
                 </div>
                 <div>
-                  <span className="font-medium">Cập nhật:</span>{" "}
+                  <span className="font-medium">{t("updatedAt")}:</span>{" "}
                   {formatDateTime(payment.updatedAt)}
                 </div>
               </div>

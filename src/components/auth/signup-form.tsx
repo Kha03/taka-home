@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import {
 } from "@/lib/auth/google-oauth";
 
 export function SignUpForm() {
+  const t = useTranslations("auth");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -42,12 +44,12 @@ export function SignUpForm() {
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
+      setError(t("passwordMismatch"));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setError(t("passwordTooShort"));
       return;
     }
 
@@ -75,7 +77,7 @@ export function SignUpForm() {
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="fullName" className="text-sm">
-            Họ và tên
+            {t("fullName")}
           </Label>
           <Input
             id="fullName"
@@ -92,7 +94,7 @@ export function SignUpForm() {
 
         {/* Role Selection */}
         <div className="space-y-2 sm:col-span-2">
-          <Label className="text-sm">Bạn muốn đăng ký với vai trò</Label>
+          <Label className="text-sm">{t("role.selectRole")}</Label>
           <RadioGroup
             value={formData.role}
             onValueChange={handleRoleChange}
@@ -104,7 +106,7 @@ export function SignUpForm() {
                 htmlFor="tenant"
                 className="font-normal cursor-pointer flex-1"
               >
-                <div className="text-sm font-medium">Người thuê</div>
+                <div className="text-sm font-medium">{t("role.tenant")}</div>
               </Label>
             </div>
             <div className="flex items-center space-x-2 flex-1">
@@ -113,7 +115,7 @@ export function SignUpForm() {
                 htmlFor="landlord"
                 className="font-normal cursor-pointer flex-1"
               >
-                <div className="text-sm font-medium">Chủ nhà</div>
+                <div className="text-sm font-medium">{t("role.landlord")}</div>
               </Label>
             </div>
           </RadioGroup>
@@ -138,7 +140,7 @@ export function SignUpForm() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="phone" className="text-sm">
-            Số điện thoại
+            {t("phone")}
           </Label>
           <Input
             id="phone"
@@ -158,7 +160,7 @@ export function SignUpForm() {
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="password" className="text-sm">
-            Mật khẩu
+            {t("password")}
           </Label>
           <PasswordInput
             id="password"
@@ -170,7 +172,7 @@ export function SignUpForm() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="confirmPassword" className="text-sm">
-            Xác nhận mật khẩu
+            {t("confirmPassword")}
           </Label>
           <Input
             id="confirmPassword"
@@ -186,7 +188,7 @@ export function SignUpForm() {
           {formData.confirmPassword &&
           formData.confirmPassword !== formData.password ? (
             <p className="text-xs text-destructive h-2">
-              Mật khẩu nhập lại không khớp.
+              {t("passwordMismatch")}
             </p>
           ) : (
             <p className="h-2"></p>
@@ -195,7 +197,7 @@ export function SignUpForm() {
       </div>
 
       <Button type="submit" className="w-full h-9" disabled={isLoading}>
-        {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+        {isLoading ? t("creatingAccount") : t("createAccount")}
       </Button>
 
       <Separator className="my-3" />
@@ -249,12 +251,12 @@ export function SignUpForm() {
       </div>
 
       <p className="mt-3 text-center text-sm text-muted-foreground">
-        Đã có tài khoản?{" "}
+        {t("alreadyHaveAccount")}{" "}
         <Link
           href="/signin"
           className="font-medium text-primary hover:underline"
         >
-          Đăng nhập ngay
+          {t("loginNow")}
         </Link>
       </p>
     </form>

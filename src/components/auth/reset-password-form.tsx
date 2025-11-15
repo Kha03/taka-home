@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { getApiErrorMessage } from "@/lib/utils/error-handler";
 import { translateResponseMessage } from "@/lib/constants/error-messages";
 
 function ResetPasswordContent() {
+  const t = useTranslations("auth");
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -27,7 +29,7 @@ function ResetPasswordContent() {
   // Verify token khi component mount
   useEffect(() => {
     if (!token) {
-      setError("Link không hợp lệ hoặc thiếu token");
+      setError(t("resetPassword.invalidLink"));
       setIsValidToken(false);
       setIsVerifying(false);
       return;
@@ -48,18 +50,18 @@ function ResetPasswordContent() {
         );
 
         const decoded = JSON.parse(jsonPayload);
-        
+
         // Check expiry
         const currentTime = Math.floor(Date.now() / 1000);
         if (decoded.exp && decoded.exp < currentTime) {
-          setError("Link đã hết hạn. Vui lòng yêu cầu gửi lại email khôi phục.");
+          setError(t("resetPassword.linkExpired"));
           setIsValidToken(false);
         } else {
           setIsValidToken(true);
         }
       } catch (err) {
         console.error("Error verifying token:", err);
-        setError("Token không hợp lệ. Vui lòng kiểm tra lại link trong email.");
+        setError(t("resetPassword.invalidToken"));
         setIsValidToken(false);
       } finally {
         setIsVerifying(false);
@@ -75,22 +77,22 @@ function ResetPasswordContent() {
     setSuccess("");
 
     if (!token) {
-      setError("Link không hợp lệ");
+      setError(t("resetPassword.invalidLink"));
       return;
     }
 
     if (!newPassword.trim() || !confirmPassword.trim()) {
-      setError("Vui lòng nhập mật khẩu mới");
+      setError(t("resetPassword.enterNewPassword"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
+      setError(t("passwordMismatch"));
       return;
     }
 
     if (newPassword.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setError(t("passwordTooShort"));
       return;
     }
 
@@ -107,11 +109,17 @@ function ResetPasswordContent() {
       // Error: { message: "Token không hợp lệ...", error: "Unauthorized", statusCode: 401 }
 
       if (response.code !== 200) {
-        throw new Error(translateResponseMessage(response.message, "Đặt lại mật khẩu thất bại"));
+        throw new Error(
+          translateResponseMessage(
+            response.message,
+            "Đặt lại mật khẩu thất bại"
+          )
+        );
       }
 
-      const successMessage = response.data?.message || "Đặt lại mật khẩu thành công!";
-      setSuccess(`${successMessage} Đang chuyển hướng đến trang đăng nhập...`);
+      const successMessage =
+        response.data?.message || t("resetPassword.success");
+      setSuccess(`${successMessage} ${t("redirectingToLogin")}`);
 
       setTimeout(() => {
         router.push("/signin");
@@ -119,8 +127,8 @@ function ResetPasswordContent() {
     } catch (err: unknown) {
       console.error("Reset password error:", err);
 
-      const error = err as { 
-        message?: string; 
+      const error = err as {
+        message?: string;
         status?: number;
         statusCode?: number;
         error?: string;
@@ -135,11 +143,23 @@ function ResetPasswordContent() {
           )
         );
       } else if (error.status === 400 || error.statusCode === 400) {
-        setError(getApiErrorMessage(err, "Link đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu gửi lại email."));
+        setError(
+          getApiErrorMessage(
+            err,
+            "Link đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu gửi lại email."
+          )
+        );
       } else if (error.status === 404 || error.statusCode === 404) {
-        setError(getApiErrorMessage(err, "Không tìm thấy yêu cầu đặt lại mật khẩu"));
+        setError(
+          getApiErrorMessage(err, "Không tìm thấy yêu cầu đặt lại mật khẩu")
+        );
       } else {
-        setError(getApiErrorMessage(err, "Không thể đặt lại mật khẩu. Vui lòng thử lại"));
+        setError(
+          getApiErrorMessage(
+            err,
+            "Không thể đặt lại mật khẩu. Vui lòng thử lại"
+          )
+        );
       }
     } finally {
       setIsLoading(false);
@@ -151,7 +171,7 @@ function ResetPasswordContent() {
     return (
       <div className="space-y-4 text-center py-8">
         <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary" />
-        <p className="text-muted-foreground">Đang xác thực link...</p>
+        <p className="text-muted-foreground">{t("resetPassword.verifying")}</p>
       </div>
     );
   }
@@ -163,9 +183,9 @@ function ResetPasswordContent() {
         <div className="flex items-start gap-3 p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
           <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-medium mb-1">Link không hợp lệ</p>
+            <p className="font-medium mb-1">{t("resetPassword.invalidLink")}</p>
             <p className="text-red-600/80">
-              {error || "Link không hợp lệ hoặc đã hết hạn (1 giờ). Vui lòng yêu cầu gửi lại email khôi phục."}
+              {error || t("resetPassword.linkExpiredDescription")}
             </p>
           </div>
         </div>
@@ -175,7 +195,7 @@ function ResetPasswordContent() {
           onClick={() => router.push("/forgot-password")}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Gửi lại email khôi phục
+          {t("resetPassword.resendEmail")}
         </Button>
 
         <div className="text-center">
@@ -184,7 +204,7 @@ function ResetPasswordContent() {
             className="text-sm text-primary hover:underline inline-flex items-center"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Quay lại đăng nhập
+            {t("backToLogin")}
           </Link>
         </div>
       </div>
@@ -209,11 +229,11 @@ function ResetPasswordContent() {
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="new-password">Mật khẩu mới</Label>
+        <Label htmlFor="new-password">{t("resetPassword.newPassword")}</Label>
         <Input
           id="new-password"
           type="password"
-          placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+          placeholder={t("resetPassword.newPasswordPlaceholder")}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           disabled={isLoading}
@@ -223,11 +243,11 @@ function ResetPasswordContent() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="confirm-password">Xác nhận mật khẩu</Label>
+        <Label htmlFor="confirm-password">{t("confirmPassword")}</Label>
         <Input
           id="confirm-password"
           type="password"
-          placeholder="Nhập lại mật khẩu mới"
+          placeholder={t("resetPassword.confirmPasswordPlaceholder")}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           disabled={isLoading}
@@ -239,10 +259,10 @@ function ResetPasswordContent() {
         {isLoading ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Đang xử lý...
+            {t("resetPassword.processing")}
           </>
         ) : (
-          "Đặt lại mật khẩu"
+          t("resetPassword.resetButton")
         )}
       </Button>
 
@@ -252,7 +272,7 @@ function ResetPasswordContent() {
           className="text-sm text-primary hover:underline inline-flex items-center"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Quay lại đăng nhập
+          {t("backToLogin")}
         </Link>
       </div>
     </form>
@@ -265,7 +285,6 @@ export function ResetPasswordForm() {
       fallback={
         <div className="space-y-4 text-center py-8">
           <Loader2 className="w-12 h-12 mx-auto animate-spin text-primary" />
-          <p className="text-muted-foreground">Đang tải...</p>
         </div>
       }
     >

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building, Clock, MapPin, Zap, Droplet } from "lucide-react";
 import { PropertyDetails } from "./PropertyDetails";
@@ -11,6 +12,7 @@ interface PropertyMainContentProps {
 }
 
 export function PropertyMainContent({ property }: PropertyMainContentProps) {
+  const t = useTranslations("propertyDetail");
   // Helper function to check if property is RoomTypeDetail
   const isRoomTypeDetail = (
     prop: Property | RoomTypeDetail
@@ -26,7 +28,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
       // BOARDING data
       const propertyInfo = property.rooms[0]?.property;
       return {
-        title: propertyInfo?.title || "Phòng trọ",
+        title: propertyInfo?.title || t("category.boarding"),
         price: Number(property.price) || 0,
         location: `${propertyInfo?.address || ""}, ${
           propertyInfo?.ward || ""
@@ -34,8 +36,8 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
         bedrooms: property.bedrooms || 0,
         bathrooms: property.bathrooms || 0,
         area: Number(property.area) || 0,
-        furnishing: property.furnishing || "Không có thông tin",
-        category: "Phòng trọ",
+        furnishing: property.furnishing || t("noInfo"),
+        category: t("category.boarding"),
         roomTypeName: property.name,
         roomCount: property.rooms?.filter((r) => r.isVisible).length || 0,
         electricityPrice: Number(propertyInfo?.electricityPricePerKwh) || 0,
@@ -45,7 +47,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
     } else {
       // APARTMENT data
       return {
-        title: property.title || "Bất động sản",
+        title: property.title || t("category.apartment"),
         price: property.price || 0,
         location: `${property.address || ""}, ${property.ward || ""}, ${
           property.province || ""
@@ -53,8 +55,8 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
         bedrooms: property.bedrooms || 0,
         bathrooms: property.bathrooms || 0,
         area: property.area || 0,
-        furnishing: property.furnishing || "Không có thông tin",
-        category: "Chung cư / Nhà ở",
+        furnishing: property.furnishing || t("noInfo"),
+        category: t("category.apartment"),
         unit: property.unit || "",
         updatedAt: property.updatedAt,
       };
@@ -65,7 +67,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
 
   // Format time ago
   const getTimeAgo = (dateString?: string) => {
-    if (!dateString) return "Không rõ";
+    if (!dateString) return t("unknownTime");
 
     const date = new Date(dateString);
     const now = new Date();
@@ -73,16 +75,17 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffHours < 1) return "Vừa mới cập nhật";
-    if (diffHours < 24) return `Cập nhật ${diffHours} giờ trước`;
-    if (diffDays < 7) return `Cập nhật ${diffDays} ngày trước`;
+    if (diffHours < 1) return t("justUpdated");
+    if (diffHours < 24)
+      return `${t("updatedAt")} ${diffHours} ${t("hoursAgo")}`;
+    if (diffDays < 7) return `${t("updatedAt")} ${diffDays} ${t("daysAgo")}`;
 
     // Format as dd/mm/yyyy
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
 
-    return `Cập nhật ${day}/${month}/${year}`;
+    return t("updateDateFormat").replace("{date}", `${day}/${month}/${year}`);
   };
 
   return (
@@ -94,7 +97,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
         </h1>
         <div className="flex justify-between items-center my-4">
           <p className="text-2xl font-bold text-secondary ">
-            {data.price.toLocaleString("vi-VN")} VND/Tháng
+            {data.price.toLocaleString("vi-VN")} {t("pricePerMonth")}
           </p>
           <PropertyDetails
             bathrooms={data.bathrooms}
@@ -146,7 +149,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                   </div>
                   <div className="leading-tight">
                     <div className="text-xs font-bold text-muted-foreground">
-                      Danh mục
+                      {t("categoryLabel")}
                     </div>
                     <div className="font-bold text-sm text-foreground">
                       {data.category}
@@ -162,7 +165,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                   </div>
                   <div className="leading-tight">
                     <div className="text-xs font-bold text-muted-foreground">
-                      Diện tích
+                      {t("areaLabel")}
                     </div>
                     <div className="font-bold text-sm text-foreground">
                       {data.area} m²
@@ -178,11 +181,13 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                   </div>
                   <div className="leading-tight">
                     <div className="text-xs font-bold text-muted-foreground">
-                      {isRoomTypeDetail(property) ? "Số phòng trống" : "Mã căn"}
+                      {isRoomTypeDetail(property)
+                        ? t("availableRooms")
+                        : t("unitCode")}
                     </div>
                     <div className="font-bold text-sm text-foreground">
                       {isRoomTypeDetail(property)
-                        ? `${data.roomCount} phòng`
+                        ? `${data.roomCount} ${t("roomUnit")}`
                         : data.unit || "N/A"}
                     </div>
                   </div>
@@ -197,10 +202,10 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                   </div>
                   <div className="leading-tight">
                     <div className="text-xs font-bold text-muted-foreground">
-                      Số phòng ngủ
+                      {t("bedroomsLabel")}
                     </div>
                     <div className="font-bold text-sm text-foreground">
-                      {data.bedrooms} phòng
+                      {data.bedrooms} {t("roomUnit")}
                     </div>
                   </div>
                 </div>
@@ -213,10 +218,10 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                   </div>
                   <div className="leading-tight">
                     <div className="text-xs font-bold text-muted-foreground">
-                      Số phòng vệ sinh
+                      {t("bathroomsLabel")}
                     </div>
                     <div className="font-bold text-sm text-foreground">
-                      {data.bathrooms} phòng
+                      {data.bathrooms} {t("roomUnit")}
                     </div>
                   </div>
                 </div>
@@ -229,7 +234,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                   </div>
                   <div className="leading-tight">
                     <div className="text-xs font-bold text-muted-foreground">
-                      Tình trạng nội thất
+                      {t("furnishingLabel")}
                     </div>
                     <div className="font-bold text-sm text-foreground">
                       {data.furnishing}
@@ -267,11 +272,11 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                         </div>
                         <div className="leading-tight">
                           <div className="text-xs font-bold text-muted-foreground">
-                            Giá điện
+                            {t("electricityLabel")}
                           </div>
                           <div className="font-bold text-sm text-foreground">
-                            {data.electricityPrice.toLocaleString("vi-VN")}{" "}
-                            ₫/kWh
+                            {data.electricityPrice.toLocaleString("vi-VN")} ₫
+                            {t("perKwh")}
                           </div>
                         </div>
                       </div>
@@ -287,10 +292,11 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
                         </div>
                         <div className="leading-tight">
                           <div className="text-xs font-bold text-muted-foreground">
-                            Giá nước
+                            {t("waterLabel")}
                           </div>
                           <div className="font-bold text-sm text-foreground">
-                            {data.waterPrice.toLocaleString("vi-VN")} ₫/m³
+                            {data.waterPrice.toLocaleString("vi-VN")} ₫
+                            {t("perM3")}
                           </div>
                         </div>
                       </div>

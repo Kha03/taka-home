@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Wallet } from "lucide-react";
 import {
   contractService,
@@ -12,6 +13,7 @@ interface EscrowBalanceCardProps {
 }
 
 export function EscrowBalanceCard({ contractId }: EscrowBalanceCardProps) {
+  const t = useTranslations("contract");
   const [balance, setBalance] = useState<EscrowBalanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +40,7 @@ export function EscrowBalanceCard({ contractId }: EscrowBalanceCardProps) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Wallet className="w-4 h-4 animate-pulse" />
-        <span>Đang tải số dư...</span>
+        <span>{t("loadingBalance")}</span>
       </div>
     );
   }

@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { useVietnameseAddress } from "@/hooks/use-vietnamese-address";
 import { useFormContextStrict } from "./useFormContextStrict";
 import { NewPropertyForm } from "@/schema/schema";
 import { ComboboxField } from "./ComboboxField";
 
 export function AddressSelector() {
+  const t = useTranslations("form");
   const { watch, setValue } = useFormContextStrict<NewPropertyForm>();
   const {
     provinces,
@@ -36,22 +38,18 @@ export function AddressSelector() {
         name="province"
         options={provinces.map((p) => ({ value: p.name, label: p.name }))}
         loading={loadingProvinces}
-        placeholder="Chọn tỉnh, thành phố"
-        searchPlaceholder="Tìm kiếm tỉnh/thành phố..."
-        emptyText="Không tìm thấy tỉnh/thành phố"
+        placeholder={t("selectProvince")}
+        searchPlaceholder={t("searchProvince")}
+        emptyText={t("noResults")}
       />
       <ComboboxField
         name="ward"
         options={wards.map((w) => ({ value: w.name, label: w.name }))}
         loading={loadingWards}
         disabled={!selectedProvince}
-        placeholder="Chọn phường, xã, thị trấn"
-        searchPlaceholder="Tìm kiếm phường/xã..."
-        emptyText={
-          selectedProvince
-            ? "Không tìm thấy phường/xã"
-            : "Vui lòng chọn tỉnh/thành phố trước"
-        }
+        placeholder={t("selectWard")}
+        searchPlaceholder={t("searchWard")}
+        emptyText={selectedProvince ? t("noResults") : t("selectFirst")}
       />
     </>
   );

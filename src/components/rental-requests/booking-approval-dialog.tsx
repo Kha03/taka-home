@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +35,7 @@ export function BookingApprovalDialog({
   booking,
   onConfirmApprove,
 }: BookingApprovalDialogProps) {
+  const t = useTranslations("rentalRequests");
   type DialogState = "approval" | "signing-method" | "approving" | "result";
   const [dialogState, setDialogState] = useState<DialogState>("approval");
   const [selectedSigningMethod, setSelectedSigningMethod] =
@@ -110,11 +112,11 @@ export function BookingApprovalDialog({
       <Dialog open={true} onOpenChange={() => {}}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Đang xử lý yêu cầu duyệt...</DialogTitle>
+            <DialogTitle>{t("processingApproval")}</DialogTitle>
             <DialogDescription>
               {selectedSigningMethod === signingOption.VNPT
-                ? "Vui lòng kiểm tra điện thoại"
-                : "Đang ký hợp đồng"}
+                ? t("checkPhone")
+                : t("signingContract")}
             </DialogDescription>
           </DialogHeader>
 
@@ -132,13 +134,13 @@ export function BookingApprovalDialog({
                   <div className="space-y-2">
                     <p className="font-medium text-blue-900">
                       {selectedSigningMethod === signingOption.VNPT
-                        ? "Vui lòng kiểm tra điện thoại"
-                        : "Đang ký hợp đồng"}
+                        ? t("checkPhone")
+                        : t("signingContract")}
                     </p>
                     <p className="text-sm text-blue-800">
                       {selectedSigningMethod === signingOption.VNPT
-                        ? "Hệ thống đang gửi yêu cầu ký hợp đồng đến điện thoại của bạn. Hãy mở ứng dụng VNPT SmartCA trên điện thoại để ký xác nhận hợp đồng. Sau khi ký thành công, hệ thống sẽ tự động cập nhật trạng thái."
-                        : "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát..."}
+                        ? t("vnptSigningInstruction")
+                        : t("autoSigningInstruction")}
                     </p>
                   </div>
                 </div>

@@ -3,6 +3,7 @@
 import { MapPin } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 // Define the props interface
 interface MapLocationProps {
@@ -58,15 +59,20 @@ declare global {
 export default function MapLocation({ mapLocation }: MapLocationProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<VietMapInstance | null>(null);
+  const t = useTranslations("propertyDetail");
 
   useEffect(() => {
     // Parse the coordinates from the mapLocation string
     if (!mapLocation || !mapContainer.current) return;
-    
-    const [latitude, longitude] = mapLocation.split(',').map(coord => parseFloat(coord.trim()));
-    
+
+    const [latitude, longitude] = mapLocation
+      .split(",")
+      .map((coord) => parseFloat(coord.trim()));
+
     if (isNaN(latitude) || isNaN(longitude)) {
-      console.error('Invalid coordinates format. Expected: "latitude,longitude"');
+      console.error(
+        'Invalid coordinates format. Expected: "latitude,longitude"'
+      );
       return;
     }
 
@@ -76,15 +82,15 @@ export default function MapLocation({ mapLocation }: MapLocationProps) {
     // Function to initialize the map
     const initializeMap = () => {
       if (!window.vietmapgl) {
-        console.error('VietMap GL JS library not loaded');
+        console.error("VietMap GL JS library not loaded");
         return;
       }
 
       // Get API key from environment variable
       const apiKey = process.env.NEXT_PUBLIC_VIETMAP_API_KEY;
-      
+
       if (!apiKey) {
-        console.error('VietMap API key not found in environment variables');
+        console.error("VietMap API key not found in environment variables");
         return;
       }
 
@@ -109,21 +115,22 @@ export default function MapLocation({ mapLocation }: MapLocationProps) {
       mapRef.current = map;
 
       // Add marker when map is loaded
-      map.on('load', () => {
-        console.log('VietMap loaded successfully!');
-        
+      map.on("load", () => {
+        console.log("VietMap loaded successfully!");
+
         // Add navigation controls (zoom in/out buttons)
         const nav = new window.vietmapgl.NavigationControl();
-        map.addControl(nav, 'top-right');
-        
+        map.addControl(nav, "top-right");
+
         // Create a popup for the marker
-        const popup = new window.vietmapgl.Popup({ offset: 25 })
-          .setHTML('<h3>Vị trí bất động sản</h3><p>Đây là vị trí của bất động sản.</p>');
+        const popup = new window.vietmapgl.Popup({ offset: 25 }).setHTML(
+          `<h3>${t("mapPopupTitle")}</h3><p>${t("mapPopupDesc")}</p>`
+        );
 
         // Create and add marker
         new window.vietmapgl.Marker({
           color: "#ef4444", // Red color for the marker
-          draggable: false
+          draggable: false,
         })
           .setLngLat(coordinates)
           .setPopup(popup)
@@ -131,25 +138,27 @@ export default function MapLocation({ mapLocation }: MapLocationProps) {
       });
 
       // Handle map errors
-      map.on('error', (e: unknown) => {
-        console.error('VietMap error:', e);
+      map.on("error", (e: unknown) => {
+        console.error("VietMap error:", e);
       });
     };
 
     // Load VietMap GL JS library if not already loaded
     if (!window.vietmapgl) {
       // Load CSS
-      const cssLink = document.createElement('link');
-      cssLink.href = 'https://maps.vietmap.vn/sdk/vietmap-gl/1.15.3/vietmap-gl.css';
-      cssLink.rel = 'stylesheet';
+      const cssLink = document.createElement("link");
+      cssLink.href =
+        "https://maps.vietmap.vn/sdk/vietmap-gl/1.15.3/vietmap-gl.css";
+      cssLink.rel = "stylesheet";
       document.head.appendChild(cssLink);
 
       // Load JS
-      const script = document.createElement('script');
-      script.src = 'https://maps.vietmap.vn/sdk/vietmap-gl/1.15.3/vietmap-gl.js';
+      const script = document.createElement("script");
+      script.src =
+        "https://maps.vietmap.vn/sdk/vietmap-gl/1.15.3/vietmap-gl.js";
       script.onload = initializeMap;
       script.onerror = () => {
-        console.error('Failed to load VietMap GL JS library');
+        console.error("Failed to load VietMap GL JS library");
       };
       document.head.appendChild(script);
     } else {
@@ -163,7 +172,7 @@ export default function MapLocation({ mapLocation }: MapLocationProps) {
         mapRef.current = null;
       }
     };
-  }, [mapLocation]);
+  }, [mapLocation, t]);
 
   return (
     <Card className="shadow-none bg-background border-0 p-4 rounded-[12px]">
@@ -172,9 +181,9 @@ export default function MapLocation({ mapLocation }: MapLocationProps) {
           <div className="w-6 h-6 flex items-center justify-center bg-[#D9D9D9] rounded-full">
             <MapPin className="h-3 w-3 text-primary" />
           </div>
-          Vị trí bất động sản trên bản đồ
+          {t("mapLocationTitle")}
         </div>
-        <div 
+        <div
           ref={mapContainer}
           className="w-full h-[400px] rounded-lg overflow-hidden relative bg-gray-200"
         />

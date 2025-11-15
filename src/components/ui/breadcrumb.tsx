@@ -1,5 +1,6 @@
 import { Home } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface BreadcrumbItem {
   href?: string;
@@ -12,6 +13,7 @@ interface BreadcrumbProps {
 }
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
+  const t = useTranslations("common");
   return (
     <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
       <Link
@@ -22,7 +24,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
       </Link>
 
       <Link href="/" className="hover:text-foreground transition-colors">
-        Trang chủ
+        {t("home")}
       </Link>
 
       {items.map((item, index) => (

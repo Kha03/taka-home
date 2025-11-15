@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Check, X } from "lucide-react";
 import { Button } from "../ui/button";
+import { useTranslations } from "next-intl";
 
 interface RentalRequestStatusProps {
   user: {
@@ -24,6 +25,7 @@ export function RentalRequestStatus({
   onApprove,
   onReject,
 }: RentalRequestStatusProps) {
+  const t = useTranslations("rentalRequests");
   const isRejected = status === "rejected";
   const isPending = status === "pending";
 
@@ -53,7 +55,7 @@ export function RentalRequestStatus({
         <div className="flex items-center gap-3">
           <p className="font-bold text-primary text-sm">{user.name}</p>
           <span className="text-xs text-accent">
-            Số điện thoại:
+            {t("phone")}:
             <span className="text-primary font-bold"> {user.phone}</span>
           </span>
         </div>
@@ -66,10 +68,10 @@ export function RentalRequestStatus({
             )}
           >
             {isPending
-              ? "Đã gửi yêu cầu thuê"
+              ? t("requestSent")
               : isRejected
-              ? "Đã từ chối yêu cầu thuê"
-              : "Đã chấp nhận yêu cầu thuê"}
+              ? t("requestRejected")
+              : t("requestApproved")}
           </p>
           <span className="text-xs text-[#C0C0C0]">{timestamp}</span>
         </div>
@@ -84,7 +86,7 @@ export function RentalRequestStatus({
             className="hover:bg-red-600/10 rounded-[30px] text-xs"
           >
             <X className="w-3 h-3" />
-            Từ chối
+            {t("reject")}
           </Button>
           <Button
             size="sm"
@@ -92,13 +94,14 @@ export function RentalRequestStatus({
             className="text-primary-foreground rounded-[30px] text-xs"
           >
             <Check className="w-3 h-3" />
-            Đồng ý
+            {t("approve")}
           </Button>
         </div>
       )}
       {isRejected && reason && (
         <p className="mt-1 text-sm text-popover">
-          <strong className="font-bold">Lý do từ chối:</strong> {reason}
+          <strong className="font-bold">{t("rejectionReason")}:</strong>{" "}
+          {reason}
         </p>
       )}
     </div>

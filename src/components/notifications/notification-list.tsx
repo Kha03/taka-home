@@ -5,6 +5,7 @@
  * Hiển thị danh sách thông báo
  */
 
+import { useTranslations } from "next-intl";
 import { Bell, CheckCircle2 } from "lucide-react";
 import { NotificationItem } from "./notification-item";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -27,6 +28,7 @@ export function NotificationList({
   onNotificationClick,
   className = "",
 }: NotificationListProps) {
+  const t = useTranslations("notification");
   const {
     notifications,
     pendingCount,
@@ -55,7 +57,7 @@ export function NotificationList({
   if (loading && notifications.length === 0) {
     return (
       <div className={`p-8 text-center ${className}`}>
-        <LoadingSpinner text="Đang tải thông báo..." />
+        <LoadingSpinner text={t("loading")} />
       </div>
     );
   }
@@ -65,7 +67,7 @@ export function NotificationList({
       <div className={`p-8 text-center ${className}`}>
         <Bell className="h-12 w-12 text-gray-400 mx-auto mb-2" />
         <p className="text-sm text-red-500 mb-4">{error}</p>
-        <Button onClick={refetch}>Thử lại</Button>
+        <Button onClick={refetch}>{t("tryAgain")}</Button>
       </div>
     );
   }
@@ -74,7 +76,7 @@ export function NotificationList({
     return (
       <div className={`p-8 text-center ${className}`}>
         <Bell className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-500">Không có thông báo nào</p>
+        <p className="text-sm text-gray-500">{t("empty")}</p>
       </div>
     );
   }
@@ -85,7 +87,7 @@ export function NotificationList({
       {pendingCount > 0 && (
         <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
           <span className="text-sm text-gray-600">
-            {pendingCount} thông báo
+            {pendingCount} {t("unread")}
           </span>
           <Button
             variant={"outline"}
@@ -93,7 +95,7 @@ export function NotificationList({
             className="flex items-center gap-1 px-2 py-1  text-primary text-xs hover:bg-primary/10"
           >
             <CheckCircle2 className="h-2 w-2" />
-            Đã đọc tất cả
+            {t("markAllAsRead")}
           </Button>
         </div>
       )}
@@ -120,7 +122,7 @@ export function NotificationList({
           disabled={loading}
           className="text-sm w-full text-accent hover:text-accent border-accent hover:bg-accent/20"
         >
-          {loading ? "Đang tải..." : "Làm mới"}
+          {loading ? t("loading") : t("refresh")}
         </Button>
       </div>
     </div>

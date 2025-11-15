@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,7 @@ export function PropertyDetailModal({
   onOpenChange,
   onUpdate,
 }: PropertyDetailModalProps) {
+  const t = useTranslations("myProperties");
   const [activeIndex, setActiveIndex] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [moveRoomDialogOpen, setMoveRoomDialogOpen] = useState(false);
@@ -55,9 +57,7 @@ export function PropertyDetailModal({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="w-[98vw] sm:w-[95vw] max-w-[1400px] p-6 bg-[#FFF7E9]">
-          <p className="text-center text-muted-foreground">
-            Không có dữ liệu property
-          </p>
+          <p className="text-center text-muted-foreground">{t("noData")}</p>
         </DialogContent>
       </Dialog>
     );
@@ -253,7 +253,7 @@ export function PropertyDetailModal({
                             ? "border-[#DCBB87] ring-2 ring-[#DCBB87]/40"
                             : "border-[#DCBB87]/20 hover:border-[#DCBB87]/40"
                         }`}
-                        aria-label={`Xem ảnh ${idx + 1}`}
+                        aria-label={`${t("viewImage")} ${idx + 1}`}
                       >
                         <Image
                           src={img}
@@ -290,7 +290,7 @@ export function PropertyDetailModal({
                         className="flex items-center gap-2 border-[#DCBB87] text-[#DCBB87] hover:bg-[#DCBB87] hover:text-white"
                       >
                         <Edit className="w-4 h-4" />
-                        Chỉnh sửa
+                        {t("edit")}
                       </Button>
                     )}
                   </div>
