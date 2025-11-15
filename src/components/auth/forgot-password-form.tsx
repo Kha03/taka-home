@@ -80,8 +80,7 @@ export function ForgotPasswordForm() {
 
         const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
           size: "invisible",
-          callback: () => {
-          },
+          callback: () => {},
           "expired-callback": () => {
             setError("reCAPTCHA đã hết hạn. Vui lòng thử lại");
           },
@@ -154,9 +153,7 @@ export function ForgotPasswordForm() {
         if (error.code === "auth/invalid-app-credential") {
           setError("Lỗi xác thực reCAPTCHA!");
         } else if (error.code === "auth/too-many-requests") {
-          setError(
-            "Đã gửi quá nhiều OTP! Vui lòng thử lại sau."
-          );
+          setError("Đã gửi quá nhiều OTP! Vui lòng thử lại sau.");
         } else if (error.code === "auth/billing-not-enabled") {
           setError(
             "Cần nâng cấp Firebase lên Blaze Plan và enable Identity Platform API"
@@ -168,7 +165,9 @@ export function ForgotPasswordForm() {
         } else if (error.code === "auth/quota-exceeded") {
           setError("Đã vượt quá giới hạn gửi SMS. Vui lòng thử lại sau");
         } else {
-          setError(getApiErrorMessage(error, "Không thể gửi mã OTP. Vui lòng thử lại"));
+          setError(
+            getApiErrorMessage(error, "Không thể gửi mã OTP. Vui lòng thử lại")
+          );
         }
       } finally {
         setIsLoading(false);
@@ -198,8 +197,8 @@ export function ForgotPasswordForm() {
 
         setSuccess(
           "✅ Email khôi phục mật khẩu đã được gửi!\n\n" +
-          "Vui lòng kiểm tra hộp thư (và cả thư mục Spam) để nhận link đặt lại mật khẩu.\n\n" +
-          "Link có hiệu lực trong 1 giờ."
+            "Vui lòng kiểm tra hộp thư (và cả thư mục Spam) để nhận link đặt lại mật khẩu.\n\n" +
+            "Link có hiệu lực trong 1 giờ."
         );
 
         // Reset form sau 5 giây
@@ -212,11 +211,18 @@ export function ForgotPasswordForm() {
         const error = err as { message?: string; status?: number };
 
         if (error.status === 404) {
-          setError(getApiErrorMessage(err, "Không tìm thấy tài khoản với email này"));
+          setError(
+            getApiErrorMessage(err, "Không tìm thấy tài khoản với email này")
+          );
         } else if (error.status === 400) {
           setError(getApiErrorMessage(err, "Email không hợp lệ"));
         } else {
-          setError(getApiErrorMessage(err, "Không thể gửi email khôi phục. Vui lòng thử lại"));
+          setError(
+            getApiErrorMessage(
+              err,
+              "Không thể gửi email khôi phục. Vui lòng thử lại"
+            )
+          );
         }
       } finally {
         setIsLoading(false);
@@ -271,7 +277,9 @@ export function ForgotPasswordForm() {
         });
 
         if (response.code !== 200) {
-          setError(translateResponseMessage(response.message, "Không thể đổi mật khẩu"));
+          setError(
+            translateResponseMessage(response.message, "Không thể đổi mật khẩu")
+          );
           return;
         }
 
@@ -290,11 +298,23 @@ export function ForgotPasswordForm() {
         };
 
         if (error.status === 401) {
-          setError(getApiErrorMessage(apiError, "Token không hợp lệ hoặc đã hết hạn"));
+          setError(
+            getApiErrorMessage(apiError, "Token không hợp lệ hoặc đã hết hạn")
+          );
         } else if (error.status === 404) {
-          setError(getApiErrorMessage(apiError, "Không tìm thấy tài khoản với số điện thoại này"));
+          setError(
+            getApiErrorMessage(
+              apiError,
+              "Không tìm thấy tài khoản với số điện thoại này"
+            )
+          );
         } else {
-          setError(getApiErrorMessage(apiError, "Không thể đổi mật khẩu. Vui lòng thử lại"));
+          setError(
+            getApiErrorMessage(
+              apiError,
+              "Không thể đổi mật khẩu. Vui lòng thử lại"
+            )
+          );
         }
       }
     } catch (err: unknown) {
@@ -307,7 +327,9 @@ export function ForgotPasswordForm() {
       } else if (error.code === "auth/code-expired") {
         setError("Mã OTP đã hết hạn. Vui lòng gửi lại");
       } else {
-        setError(getApiErrorMessage(err, "Xác thực thất bại. Vui lòng thử lại"));
+        setError(
+          getApiErrorMessage(err, "Xác thực thất bại. Vui lòng thử lại")
+        );
       }
     } finally {
       setIsLoading(false);
