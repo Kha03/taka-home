@@ -107,7 +107,9 @@ export function BlockchainHistoryTimeline({
                     </div>
                   </CardDescription>
                 </div>
-                <div><StatusBadge status={value.status} /></div>
+                <div>
+                  <StatusBadge status={value.status} />
+                </div>
               </div>
             </CardHeader>
 

@@ -34,7 +34,11 @@
     "loginSuccess": "Đăng nhập thành công",
     "registerSuccess": "Đăng ký thành công",
     "registerError": "Đăng ký thất bại",
-    "role": "Bạn muốn đăng ký với vai trò",
+    "role": {
+      "selectRole": "Chọn vai trò của bạn",
+      "tenant": "Người thuê",
+      "landlord": "Chủ nhà"
+    },
     "creatingAccount": "Đang tạo tài khoản...",
     "createAccount": "Tạo tài khoản",
     "loginNow": "Đăng nhập ngay",
@@ -619,6 +623,7 @@
     }
   },
   "form": {
+    "noResults": "Không tìm thấy kết quả",
     "selectFirst": "Vui lòng chọn mục trước",
     "searchProvince": "Tìm kiếm tỉnh/thành phố...",
     "selectDistrict": "Chọn quận, huyện",

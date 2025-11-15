@@ -34,7 +34,11 @@
     "loginSuccess": "Login Successful",
     "registerSuccess": "Registration Successful",
     "registerError": "Registration Failed",
-    "role": "You want to register as",
+    "role": {
+      "selectRole": "Select your role",
+      "tenant": "Tenant",
+      "landlord": "Landlord"
+    },
     "creatingAccount": "Creating account...",
     "createAccount": "Create Account",
     "loginNow": "Login now",
@@ -617,6 +621,7 @@
     }
   },
   "form": {
+    "noResults": "No results found",
     "selectFirst": "Please select previous item first",
     "searchProvince": "Search province/city...",
     "selectDistrict": "Select district",
