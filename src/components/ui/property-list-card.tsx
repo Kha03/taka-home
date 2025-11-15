@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PropertyDetails } from "@/components/property-detail/PropertyDetails";
 import { MapPin, Clock } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 
 interface PropertyListCardProps {
   id?: string;

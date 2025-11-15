@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Heart, Send, MessageCircle } from "lucide-react";
 import { NotificationBell } from "@/components/notifications";

@@ -117,7 +117,7 @@ export default function UsersPage() {
           </Alert>
         )}
 
-        <div className="bg-card rounded-lg border shadow-sm bg-primary-foreground">
+        <div className="rounded-lg border shadow-sm bg-primary-foreground">
           <div className="p-6 border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

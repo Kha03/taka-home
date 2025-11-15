@@ -13,7 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { getAccountFromStorage } from "@/lib/utils/auth-utils";
 import { cn } from "@/lib/utils/utils";
 

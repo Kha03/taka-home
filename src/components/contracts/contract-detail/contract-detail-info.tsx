@@ -11,7 +11,6 @@ interface ContractDetailInfoProps {
 export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
   const t = useTranslations("contract");
   const { property, room, contract } = booking;
-  const tdetail = useTranslations("contract");
   // Format date
   const formatDate = (dateString: string) => {
     try {

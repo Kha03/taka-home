@@ -55,7 +55,19 @@ export default function ClientComponent() {
 }
 ```
 
-### 3. Sử dụng Language Switcher
+### 3. Sử dụng Link với i18n
+
+**QUAN TRỌNG**: Luôn sử dụng Link từ `@/lib/i18n/navigation` thay vì `next/link`:
+
+```tsx
+import { Link } from "@/lib/i18n/navigation";
+
+export default function MyComponent() {
+  return <Link href="/properties">Xem bất động sản</Link>;
+}
+```
+
+### 4. Sử dụng Language Switcher
 
 Import component `LanguageSwitcher` vào header hoặc nơi cần chuyển đổi ngôn ngữ:
 
@@ -74,7 +86,7 @@ export function Header() {
 }
 ```
 
-### 4. Hook tùy chỉnh
+### 5. Hook tùy chỉnh
 
 ```tsx
 "use client";
@@ -159,9 +171,10 @@ const t = useTranslations("validation");
 
 1. **Luôn dùng namespace**: Tổ chức bản dịch theo namespace để dễ quản lý
 2. **Key rõ ràng**: Đặt tên key dễ hiểu, mô tả đúng nội dung
-3. **Consistency**: Giữ cấu trúc giống nhau giữa các file ngôn ngữ
+3. **Consistency**: Giữ cấu trúc giống nhau giữa các file ngôn ngữ (en.json và vi.json phải có cùng keys)
 4. **Fallback**: Luôn cung cấp bản dịch cho cả 2 ngôn ngữ
-5. **Type safety**: Update type `Messages` trong `src/lib/i18n/messages.ts` khi thêm namespace mới
+5. **Link component**: **LUÔN** sử dụng `Link` từ `@/lib/i18n/navigation` thay vì `next/link`
+6. **Router navigation**: Sử dụng `useRouter`, `usePathname` từ `@/lib/i18n/navigation` thay vì `next/navigation`
 
 ## Routing
 
@@ -175,9 +188,10 @@ Middleware sẽ tự động redirect về ngôn ngữ mặc định nếu khôn
 ## Lưu ý quan trọng
 
 1. Ngôn ngữ được lưu trong cookie `NEXT_LOCALE`
-2. Middleware tự động xử lý locale routing
-3. Sử dụng `Link` từ `next-intl/navigation` thay vì `next/link` để có tự động locale prefix
+2. Middleware tự động xử lý locale routing với `localePrefix: "always"`
+3. **CRITICAL**: Sử dụng `Link` từ `@/lib/i18n/navigation` thay vì `next/link` để có tự động locale prefix
 4. Client components cần đánh dấu `'use client'`
+5. File `i18n.config.js` chỉ cần `locales` và `defaultLocale` - không cần `localeDetection`
 
 ## Troubleshooting
 

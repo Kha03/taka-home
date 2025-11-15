@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/utils";
 import {
   User,

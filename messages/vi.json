@@ -793,6 +793,8 @@
     "changeAvatar": "Thay đổi ảnh đại diện"
   },
   "invoice": {
+    "details": "Chi tiết hóa đơn",
+    "noInvoiceInfo": "Không có thông tin hóa đơn",
     "invoiceDetails": "Chi tiết hóa đơn",
     "description": "Thông tin chi tiết về hóa đơn thanh toán",
     "billingPeriod": "Kỳ thanh toán",
@@ -806,12 +808,15 @@
     "paymentStatus": {
       "PAID": "Đã thanh toán",
       "PENDING": "Chờ thanh toán",
-      "OVERDUE": "Quá hạn"
+      "OVERDUE": "Quá hạn",
+      "overdue": "Quá hạn"
     },
     "detail": "Chi tiết các khoản",
     "loading": "Đang tải thông tin hóa đơn...",
     "errorLoading": "Lỗi tải thông tin hóa đơn",
     "noPaymentDetails": "Không có chi tiết khoản thanh toán",
-    "totalAmount": "Tổng cộng:"
+    "totalAmount": "Tổng cộng:",
+    "cancel": "Hủy",
+    "payNow": "Thanh toán ngay"
   }
 }

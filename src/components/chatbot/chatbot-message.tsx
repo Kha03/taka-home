@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/utils";
 import { Bot, User, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";

@@ -5,7 +5,7 @@ import { ChatProvider, useChat } from "@/contexts/chat-context";
 import { useAuth } from "@/contexts/auth-context";
 import { ChatList, ChatWindow } from "@/components/chat";
 import { cn } from "@/lib/utils/utils";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useSearchParams } from "next/navigation";
