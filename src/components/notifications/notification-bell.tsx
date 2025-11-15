@@ -32,9 +32,11 @@ export function NotificationBell({
   // Lấy userId từ localStorage
   const userId = getUserIdFromStorage();
 
+  // Chỉ lấy pendingCount, không auto refresh ở đây
+  // Auto refresh sẽ được xử lý ở NotificationList
   const { pendingCount } = useNotifications({
     userId: userId || undefined,
-    autoRefresh,
+    autoRefresh: false, // Tắt auto refresh để tránh duplicate requests
     refreshInterval,
   });
 
@@ -84,7 +86,8 @@ export function NotificationBell({
             <div className="overflow-y-auto max-h-80">
               <NotificationList
                 userId={userId || undefined}
-                autoRefresh={false} // Không auto refresh trong dropdown
+                autoRefresh={autoRefresh} // Sử dụng prop từ NotificationBell
+                refreshInterval={refreshInterval}
                 onNotificationClick={closeNotifications}
               />
             </div>
