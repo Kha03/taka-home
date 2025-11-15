@@ -40,7 +40,7 @@ export function LanguageSwitcher() {
           variant="outline"
           size="sm"
           disabled={isChanging}
-          className="text-accent"
+          className="text-accent border-accent"
         >
           <Languages className="mr-2 h-4 w-4" />
           {currentLanguage?.flag} {currentLanguage?.name}
