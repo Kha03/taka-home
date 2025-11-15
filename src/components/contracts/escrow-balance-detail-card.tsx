@@ -41,11 +41,11 @@ export function EscrowBalanceDetailCard({
       }
     } catch (err) {
       console.error("Error fetching escrow balance:", err);
-      toast.error("Không thể tải thông tin số dư cọc");
+      toast.error(t("escrowBalanceFetchError"));
     } finally {
       setLoading(false);
     }
-  }, [contractId]);
+  }, [contractId, t]);
 
   useEffect(() => {
     fetchBalance();
@@ -77,25 +77,25 @@ export function EscrowBalanceDetailCard({
 
       if (method === "WALLET") {
         if (response.data?.status === "PAID") {
-          toast.success("Nộp thêm tiền cọc thành công!");
+          toast.success(t("escrowTopUpSuccess"));
           await fetchBalance();
           onRefresh?.();
         } else {
-          toast.error("Thanh toán thất bại. Vui lòng kiểm tra số dư ví");
+          toast.error(t("escrowPaymentFailed"));
         }
       } else {
         if (response.data?.paymentUrl) {
-          toast.success("Đang chuyển đến trang thanh toán...");
+          toast.success(t("escrowRedirectingPayment"));
           window.location.href = response.data.paymentUrl;
         } else {
-          toast.error("Không thể tạo thanh toán");
+          toast.error(t("escrowPaymentCreateError"));
         }
       }
 
       setShowPaymentModal(false);
     } catch (error) {
       console.error(error);
-      toast.error("Không thể tạo thanh toán. Vui lòng thử lại");
+      toast.error(t("escrowPaymentRetryError"));
     }
   };
 
@@ -128,20 +128,24 @@ export function EscrowBalanceDetailCard({
         <CardHeader>
           <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
             <Wallet className="w-5 h-5" />
-            Số dư tiền cọc
+            {t("escrowBalanceTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Deposit Summary */}
           <div className="grid grid-cols-3 gap-3 p-2 bg-[#f5f5f5] rounded-lg">
             <div className="text-center">
-              <p className="text-xs text-muted-foreground mb-1">Yêu cầu</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {t("escrowRequired")}
+              </p>
               <p className="text-sm font-bold text-foreground">
                 {formatCurrency(requiredDeposit)}
               </p>
             </div>
             <div className="text-center border-l border-r border-gray-300">
-              <p className="text-xs text-muted-foreground mb-1">Người thuê</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {t("escrowTenant")}
+              </p>
               <p
                 className={`text-sm font-bold ${
                   tenantShortage > 0 ? "text-red-600" : "text-green-600"
@@ -151,7 +155,9 @@ export function EscrowBalanceDetailCard({
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-muted-foreground mb-1">Chủ nhà</p>
+              <p className="text-xs text-muted-foreground mb-1">
+                {t("escrowLandlord")}
+              </p>
               <p
                 className={`text-sm font-bold ${
                   landlordShortage > 0 ? "text-red-600" : "text-green-600"
@@ -168,10 +174,12 @@ export function EscrowBalanceDetailCard({
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-yellow-900 mb-1">
-                    Bạn còn thiếu {formatCurrency(currentUserShortage)}
+                    {t("escrowShortage", {
+                      amount: formatCurrency(currentUserShortage),
+                    })}
                   </p>
                   <p className="text-xs text-yellow-700">
-                    Vui lòng nộp thêm để đủ tiền cọc yêu cầu
+                    {t("escrowPleaseTopUp")}
                   </p>
                 </div>
                 <Button
@@ -180,7 +188,7 @@ export function EscrowBalanceDetailCard({
                   className="bg-accent hover:bg-accent/80 ml-3"
                 >
                   <Plus className="w-4 h-4 mr-1" />
-                  Nộp thêm
+                  {t("escrowTopUp")}
                 </Button>
               </div>
             </div>
@@ -204,8 +212,8 @@ export function EscrowBalanceDetailCard({
                 </div>
                 <p className="text-sm font-medium text-green-900">
                   {tenantShortage === 0 && landlordShortage === 0
-                    ? "Cả hai bên đã đặt đủ tiền cọc"
-                    : "Bạn đã đặt đủ tiền cọc"}
+                    ? t("escrowBothComplete")
+                    : t("escrowComplete")}
                 </p>
               </div>
             </div>

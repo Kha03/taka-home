@@ -2,14 +2,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, MapPin, Home, DollarSign } from "lucide-react";
 import type { Booking } from "@/lib/api/services/booking";
+import { useTranslations } from "next-intl";
 
 interface ContractDetailInfoProps {
   booking: Booking;
 }
 
 export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
+  const t = useTranslations("contract");
   const { property, room, contract } = booking;
-
+  const tdetail = useTranslations("contract");
   // Format date
   const formatDate = (dateString: string) => {
     try {
@@ -32,22 +34,24 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
         <CardHeader>
           <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
             <Home className="w-5 h-5" />
-            Thông tin bất động sản
+            {t("propertyInfo")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Loại hình</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              {t("propertyType")}
+            </p>
             <p className="font-semibold text-foreground">
               {property.type === "APARTMENT"
-                ? "Chung cư"
+                ? t("apartmentType")
                 : property.type === "HOUSING"
-                ? "Nhà riêng"
-                : "Nhà trọ"}
+                ? t("privateHouse")
+                : t("boarding")}
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Địa chỉ</p>
+            <p className="text-sm text-muted-foreground mb-1">{t("address")}</p>
             <div className="flex items-start gap-2">
               <MapPin className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
               <p className="font-semibold text-foreground">
@@ -57,7 +61,7 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
           </div>
           {room && (
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Phòng</p>
+              <p className="text-sm text-muted-foreground mb-1">{t("room")}</p>
               <p className="font-semibold text-foreground">
                 {room.name} - {room.roomType.name}
               </p>
@@ -65,25 +69,31 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Diện tích</p>
+              <p className="text-sm text-muted-foreground mb-1">{t("area")}</p>
               <p className="font-semibold text-foreground">
                 {room ? room.roomType.area : property.area} m²
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Phòng ngủ</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                {t("bedrooms")}
+              </p>
               <p className="font-semibold text-foreground">
                 {room ? room.roomType.bedrooms : property.bedrooms}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Phòng tắm</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                {t("bathrooms")}
+              </p>
               <p className="font-semibold text-foreground">
                 {room ? room.roomType.bathrooms : property.bathrooms}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Nội thất</p>
+              <p className="text-sm text-muted-foreground mb-1">
+                {t("furniture")}
+              </p>
               <p className="font-semibold text-foreground">
                 {room ? room.roomType.furnishing : property.furnishing}
               </p>
@@ -97,7 +107,7 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
         <CardHeader>
           <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            Thông tin hợp đồng
+            {t("contractInfoTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -105,7 +115,7 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
             <>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Mã hợp đồng
+                  {t("contractCode")}
                 </p>
                 <p className="font-semibold text-foreground">
                   {contract.contractCode}
@@ -113,7 +123,7 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Thời hạn hợp đồng
+                  {t("contractPeriod")}
                 </p>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-primary" />
@@ -129,7 +139,9 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
             <div className="p-4 bg-[#f5f5f5] rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-4 h-4 text-primary" />
-                <p className="text-sm text-muted-foreground">Giá thuê</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("rentPrice")}
+                </p>
               </div>
               <p className="text-lg font-bold text-secondary">
                 {price.toLocaleString("vi-VN")} VND
@@ -138,7 +150,7 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
             <div className="p-4 bg-[#f5f5f5] rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-4 h-4 text-primary" />
-                <p className="text-sm text-muted-foreground">Tiền cọc</p>
+                <p className="text-sm text-muted-foreground">{t("deposit")}</p>
               </div>
               <p className="text-lg font-bold text-secondary">
                 {deposit.toLocaleString("vi-VN")} VND
@@ -148,7 +160,9 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
           {property.type === "BOARDING" && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Giá điện</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {t("electricityLabel")}
+                </p>
                 <p className="font-semibold text-foreground">
                   {parseFloat(
                     property.electricityPricePerKwh || "0"
@@ -157,7 +171,9 @@ export function ContractDetailInfo({ booking }: ContractDetailInfoProps) {
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Giá nước</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {t("waterLabel")}
+                </p>
                 <p className="font-semibold text-foreground">
                   {parseFloat(property.waterPricePerM3 || "0").toLocaleString(
                     "vi-VN"

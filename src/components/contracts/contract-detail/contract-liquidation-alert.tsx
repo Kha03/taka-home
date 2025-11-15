@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, FileText } from "lucide-react";
 import { useState } from "react";
 import { CreateInvoiceDialog } from "@/components/contracts/create-invoice-dialog";
+import { useTranslations } from "next-intl";
 
 interface ContractLiquidationAlertProps {
   contractId: string;
@@ -20,6 +21,7 @@ export function ContractLiquidationAlert({
   userRole,
   onInvoiceCreated,
 }: ContractLiquidationAlertProps) {
+  const t = useTranslations("contract");
   const [showCreateInvoiceDialog, setShowCreateInvoiceDialog] = useState(false);
 
   // Check if contract is within last 7 days
@@ -46,14 +48,17 @@ export function ContractLiquidationAlert({
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-amber-900 mb-1">
-                Nhắc nhở: Hợp đồng sắp hết hạn
+                {t("liquidationReminder")}
               </h3>
-              <p className="text-sm text-amber-800 mb-3">
-                Hợp đồng sẽ kết thúc trong <strong>{daysUntilEnd} ngày</strong>{" "}
-                ({endDate.toLocaleDateString("vi-VN")}). Nếu có thiệt hại hoặc
-                phí phát sinh, vui lòng tạo hóa đơn thanh lý để xử lý trước khi
-                kết thúc hợp đồng.
-              </p>
+              <p
+                className="text-sm text-amber-800 mb-3"
+                dangerouslySetInnerHTML={{
+                  __html: t("contractEndsIn", {
+                    days: daysUntilEnd,
+                    date: endDate.toLocaleDateString("vi-VN"),
+                  }),
+                }}
+              />
               <div className="flex items-center gap-3">
                 <Button
                   size="sm"
@@ -61,7 +66,7 @@ export function ContractLiquidationAlert({
                   className="bg-amber-600 hover:bg-amber-700 text-white"
                 >
                   <FileText className="w-4 h-4 mr-2" />
-                  Tạo hóa đơn thanh lý
+                  {t("createLiquidationInvoice")}
                 </Button>
               </div>
             </div>

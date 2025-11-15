@@ -370,7 +370,7 @@ export default function ContractCard({
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-bold text-primary text-lg">
-                  {contract.type}
+                  {t("type")}
                 </span>
                 <span className="text-[#4F4F4F]">•</span>
                 <span className="text-[#4F4F4F] text-sm">

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { bookingService, type Booking } from "@/lib/api/services/booking";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { ContractTerminationSection } from "@/components/contracts";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function ContractDetailPage() {
+  const t = useTranslations("contract");
   const params = useParams();
   const router = useRouter();
   const bookingId = params.id as string;
@@ -44,12 +46,12 @@ export default function ContractDetailPage() {
         if (response.data) {
           setBooking(response.data);
         } else {
-          toast.error("Không tìm thấy thông tin hợp đồng");
+          toast.error(t("contractNotFoundError"));
           router.push("/contracts");
         }
       } catch (error) {
         console.error("Error fetching booking detail:", error);
-        toast.error("Không thể tải thông tin hợp đồng");
+        toast.error(t("cannotLoadContractInfo"));
         router.push("/contracts");
       } finally {
         setLoading(false);
@@ -69,14 +71,14 @@ export default function ContractDetailPage() {
       }
     } catch (error) {
       console.error("Error refreshing booking:", error);
-      toast.error("Không thể tải lại thông tin hợp đồng");
+      toast.error(t("cannotReloadContract"));
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FFF7E9] flex items-center justify-center">
-        <LoadingSpinner size="xl" text="Đang tải thông tin hợp đồng..." />
+        <LoadingSpinner size="xl" text={t("loadingContractInfo")} />
       </div>
     );
   }
@@ -88,17 +90,17 @@ export default function ContractDetailPage() {
           <CardContent>
             <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2 text-center">
-              Không tìm thấy hợp đồng
+              {t("contractNotFound")}
             </h3>
             <p className="text-gray-500 text-center mb-4">
-              Hợp đồng không tồn tại hoặc đã bị xóa
+              {t("contractNotFoundDesc")}
             </p>
             <Button
               variant="link"
               onClick={() => router.push("/contracts")}
               className="w-full"
             >
-              Quay lại danh sách hợp đồng
+              {t("backToContractList")}
             </Button>
           </CardContent>
         </Card>
@@ -116,7 +118,7 @@ export default function ContractDetailPage() {
           className="mb-4 text-primary hover:text-primary/80"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Quay lại danh sách hợp đồng
+          {t("backToContractList")}
         </Button>
 
         {/* Contract Header */}

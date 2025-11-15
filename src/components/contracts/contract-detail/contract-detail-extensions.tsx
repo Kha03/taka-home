@@ -5,6 +5,7 @@ import { ContractExtensionStatus } from "@/components/contracts/contract-extensi
 import { ContractExpiryAlert } from "@/components/contracts/contract-expiry-alert";
 import { ContractExtensionDialog } from "@/components/contracts/contract-extension-dialog";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface ContractDetailExtensionsProps {
   contractId: string;
@@ -19,6 +20,7 @@ export function ContractDetailExtensions({
   endDate,
   requiredDeposit,
 }: ContractDetailExtensionsProps) {
+  const t = useTranslations("contract");
   const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
 
   // Calculate days remaining until contract end
@@ -58,7 +60,7 @@ export function ContractDetailExtensions({
         <CardHeader>
           <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
             <Clock className="w-5 h-5" />
-            Gia hạn hợp đồng
+            {t("contractExtension")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

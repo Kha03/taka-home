@@ -74,11 +74,11 @@ export function ContractDetailInvoices({
       setInvoices(response.data || []);
     } catch (error) {
       console.error("Error fetching invoices:", error);
-      toast.error("Không thể tải danh sách hóa đơn");
+      toast.error(t("cannotLoadInvoiceList"));
     } finally {
       setLoading(false);
     }
-  }, [contractId, bookingStatus]);
+  }, [contractId, bookingStatus, t]);
 
   useEffect(() => {
     void fetchInvoices();
@@ -98,7 +98,7 @@ export function ContractDetailInvoices({
     if (!selectedInvoice) return;
 
     try {
-      toast.loading("Đang tạo thanh toán...");
+      toast.loading(t("loading"));
 
       const response = await paymentService.createPaymentByInvoice(
         selectedInvoice.id,
@@ -109,17 +109,17 @@ export function ContractDetailInvoices({
 
       if (method === "WALLET") {
         if (response.data?.status === "PAID") {
-          toast.success("Thanh toán thành công!");
+          toast.success(t("paymentSuccess"));
           await fetchInvoices();
         } else {
-          toast.error("Thanh toán thất bại. Vui lòng kiểm tra số dư ví");
+          toast.error(t("paymentFailedCheckWallet"));
         }
       } else {
         if (response.data?.paymentUrl) {
-          toast.success("Đang chuyển đến trang thanh toán...");
+          toast.success(t("redirectingToPayment"));
           window.location.href = response.data.paymentUrl;
         } else {
-          toast.error("Không thể tạo thanh toán");
+          toast.error(t("cannotCreatePayment"));
         }
       }
 
@@ -127,7 +127,7 @@ export function ContractDetailInvoices({
     } catch (error) {
       console.error(error);
       toast.dismiss();
-      toast.error("Không thể tạo thanh toán. Vui lòng thử lại");
+      toast.error(t("cannotCreatePaymentRetry"));
     }
   };
 
@@ -167,7 +167,7 @@ export function ContractDetailInvoices({
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Hóa đơn thanh toán
+                {t("invoicesTitle")}
               </CardTitle>
               {userRole === "LANDLORD" && isActionsAllowed && (
                 <Button
@@ -176,7 +176,7 @@ export function ContractDetailInvoices({
                   className="bg-primary hover:bg-primary/90"
                 >
                   <Plus className="w-4 h-4 mr-1" />
-                  Tạo hóa đơn
+                  {t("createInvoice")}
                 </Button>
               )}
             </div>
@@ -184,7 +184,7 @@ export function ContractDetailInvoices({
           <CardContent>
             <div className="text-center py-8">
               <FileText className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-              <p className="text-muted-foreground">{t("noInvoices")}</p>
+              <p className="text-muted-foreground">{t("noInvoicesYet")}</p>
             </div>
           </CardContent>
         </Card>
@@ -211,7 +211,7 @@ export function ContractDetailInvoices({
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-bold text-primary flex items-center gap-2">
               <FileText className="w-5 h-5" />
-              Hóa đơn thanh toán ({invoices.length})
+              {t("invoicesTitle")} ({invoices.length})
             </CardTitle>
             {userRole === "LANDLORD" && isActionsAllowed && (
               <Button
@@ -220,7 +220,7 @@ export function ContractDetailInvoices({
                 className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="w-4 h-4 mr-1" />
-                Tạo hóa đơn
+                {t("createInvoice")}
               </Button>
             )}
           </div>
@@ -244,16 +244,17 @@ export function ContractDetailInvoices({
                 </div>
                 <div>
                   <div className="font-bold text-foreground">
-                    Hóa đơn{" "}
-                    {new Date(
-                      mostRecentInvoice.billingPeriod
-                    ).toLocaleDateString("vi-VN", {
-                      month: "2-digit",
-                      year: "numeric",
+                    {t("invoiceOf", {
+                      period: new Date(
+                        mostRecentInvoice.billingPeriod
+                      ).toLocaleDateString("vi-VN", {
+                        month: "2-digit",
+                        year: "numeric",
+                      }),
                     })}
                   </div>
                   <div className="text-xs text-[#4f4f4f]">
-                    Hạn thanh toán:{" "}
+                    {t("dueDate")}:{" "}
                     <strong>
                       {new Date(mostRecentInvoice.dueDate).toLocaleDateString(
                         "vi-VN"
@@ -270,14 +271,14 @@ export function ContractDetailInvoices({
                   onClick={() => handleViewInvoice(mostRecentInvoice)}
                 >
                   <Eye className="w-3 h-3 mr-1" />
-                  Chi tiết
+                  {t("viewDetails")}
                 </Button>
                 {mostRecentInvoice.status === "PAID" ? (
                   <div className="flex items-center gap-2 text-xs text-foreground">
                     <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
                       <Check className="h-3 w-3 text-primary-foreground" />
                     </div>
-                    <span>Đã thanh toán</span>
+                    <span>{t("paidLabel")}</span>
                   </div>
                 ) : mostRecentInvoice.status === "PENDING" ? (
                   userRole === "TENANT" && isActionsAllowed ? (
@@ -286,14 +287,14 @@ export function ContractDetailInvoices({
                       className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
                       onClick={() => handlePayInvoice(mostRecentInvoice)}
                     >
-                      Thanh toán
+                      {t("payButton")}
                     </Button>
                   ) : (
                     <div className="flex items-center gap-2 text-xs text-orange-600">
                       <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
                         <AlertCircle className="h-3 w-3 text-white" />
                       </div>
-                      <span>Chờ thanh toán</span>
+                      <span>{t("pendingPayment")}</span>
                     </div>
                   )
                 ) : (
@@ -301,7 +302,7 @@ export function ContractDetailInvoices({
                     <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
                       <AlertCircle className="h-3 w-3 text-white" />
                     </div>
-                    <span>Quá hạn</span>
+                    <span>{t("overdueStatus")}</span>
                   </div>
                 )}
               </div>
@@ -331,17 +332,17 @@ export function ContractDetailInvoices({
                         </div>
                         <div>
                           <div className="font-bold text-foreground">
-                            Hóa đơn{" "}
-                            {new Date(invoice.billingPeriod).toLocaleDateString(
-                              "vi-VN",
-                              {
+                            {t("invoiceOf", {
+                              period: new Date(
+                                invoice.billingPeriod
+                              ).toLocaleDateString("vi-VN", {
                                 month: "2-digit",
                                 year: "numeric",
-                              }
-                            )}
+                              }),
+                            })}
                           </div>
                           <div className="text-xs text-[#4f4f4f]">
-                            Hạn thanh toán:{" "}
+                            {t("dueDate")}:{" "}
                             <strong>
                               {new Date(invoice.dueDate).toLocaleDateString(
                                 "vi-VN"
@@ -358,14 +359,14 @@ export function ContractDetailInvoices({
                           onClick={() => handleViewInvoice(invoice)}
                         >
                           <Eye className="w-3 h-3 mr-1" />
-                          Chi tiết
+                          {t("viewDetails")}
                         </Button>
                         {invoice.status === "PAID" ? (
                           <div className="flex items-center gap-2 text-xs text-foreground">
                             <div className="h-4 w-4 rounded-full bg-[#00AE26] flex items-center justify-center">
                               <Check className="h-3 w-3 text-primary-foreground" />
                             </div>
-                            <span>Đã thanh toán</span>
+                            <span>{t("paidLabel")}</span>
                           </div>
                         ) : invoice.status === "PENDING" ? (
                           userRole === "TENANT" && isActionsAllowed ? (
@@ -374,14 +375,14 @@ export function ContractDetailInvoices({
                               className="rounded-full bg-secondary text-primary-foreground hover:bg-secondary/85"
                               onClick={() => handlePayInvoice(invoice)}
                             >
-                              Thanh toán
+                              {t("payButton")}
                             </Button>
                           ) : (
                             <div className="flex items-center gap-2 text-xs text-orange-600">
                               <div className="h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center">
                                 <AlertCircle className="h-3 w-3 text-white" />
                               </div>
-                              <span>Chờ thanh toán</span>
+                              <span>{t("pendingPayment")}</span>
                             </div>
                           )
                         ) : (
@@ -389,7 +390,7 @@ export function ContractDetailInvoices({
                             <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
                               <AlertCircle className="h-3 w-3 text-white" />
                             </div>
-                            <span>Quá hạn</span>
+                            <span>{t("overdueStatus")}</span>
                           </div>
                         )}
                       </div>
@@ -408,7 +409,7 @@ export function ContractDetailInvoices({
                           <div className="h-5 w-5 bg-secondary rounded-full flex items-center justify-center">
                             <ChevronUp className="h-4 w-4 text-primary-foreground" />
                           </div>
-                          <span>Ẩn bớt</span>
+                          <span>{t("hideInvoices")}</span>
                         </>
                       ) : (
                         <>
@@ -416,7 +417,9 @@ export function ContractDetailInvoices({
                             <ChevronDown className="w-4 h-4 text-primary-foreground" />
                           </div>
                           <span>
-                            Xem thêm {remainingInvoices.length} hóa đơn
+                            {t("viewMoreInvoices", {
+                              count: remainingInvoices.length,
+                            })}
                           </span>
                         </>
                       )}

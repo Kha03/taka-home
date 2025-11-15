@@ -28,7 +28,7 @@ export default function InvoiceDetailDialog({
   invoice,
   onPayInvoice,
 }: InvoiceDetailDialogProps) {
-  const t = useTranslations("contract");
+  const t = useTranslations("invoice");
   // Don't render anything if invoice is null/undefined
   if (!invoice) {
     return (
@@ -47,17 +47,17 @@ export default function InvoiceDetailDialog({
     switch (status) {
       case "PAID":
         return {
-          label: "Đã thanh toán",
+          label: `${t("paymentStatus.PAID")}`,
           className: "bg-green-100 text-green-800",
         };
       case "PENDING":
         return {
-          label: "Chờ thanh toán",
+          label: `${t("paymentStatus.PENDING")}`,
           className: "bg-orange-100 text-orange-800",
         };
       case "OVERDUE":
         return {
-          label: "Quá hạn",
+          label: `${t("paymentStatus.OVERDUE")}`,
           className: "bg-red-100 text-red-800",
         };
       default:
@@ -91,11 +91,9 @@ export default function InvoiceDetailDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Chi tiết hóa đơn
+            {t("invoiceDetails")}
           </DialogTitle>
-          <DialogDescription>
-            Thông tin chi tiết về hóa đơn thanh toán
-          </DialogDescription>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -105,7 +103,7 @@ export default function InvoiceDetailDialog({
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-gray-500" />
                 <span className="text-sm font-medium text-gray-700">
-                  Mã hóa đơn:
+                  {t("invoiceCode")}:
                 </span>
                 <span className="text-sm font-semibold">
                   {invoice.invoiceCode}
@@ -119,7 +117,7 @@ export default function InvoiceDetailDialog({
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-700">
-                Kỳ thanh toán:{" "}
+                {t("billingPeriod")}:
                 <span className="font-medium">{invoice.billingPeriod}</span>
               </span>
             </div>
@@ -127,13 +125,13 @@ export default function InvoiceDetailDialog({
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-700">
-                Hạn thanh toán:{" "}
+                {t("dueDate")}:
                 <span className="font-medium">
                   {formatDate(invoice.dueDate)}{" "}
                 </span>
                 <span className="text-red-400 font-bold">
                   {isPaymentOverdue(invoice.dueDate, invoice.status) &&
-                    " (Quá hạn)"}
+                    ` (${t("paymentStatus.overdue")})`}
                 </span>
               </span>
             </div>
@@ -143,7 +141,7 @@ export default function InvoiceDetailDialog({
 
           {/* Invoice Items */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900">Chi tiết các khoản</h3>
+            <h3 className="font-semibold text-gray-900">{t("detail")}</h3>
 
             <div className="space-y-3">
               {invoice.items.length > 0 ? (
@@ -165,7 +163,7 @@ export default function InvoiceDetailDialog({
                 ))
               ) : (
                 <div className="text-center py-4 text-gray-500">
-                  Không có chi tiết khoản thanh toán
+                  {t("noPaymentDetails")}
                 </div>
               )}
             </div>
@@ -177,7 +175,7 @@ export default function InvoiceDetailDialog({
           <div className="bg-[#FFF7E9] rounded-lg p-4">
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-gray-900">
-                Tổng cộng:
+                {t("totalAmount")}
               </span>
               <span className="text-2xl font-bold text-[#D4A574]">
                 {formatCurrency(invoice.totalAmount)}
@@ -193,7 +191,7 @@ export default function InvoiceDetailDialog({
                 onClick={onClose}
                 className="text-primary"
               >
-                Hủy
+                {t("cancel")}
               </Button>
               <Button
                 onClick={() => {
@@ -203,7 +201,7 @@ export default function InvoiceDetailDialog({
                 className="bg-[#D4A574] hover:bg-[#D4A574]/90"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
-                Thanh toán ngay
+                {t("payNow")}
               </Button>
             </div>
           )}

@@ -43,7 +43,6 @@ export function ContractExtensionStatus({
   requiredDeposit,
 }: ContractExtensionStatusProps) {
   const t = useTranslations("contract");
-  const tCommon = useTranslations("common");
   const [extensions, setExtensions] = useState<ContractExtension[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -122,21 +121,21 @@ export function ContractExtensionStatus({
     switch (status) {
       case "PENDING":
         return {
-          label: "Chờ phản hồi",
+          label: t("pendingResponse"),
           color:
             "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
           icon: <Clock className="w-4 h-4" />,
         };
       case "LANDLORD_RESPONDED":
         return {
-          label: "Chủ nhà đã phản hồi",
+          label: t("landlordResponded"),
           color:
             "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
           icon: <AlertCircle className="w-4 h-4" />,
         };
       case "AWAITING_SIGNATURES":
         return {
-          label: t("pendingSignature"),
+          label: t("awaitingSignatures"),
           color:
             "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
           icon: <FileSignature className="w-4 h-4" />,
@@ -150,21 +149,21 @@ export function ContractExtensionStatus({
         };
       case "AWAITING_ESCROW":
         return {
-          label: t("waitingDeposit"),
+          label: t("awaitingEscrow"),
           color:
             "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
           icon: <Wallet className="w-4 h-4" />,
         };
       case "ESCROW_FUNDED_T":
         return {
-          label: t("tenantDeposited"),
+          label: t("escrowFundedTenant"),
           color:
             "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400",
           icon: <CheckCircle2 className="w-4 h-4" />,
         };
       case "ESCROW_FUNDED_L":
         return {
-          label: t("landlordDeposited"),
+          label: t("escrowFundedLandlord"),
           color: "bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400",
           icon: <CheckCircle2 className="w-4 h-4" />,
         };
@@ -199,7 +198,7 @@ export function ContractExtensionStatus({
   };
 
   const formatCurrency = (amount: number | null) => {
-    if (!amount) return "Không thay đổi";
+    if (!amount) return t("noChange");
     return new Intl.NumberFormat("vi-VN").format(amount) + " đ";
   };
 
@@ -268,7 +267,7 @@ export function ContractExtensionStatus({
             className="w-full"
           >
             <FileText className="w-4 h-4 mr-2" />
-            Phản hồi yêu cầu
+            {t("respondRequest")}
           </Button>
         );
       }
@@ -285,7 +284,7 @@ export function ContractExtensionStatus({
             className="w-full"
           >
             <FileSignature className="w-4 h-4 mr-2" />
-            Ký hợp đồng gia hạn (Chủ nhà ký trước)
+            {t("signExtension")} ({t("landlordSignFirst")})
           </Button>
         );
       }
@@ -303,7 +302,7 @@ export function ContractExtensionStatus({
             className="w-full bg-cyan-600 hover:bg-cyan-700"
           >
             <Wallet className="w-4 h-4 mr-2" />
-            Đặt cọc gia hạn
+            {t("depositExtension")}
           </Button>
         );
       }
@@ -321,7 +320,7 @@ export function ContractExtensionStatus({
               className="flex-1"
             >
               <CheckCircle2 className="w-4 h-4 mr-2" />
-              Xem & Quyết định
+              {t("viewAndDecide")}
             </Button>
           </div>
         );
@@ -336,7 +335,7 @@ export function ContractExtensionStatus({
             className="w-full"
           >
             <FileSignature className="w-4 h-4 mr-2" />
-            Ký hợp đồng gia hạn (Người thuê ký sau)
+            {t("signExtension")} ({t("tenantSignAfter")})
           </Button>
         );
       }
@@ -354,7 +353,7 @@ export function ContractExtensionStatus({
             className="w-full bg-cyan-600 hover:bg-cyan-700"
           >
             <Wallet className="w-4 h-4 mr-2" />
-            Đặt cọc gia hạn
+            {t("depositExtension")}
           </Button>
         );
       }
@@ -418,7 +417,9 @@ export function ContractExtensionStatus({
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base font-semibold flex items-center gap-2">
                         <FileText className="w-5 h-5 text-blue-600" />
-                        Yêu cầu gia hạn {extension.extensionMonths} tháng
+                        {t("extensionRequestMonths", {
+                          months: extension.extensionMonths,
+                        })}
                       </CardTitle>
                       <Badge className={statusConfig.color}>
                         {statusConfig.icon}
@@ -430,17 +431,19 @@ export function ContractExtensionStatus({
                     {/* Request Info */}
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-muted-foreground">Ngày yêu cầu</p>
+                        <p className="text-muted-foreground">
+                          {t("requestDate")}
+                        </p>
                         <p className="font-medium">
                           {formatDate(extension.createdAt)}
                         </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">
-                          Số tháng gia hạn
+                          {t("extensionMonths")}
                         </p>
                         <p className="font-medium">
-                          {extension.extensionMonths} tháng
+                          {extension.extensionMonths} {t("months")}
                         </p>
                       </div>
                     </div>
@@ -449,7 +452,7 @@ export function ContractExtensionStatus({
                     {extension.requestNote && (
                       <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-3">
                         <p className="text-xs text-muted-foreground mb-1">
-                          Lời nhắn từ người thuê:
+                          {t("tenantMessage")}
                         </p>
                         <p className="text-sm">{extension.requestNote}</p>
                       </div>
@@ -460,12 +463,12 @@ export function ContractExtensionStatus({
                       extension.status !== "CANCELLED" && (
                         <div className="border-t pt-3 space-y-2">
                           <p className="text-sm font-semibold">
-                            Điều kiện gia hạn từ chủ nhà:
+                            {t("extensionTerms")}
                           </p>
                           <div className="text-sm">
                             <div>
                               <p className="text-muted-foreground">
-                                Giá thuê mới
+                                {t("newRentPrice")}
                               </p>
                               <p className="font-medium text-blue-600">
                                 {formatCurrency(extension.newMonthlyRent)}
@@ -475,7 +478,7 @@ export function ContractExtensionStatus({
                           {extension.responseNote && (
                             <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-lg p-3">
                               <p className="text-xs text-muted-foreground mb-1">
-                                Lời nhắn từ chủ nhà:
+                                {t("landlordMessage")}
                               </p>
                               <p className="text-sm">
                                 {extension.responseNote}
@@ -490,7 +493,9 @@ export function ContractExtensionStatus({
                       extension.tenantSignedAt) && (
                       <div className="border-t pt-3 grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <p className="text-muted-foreground">Chủ nhà ký</p>
+                          <p className="text-muted-foreground">
+                            {t("landlordSign")}
+                          </p>
                           <p className="font-medium">
                             {extension.landlordSignedAt ? (
                               <span className="text-green-600 flex items-center gap-1">
@@ -498,12 +503,16 @@ export function ContractExtensionStatus({
                                 {formatDate(extension.landlordSignedAt)}
                               </span>
                             ) : (
-                              <span className="text-gray-400">Chưa ký</span>
+                              <span className="text-gray-400">
+                                {t("notSigned2")}
+                              </span>
                             )}
                           </p>
                         </div>
                         <div>
-                          <p className="text-muted-foreground">Người thuê ký</p>
+                          <p className="text-muted-foreground">
+                            {t("tenantSign")}
+                          </p>
                           <p className="font-medium">
                             {extension.tenantSignedAt ? (
                               <span className="text-green-600 flex items-center gap-1">
@@ -511,7 +520,9 @@ export function ContractExtensionStatus({
                                 {formatDate(extension.tenantSignedAt)}
                               </span>
                             ) : (
-                              <span className="text-gray-400">Chưa ký</span>
+                              <span className="text-gray-400">
+                                {t("notSigned2")}
+                              </span>
                             )}
                           </p>
                         </div>
@@ -526,12 +537,12 @@ export function ContractExtensionStatus({
                       extension.landlordEscrowDepositFundedAt) && (
                       <div className="border-t pt-3">
                         <p className="text-sm font-semibold mb-2">
-                          Trạng thái đặt cọc gia hạn:
+                          {t("extensionDepositStatus")}
                         </p>
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
                             <p className="text-muted-foreground">
-                              Người thuê cọc
+                              {t("tenantDepositExtension")}
                             </p>
                             <p className="font-medium">
                               {extension.tenantEscrowDepositFundedAt ? (
@@ -543,13 +554,15 @@ export function ContractExtensionStatus({
                                 </span>
                               ) : (
                                 <span className="text-orange-500">
-                                  Chưa đặt cọc
+                                  {t("notDeposited")}
                                 </span>
                               )}
                             </p>
                           </div>
                           <div>
-                            <p className="text-muted-foreground">Chủ nhà cọc</p>
+                            <p className="text-muted-foreground">
+                              {t("landlordDepositExtension")}
+                            </p>
                             <p className="font-medium">
                               {extension.landlordEscrowDepositFundedAt ? (
                                 <span className="text-green-600 flex items-center gap-1">
@@ -560,7 +573,7 @@ export function ContractExtensionStatus({
                                 </span>
                               ) : (
                                 <span className="text-orange-500">
-                                  Chưa đặt cọc
+                                  {t("notDeposited")}
                                 </span>
                               )}
                             </p>
@@ -569,7 +582,7 @@ export function ContractExtensionStatus({
                         {extension.escrowDepositDueAt && (
                           <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-950/20 rounded text-xs">
                             <span className="text-muted-foreground">
-                              Hạn đặt cọc:{" "}
+                              {t("depositDeadline")}{" "}
                             </span>
                             <span className="font-medium">
                               {formatDate(extension.escrowDepositDueAt)}

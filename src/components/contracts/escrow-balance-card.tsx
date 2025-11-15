@@ -56,18 +56,20 @@ export function EscrowBalanceCard({ contractId }: EscrowBalanceCardProps) {
     <div className="flex items-center gap-4 text-sm bg-accent/20 rounded-lg px-3 py-2 border border-accent">
       <div className="flex items-center gap-2">
         <Wallet className="w-4 h-4 text-primary" />
-        <span className="text-muted-foreground">Số dư cọc:</span>
+        <span className="text-muted-foreground">{t("depositBalance")}</span>
       </div>
       <div className="flex items-center gap-3">
         <div>
-          <span className="text-xs text-muted-foreground">Người thuê: </span>
+          <span className="text-xs text-muted-foreground">{t("tenant")}: </span>
           <span className="font-semibold text-primary">
             {formatCurrency(balance.balanceTenant)}
           </span>
         </div>
         <span className="text-muted-foreground">•</span>
         <div>
-          <span className="text-xs text-muted-foreground">Chủ nhà: </span>
+          <span className="text-xs text-muted-foreground">
+            {t("landlord")}:{" "}
+          </span>
           <span className="font-semibold text-primary">
             {formatCurrency(balance.balanceLandlord)}
           </span>
