@@ -47,6 +47,8 @@ export function PropertyDetailModal({
   onUpdate,
 }: PropertyDetailModalProps) {
   const t = useTranslations("myProperties");
+  const tProperty = useTranslations("property");
+  const tContract = useTranslations("contract");
   const [activeIndex, setActiveIndex] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [moveRoomDialogOpen, setMoveRoomDialogOpen] = useState(false);
@@ -176,10 +178,10 @@ export function PropertyDetailModal({
     >
       <Building2 className="w-3 h-3 mr-1" />
       {isBoarding
-        ? "Nhà trọ"
+        ? t("boarding")
         : property.type === "HOUSING"
-        ? "Nhà riêng"
-        : "Chung cư"}
+        ? t("privateHouse")
+        : t("apartment")}
     </Badge>
   );
 
@@ -191,7 +193,7 @@ export function PropertyDetailModal({
           : "bg-gray-100 text-gray-700"
       } border-none pointer-events-none`}
     >
-      {property.isVisible ? "Trống" : "Đang cho thuê"}
+      {property.isVisible ? t("empty") : t("rented")}
     </Badge>
   );
 
@@ -215,7 +217,7 @@ export function PropertyDetailModal({
                 <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-amber-100 to-amber-50">
                   <div className="flex items-center gap-2 text-amber-700">
                     <Images className="w-5 h-5" />
-                    <span>Chưa có hình ảnh</span>
+                    <span>{tProperty("noImages")}</span>
                   </div>
                 </div>
               )}
@@ -232,7 +234,7 @@ export function PropertyDetailModal({
                         : "bg-amber-100 text-amber-700"
                     } border-none pointer-events-none`}
                   >
-                    {property.isApproved ? "Đã duyệt" : "Chờ duyệt"}
+                    {property.isApproved ? t("approved") : t("pendingApproval")}
                   </Badge>
                 )}
               </div>
@@ -301,7 +303,8 @@ export function PropertyDetailModal({
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Bed className="w-4 h-4 text-[#DCBB87]" /> Phòng ngủ
+                        <Bed className="w-4 h-4 text-[#DCBB87]" />{" "}
+                        {t("bedrooms")}
                       </div>
                       <p className="mt-1 text-2xl font-semibold text-primary">
                         {property.bedrooms || 0}
@@ -309,7 +312,8 @@ export function PropertyDetailModal({
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Bath className="w-4 h-4 text-[#DCBB87]" /> Phòng tắm
+                        <Bath className="w-4 h-4 text-[#DCBB87]" />{" "}
+                        {t("bathrooms")}
                       </div>
                       <p className="mt-1 text-2xl font-semibold text-primary">
                         {property.bathrooms || 0}
@@ -317,7 +321,8 @@ export function PropertyDetailModal({
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Ruler className="w-4 h-4 text-[#DCBB87]" /> Diện tích
+                        <Ruler className="w-4 h-4 text-[#DCBB87]" />{" "}
+                        {tProperty("area")}
                       </div>
                       <p className="mt-1 text-2xl font-semibold text-primary">
                         {property.area || 0}m²
@@ -325,13 +330,13 @@ export function PropertyDetailModal({
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <DollarSign className="w-4 h-4 text-[#DCBB87]" /> Giá
-                        thuê
+                        <DollarSign className="w-4 h-4 text-[#DCBB87]" />{" "}
+                        {tContract("rentPrice")}
                       </div>
                       <p className="mt-1 text-xl font-bold text-emerald-700">
                         {(property.price || 0).toLocaleString("vi-VN")}₫
                         <span className="ml-1 text-sm font-normal text-muted-foreground">
-                          /tháng
+                          {t("perMonth")}
                         </span>
                       </p>
                     </div>
@@ -343,7 +348,8 @@ export function PropertyDetailModal({
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Home className="w-4 h-4 text-[#DCBB87]" /> Tổng phòng
+                        <Home className="w-4 h-4 text-[#DCBB87]" />{" "}
+                        {t("totalRooms")}
                       </div>
                       <p className="mt-1 text-2xl font-semibold text-primary">
                         {totalRooms}
@@ -351,7 +357,8 @@ export function PropertyDetailModal({
                     </div>
                     <div className="bg-green-50 rounded-xl p-4 border border-green-500/30">
                       <div className="flex items-center gap-2 text-sm text-green-700">
-                        <Home className="w-4 h-4 text-green-600" /> Đã thuê
+                        <Home className="w-4 h-4 text-green-600" />{" "}
+                        {t("rented")}
                       </div>
                       <p className="mt-1 text-2xl font-semibold text-green-700">
                         {rentedCount}
@@ -359,7 +366,7 @@ export function PropertyDetailModal({
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-gray-300/30">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Home className="w-4 h-4 text-gray-500" /> Trống
+                        <Home className="w-4 h-4 text-gray-500" /> {t("empty")}
                       </div>
                       <p className="mt-1 text-2xl font-semibold text-primary">
                         {emptyCount}
@@ -367,13 +374,13 @@ export function PropertyDetailModal({
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <DollarSign className="w-4 h-4 text-[#DCBB87]" /> Thu
-                        nhập
+                        <DollarSign className="w-4 h-4 text-[#DCBB87]" />{" "}
+                        {t("income")}
                       </div>
                       <p className="mt-1 text-xl font-bold text-emerald-700">
                         {monthlyIncome.toLocaleString("vi-VN")}₫
                         <span className="ml-1 text-sm font-normal text-muted-foreground">
-                          /tháng
+                          {t("perMonth")}
                         </span>
                       </p>
                     </div>
@@ -386,7 +393,7 @@ export function PropertyDetailModal({
                     {property.furnishing && (
                       <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                         <p className="text-sm text-muted-foreground mb-1">
-                          Nội thất
+                          {tContract("furniture")}
                         </p>
                         <p className="text-base font-medium text-primary">
                           {property.furnishing}
@@ -397,7 +404,7 @@ export function PropertyDetailModal({
                     {property.deposit !== undefined && (
                       <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                         <p className="text-sm text-muted-foreground mb-1">
-                          Tiền cọc
+                          {t("deposit")}
                         </p>
                         <p className="text-base font-medium text-primary">
                           {property.deposit.toLocaleString("vi-VN")}₫
@@ -408,7 +415,7 @@ export function PropertyDetailModal({
                     {property.updatedAt && (
                       <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                         <div className="flex items-center gap-2 mb-1 text-sm text-muted-foreground">
-                          <Calendar className="w-4 h-4" /> Cập nhật
+                          <Calendar className="w-4 h-4" /> {t("updated")}
                         </div>
                         <p className="text-base font-medium text-primary">
                           {new Date(property.updatedAt).toLocaleDateString(
@@ -421,7 +428,7 @@ export function PropertyDetailModal({
                     {property.unit && (
                       <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                         <p className="text-sm text-muted-foreground mb-1">
-                          Mã căn hộ
+                          {t("unitCode")}
                         </p>
                         <p className="text-base font-medium text-primary">
                           {property.unit}
@@ -437,7 +444,8 @@ export function PropertyDetailModal({
                     {property.electricityPricePerKwh !== undefined && (
                       <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                         <div className="flex items-center gap-2 mb-1 text-sm text-muted-foreground">
-                          <Zap className="w-4 h-4 text-yellow-500" /> Giá điện
+                          <Zap className="w-4 h-4 text-yellow-500" />{" "}
+                          {t("electricityPrice")}
                         </div>
                         <p className="text-base font-medium text-primary">
                           {property.electricityPricePerKwh.toLocaleString(
@@ -450,7 +458,8 @@ export function PropertyDetailModal({
                     {property.waterPricePerM3 !== undefined && (
                       <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
                         <div className="flex items-center gap-2 mb-1 text-sm text-muted-foreground">
-                          <Droplet className="w-4 h-4 text-blue-500" /> Giá nước
+                          <Droplet className="w-4 h-4 text-blue-500" />{" "}
+                          {t("waterPrice")}
                         </div>
                         <p className="text-base font-medium text-primary">
                           {property.waterPricePerM3.toLocaleString("vi-VN")}₫/m³
@@ -462,7 +471,9 @@ export function PropertyDetailModal({
 
                 {property.description && (
                   <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
-                    <p className="text-sm text-muted-foreground mb-2">Mô tả</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {t("description")}
+                    </p>
                     <p className="text-base text-primary whitespace-pre-line leading-relaxed">
                       {property.description}
                     </p>
@@ -474,7 +485,7 @@ export function PropertyDetailModal({
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
                       <Home className="w-5 h-5 text-[#DCBB87]" />
-                      Các loại phòng ({roomTypes.length})
+                      {t("roomTypes")} ({roomTypes.length})
                     </h3>
 
                     {roomTypes.map((roomType, index) => {
@@ -495,14 +506,14 @@ export function PropertyDetailModal({
                                 {roomType.name}
                               </Badge>
                               <span className="text-sm text-muted-foreground">
-                                ({rentedInType}/{roomsInType.length} phòng đã
-                                thuê)
+                                ({rentedInType}/{roomsInType.length}{" "}
+                                {t("roomsRented")})
                               </span>
                             </div>
                             <p className="text-xl font-bold text-emerald-700">
                               {roomType.price.toLocaleString("vi-VN")}₫
                               <span className="text-sm font-normal text-muted-foreground ml-1">
-                                /tháng
+                                {t("perMonth")}
                               </span>
                             </p>
                           </div>
@@ -512,7 +523,7 @@ export function PropertyDetailModal({
                             <div className="bg-white rounded-lg p-3 border border-[#DCBB87]/30">
                               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                                 <Bed className="w-4 h-4 text-[#DCBB87]" />
-                                <span>Phòng ngủ</span>
+                                <span>{t("bedrooms")}</span>
                               </div>
                               <p className="text-xl font-semibold text-primary">
                                 {roomType.bedrooms}
@@ -521,7 +532,7 @@ export function PropertyDetailModal({
                             <div className="bg-white rounded-lg p-3 border border-[#DCBB87]/30">
                               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                                 <Bath className="w-4 h-4 text-[#DCBB87]" />
-                                <span>Phòng tắm</span>
+                                <span>{t("bathrooms")}</span>
                               </div>
                               <p className="text-xl font-semibold text-primary">
                                 {roomType.bathrooms}
@@ -530,7 +541,7 @@ export function PropertyDetailModal({
                             <div className="bg-white rounded-lg p-3 border border-[#DCBB87]/30">
                               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                                 <Ruler className="w-4 h-4 text-[#DCBB87]" />
-                                <span>Diện tích</span>
+                                <span>{tProperty("area")}</span>
                               </div>
                               <p className="text-xl font-semibold text-primary">
                                 {roomType.area}m²
@@ -542,7 +553,7 @@ export function PropertyDetailModal({
                           <div className="grid grid-cols-2 gap-4">
                             <div className="bg-white rounded-lg p-3 border border-[#DCBB87]/30">
                               <p className="text-xs text-muted-foreground mb-1">
-                                Nội thất
+                                {tContract("furniture")}
                               </p>
                               <p className="text-base font-medium text-primary">
                                 {roomType.furniture}
@@ -550,7 +561,7 @@ export function PropertyDetailModal({
                             </div>
                             <div className="bg-white rounded-lg p-3 border border-[#DCBB87]/30">
                               <p className="text-xs text-muted-foreground mb-1">
-                                Tiền cọc
+                                {t("deposit")}
                               </p>
                               <p className="text-base font-medium text-primary">
                                 {roomType.deposit.toLocaleString("vi-VN")}₫
@@ -562,7 +573,7 @@ export function PropertyDetailModal({
                           {roomType.description && (
                             <div className="bg-white rounded-lg p-3 border border-[#DCBB87]/30">
                               <p className="text-xs text-muted-foreground mb-1">
-                                Mô tả
+                                {t("description")}
                               </p>
                               <p className="text-sm text-primary">
                                 {roomType.description}
@@ -575,7 +586,7 @@ export function PropertyDetailModal({
                             <div>
                               <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
                                 <Images className="w-4 h-4" />
-                                Hình ảnh ({roomType.images.length})
+                                {tProperty("images")} ({roomType.images.length})
                               </p>
                               <div className="flex gap-2 flex-wrap">
                                 {roomType.images
@@ -607,7 +618,7 @@ export function PropertyDetailModal({
                           {roomsInType.length > 0 && (
                             <div>
                               <p className="text-sm text-muted-foreground mb-2">
-                                Danh sách phòng ({roomsInType.length})
+                                {t("roomList")} ({roomsInType.length})
                               </p>
                               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
                                 {roomsInType.map((room: any, idx: number) => (
@@ -629,17 +640,17 @@ export function PropertyDetailModal({
                                       {room.name}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                      Tầng {room.floor}
+                                      {tProperty("floor")} {room.floor}
                                     </p>
                                     <div className="mt-2 pt-2 border-t border-current/10">
                                       {!room.isVisible ? (
                                         <span className="text-xs text-green-600 font-medium">
-                                          ✓ Đã thuê
+                                          ✓ {t("rented")}
                                         </span>
                                       ) : (
                                         <div className="space-y-1">
                                           <span className="text-xs text-gray-500 block">
-                                            Trống
+                                            {t("empty")}
                                           </span>
                                           <Button
                                             size="sm"
@@ -651,7 +662,7 @@ export function PropertyDetailModal({
                                             className="w-full h-7 text-xs border-[#DCBB87] text-[#DCBB87] hover:bg-[#DCBB87] hover:text-white"
                                           >
                                             <MoveRight className="w-3 h-3 mr-1" />
-                                            Chuyển
+                                            {t("moveRoom")}
                                           </Button>
                                         </div>
                                       )}
@@ -675,7 +686,7 @@ export function PropertyDetailModal({
             {images.length > 1 && (
               <div className="lg:hidden px-4 pb-4">
                 <p className="text-sm text-muted-foreground mb-2">
-                  Hình ảnh ({images.length})
+                  {tProperty("images")} ({images.length})
                 </p>
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {images.map((img, idx) => (

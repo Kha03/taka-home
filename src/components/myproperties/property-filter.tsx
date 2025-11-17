@@ -1,4 +1,5 @@
 import { Filter, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
@@ -26,12 +27,14 @@ export default function PropertyFilter({
   propertyType,
   setPropertyType,
 }: PropertyFilterProps) {
+  const t = useTranslations("myProperties");
+
   return (
     <div className="flex gap-3 items-center">
       <div className="flex-1 relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary w-4 h-4" />
         <Input
-          placeholder="Tìm kiếm tên bất động sản, mã căn hộ"
+          placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="
@@ -48,10 +51,10 @@ export default function PropertyFilter({
 
       <Select value={location} onValueChange={setLocation}>
         <SelectTrigger className="bg-primary-foreground text-secondary font-bold border-secondary rounded-full px-6 h-11 shadow-secondary min-w-[160px] data-[placeholder]:text-secondary">
-          <SelectValue placeholder="Địa điểm" />
+          <SelectValue placeholder={t("location")} />
         </SelectTrigger>
         <SelectContent className="bg-primary-foreground">
-          <SelectItem value="all">Toàn quốc</SelectItem>
+          <SelectItem value="all">{t("nationwide")}</SelectItem>
           <SelectItem value="ho-chi-minh">TP. Hồ Chí Minh</SelectItem>
           <SelectItem value="ha-noi">Hà Nội</SelectItem>
           <SelectItem value="da-nang">Đà Nẵng</SelectItem>
@@ -66,19 +69,19 @@ export default function PropertyFilter({
 
       <Select value={propertyType} onValueChange={setPropertyType}>
         <SelectTrigger className="bg-primary-foreground text-secondary font-bold border-secondary rounded-full px-6 h-11 shadow-secondary min-w-[160px] data-[placeholder]:text-secondary">
-          <SelectValue placeholder="Loại hình" />
+          <SelectValue placeholder={t("propertyType")} />
         </SelectTrigger>
         <SelectContent className="bg-primary-foreground">
-          <SelectItem value="all">Tất cả</SelectItem>
-          <SelectItem value="APARTMENT">Chung cư</SelectItem>
-          <SelectItem value="HOUSING">Nhà riêng</SelectItem>
-          <SelectItem value="BOARDING">Phòng trọ</SelectItem>
+          <SelectItem value="all">{t("all")}</SelectItem>
+          <SelectItem value="APARTMENT">{t("apartment")}</SelectItem>
+          <SelectItem value="HOUSING">{t("privateHouse")}</SelectItem>
+          <SelectItem value="BOARDING">{t("boarding")}</SelectItem>
         </SelectContent>
       </Select>
 
       <Button className="bg-secondary text-primary-foreground font-bold border-secondary rounded-full px-6 h-11 w-[100px] shadow-secondary hover:bg-secondary/90 transition-colors">
         <Filter className="w-4 h-4" />
-        Lọc
+        {t("filter")}
       </Button>
     </div>
   );

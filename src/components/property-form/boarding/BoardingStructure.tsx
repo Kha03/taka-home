@@ -3,6 +3,7 @@
 
 import React from "react";
 import { useFieldArray } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,13 +13,14 @@ import { useFormContextStrict } from "../form/useFormContextStrict";
 import { AddFloorCard } from "./AddFloorCard";
 
 export function BoardingStructure() {
+  const t = useTranslations("myProperties");
   const { control } = useFormContextStrict<NewPropertyForm>();
   const { fields, append, remove } = useFieldArray({ control, name: "floors" });
 
   const getNextFloorName = () => {
-    if (fields.length === 0) return "Tầng trệt";
-    if (fields.length === 1) return "Tầng 1";
-    return `Tầng ${fields.length}`;
+    if (fields.length === 0) return t("groundFloor");
+    if (fields.length === 1) return `${t("floor")} 1`;
+    return `${t("floor")} ${fields.length}`;
   };
 
   const addFloor = () => append({ name: getNextFloorName(), rooms: [] });
@@ -27,7 +29,7 @@ export function BoardingStructure() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Label className="text-[#4F4F4F] font-semibold text-sm">
-          Cơ cấu Bất động sản
+          {t("propertyStructure")}
           <CircleAlert className="h-4 w-4 text-[#FA0000]" />
         </Label>
       </div>
@@ -63,6 +65,7 @@ export function BoardingStructure() {
 }
 
 function TagEditor({ index }: { index: number }) {
+  const t = useTranslations("property");
   const { register, watch, setValue } = useFormContextStrict<NewPropertyForm>();
   const roomsPath = `floors.${index}.rooms` as const;
   const rooms = watch(roomsPath) as string[];
@@ -103,7 +106,7 @@ function TagEditor({ index }: { index: number }) {
           onClick={addRoom}
           className="w-full text-primary hover:bg-accent/20 border-accent"
         >
-          <Plus className="mr-1 h-4 w-4" /> Thêm phòng
+          <Plus className="mr-1 h-4 w-4" /> {t("addRoom")}
         </Button>
       </div>
 

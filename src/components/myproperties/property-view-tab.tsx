@@ -1,11 +1,7 @@
 import { cn } from "@/lib/utils/utils";
+import { useTranslations } from "next-intl";
 import { Button } from "../ui/button";
 import { Building2, Home } from "lucide-react";
-
-const viewTabs = [
-  { id: "unit", label: "Quản lý theo căn", icon: Building2 },
-  { id: "room", label: "Quản lý theo phòng", icon: Home },
-];
 
 interface PropertyViewTabProps {
   activeView: string;
@@ -16,6 +12,13 @@ export default function PropertyViewTab({
   activeView,
   setActiveView,
 }: PropertyViewTabProps) {
+  const t = useTranslations("myProperties");
+
+  const viewTabs = [
+    { id: "unit", label: t("manageByUnit"), icon: Building2 },
+    { id: "room", label: t("manageByRoom"), icon: Home },
+  ];
+
   return (
     <div className="flex gap-2 bg-primary-foreground rounded-[30px] p-2 shadow-none w-fit border border-secondary mb-2.5">
       {viewTabs.map((tab) => {

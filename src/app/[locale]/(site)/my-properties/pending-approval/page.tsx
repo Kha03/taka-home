@@ -3,11 +3,13 @@
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Clock, Home } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Stepper } from "@/components/property-form/Stepper";
 
 export default function PendingApprovalPage() {
+  const t = useTranslations("myProperties");
   const router = useRouter();
 
   return (
@@ -43,10 +45,10 @@ export default function PendingApprovalPage() {
               className="space-y-2"
             >
               <h1 className="text-3xl font-bold text-primary">
-                Đăng tin thành công!
+                {t("postSuccessTitle")}
               </h1>
               <p className="text-muted-foreground text-lg">
-                Bất động sản của bạn đã được gửi lên hệ thống
+                {t("postSuccessMessage")}
               </p>
             </motion.div>
 
@@ -61,11 +63,10 @@ export default function PendingApprovalPage() {
                 <Clock className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1" />
                 <div className="text-left space-y-2">
                   <h3 className="font-semibold text-amber-900">
-                    Đang chờ xét duyệt
+                    {t("pendingApprovalTitle")}
                   </h3>
                   <p className="text-sm text-amber-700">
-                    Quản trị viên sẽ xem xét và duyệt bất động sản của bạn trong
-                    thời gian sớm nhất.
+                    {t("pendingApprovalMessage")}
                   </p>
                 </div>
               </div>
@@ -83,14 +84,14 @@ export default function PendingApprovalPage() {
                 className="rounded-[8px] bg-accent border-0 hover:bg-[#e59400] text-primary-foreground"
               >
                 <Home className="h-4 w-4 mr-2" />
-                Xem bất động sản của tôi
+                {t("viewMyProperties")}
               </Button>
               <Button
                 onClick={() => router.push("/")}
                 variant="outline"
                 className="rounded-[8px] border-accent hover:bg-accent/10 text-accent"
               >
-                Về trang chủ
+                {t("backToHome")}
               </Button>
             </motion.div>
           </div>

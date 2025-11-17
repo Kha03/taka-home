@@ -15,6 +15,7 @@ export function ImageDrop({
   onError?: (error: string) => void;
 }) {
   const t = useTranslations("form");
+  const tProperty = useTranslations("myProperties");
   const [isUploading, setIsUploading] = React.useState(false);
   const inputId = React.useId();
 
@@ -27,14 +28,14 @@ export function ImageDrop({
     // Validate file type
     const validTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
-      onError?.("Chỉ chấp nhận file ảnh định dạng JPEG, PNG, WEBP");
+      onError?.(tProperty("onlyImageFormat"));
       return;
     }
 
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      onError?.("Kích thước ảnh không được vượt quá 5MB");
+      onError?.(tProperty("imageSizeLimit"));
       return;
     }
 
@@ -49,13 +50,13 @@ export function ImageDrop({
         setIsUploading(false);
       };
       reader.onerror = () => {
-        onError?.("Có lỗi xảy ra khi đọc file ảnh");
+        onError?.(t("errors"));
         setIsUploading(false);
       };
       reader.readAsDataURL(file);
     } catch (error) {
       console.error("File reading error:", error);
-      onError?.("Có lỗi xảy ra khi xử lý ảnh");
+      onError?.(t("errors"));
       setIsUploading(false);
     }
   };

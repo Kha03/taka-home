@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,8 @@ interface ProfileFormData {
 }
 
 export default function ProfilePage() {
+  const t = useTranslations("profile");
+  const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -86,7 +89,7 @@ export default function ProfilePage() {
           );
         }
       } catch {
-        toast.error("Lỗi", "Không thể tải thông tin tài khoản");
+        toast.error(tCommon("error"), t("errors.cannotLoadProfile"));
       } finally {
         setIsLoading(false);
       }
@@ -107,13 +110,13 @@ export default function ProfilePage() {
     if (file) {
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Lỗi", "Kích thước ảnh không được vượt quá 5MB");
+        toast.error(tCommon("error"), t("errors.imageTooLarge"));
         return;
       }
 
       // Validate file type
       if (!file.type.startsWith("image/")) {
-        toast.error("Lỗi", "Vui lòng chọn file ảnh");
+        toast.error(tCommon("error"), t("errors.selectImageFile"));
         return;
       }
 
@@ -151,17 +154,17 @@ export default function ProfilePage() {
             setAccount(updatedAccount);
           }
 
-          toast.success("Thành công", "Cập nhật ảnh đại diện thành công");
+          toast.success(tCommon("success"), t("success.avatarUpdated"));
         } else {
-          throw new Error(response.message || "Không thể upload ảnh đại diện");
+          throw new Error(response.message || t("errors.cannotUploadAvatar"));
         }
       } catch (error) {
         console.error("Upload avatar error:", error);
         toast.error(
-          "Lỗi",
+          tCommon("error"),
           error instanceof Error
             ? error.message
-            : "Không thể upload ảnh đại diện"
+            : t("errors.cannotUploadAvatar")
         );
         // Revert preview on error
         setAvatarPreview(account?.user?.avatarUrl || "/assets/imgs/avatar.png");
@@ -176,18 +179,18 @@ export default function ProfilePage() {
     try {
       // Validate phone number
       if (!formData.phone || formData.phone.trim() === "") {
-        toast.error("Lỗi", "Số điện thoại không được để trống");
+        toast.error(tCommon("error"), t("errors.phoneRequired"));
         return;
       }
 
       // Validate phone format (10-11 digits)
       if (!/^[0-9]{10,11}$/.test(formData.phone)) {
-        toast.error("Lỗi", "Số điện thoại phải có 10-11 chữ số");
+        toast.error(tCommon("error"), t("errors.phoneFormat"));
         return;
       }
 
       if (!account?.user?.id) {
-        toast.error("Lỗi", "Không tìm thấy thông tin người dùng");
+        toast.error(tCommon("error"), t("errors.userNotFound"));
         return;
       }
 
@@ -208,15 +211,15 @@ export default function ProfilePage() {
         localStorage.setItem("account_info", JSON.stringify(updatedAccount));
         setAccount(updatedAccount);
 
-        toast.success("Thành công", "Cập nhật số điện thoại thành công");
+        toast.success(tCommon("success"), t("success.phoneUpdated"));
       } else {
-        throw new Error(response.message || "Không thể cập nhật thông tin");
+        throw new Error(response.message || t("errors.cannotUpdateProfile"));
       }
     } catch (error) {
       console.error("Update profile error:", error);
       toast.error(
-        "Lỗi",
-        error instanceof Error ? error.message : "Không thể cập nhật thông tin"
+        tCommon("error"),
+        error instanceof Error ? error.message : t("errors.cannotUpdateProfile")
       );
     } finally {
       setIsSaving(false);
@@ -229,13 +232,13 @@ export default function ProfilePage() {
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Lỗi", "Kích thước ảnh không được vượt quá 10MB");
+      toast.error(tCommon("error"), t("errors.imageTooLargeCCCD"));
       return;
     }
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Lỗi", "Vui lòng chọn file ảnh");
+      toast.error(tCommon("error"), t("errors.selectImageFile"));
       return;
     }
 
@@ -264,10 +267,7 @@ export default function ProfilePage() {
       }, 100);
     } catch (error) {
       console.error("Error accessing camera:", error);
-      toast.error(
-        "Lỗi",
-        "Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập."
-      );
+      toast.error(tCommon("error"), t("errors.cannotAccessCamera"));
     }
   };
 
@@ -315,11 +315,11 @@ export default function ProfilePage() {
           });
           setFaceImage(file);
           closeCamera();
-          toast.success("Thành công", "Đã chụp ảnh khuôn mặt");
+          toast.success(tCommon("success"), t("success.facePhotoCaptured"));
         })
         .catch((error) => {
           console.error("Error converting image:", error);
-          toast.error("Lỗi", "Không thể lưu ảnh");
+          toast.error(tCommon("error"), t("errors.cannotSavePhoto"));
         });
     }
   };
@@ -335,7 +335,7 @@ export default function ProfilePage() {
 
   const handleVerifyIdentity = async () => {
     if (!faceImage || !cccdImage) {
-      toast.error("Lỗi", "Vui lòng upload cả ảnh khuôn mặt và ảnh CCCD");
+      toast.error(tCommon("error"), t("errors.uploadBothImages"));
       return;
     }
 
@@ -351,10 +351,7 @@ export default function ProfilePage() {
         const { isMatch, cccdInfo } = response.data;
 
         if (!isMatch) {
-          toast.error(
-            "Xác thực thất bại",
-            "Khuôn mặt không khớp với ảnh trên CCCD. Vui lòng thử lại."
-          );
+          toast.error(t("errors.verificationFailed"), t("errors.faceNotMatch"));
           return;
         }
 
@@ -381,21 +378,21 @@ export default function ProfilePage() {
         }
 
         // Hiển thị thông báo với thông tin nhận dạng được
-        toast.success("Xác thực thành công!");
+        toast.success(t("success.verificationSuccess"));
 
         // Reset images after successful verification
         setFaceImage(null);
         setCccdImage(null);
       } else {
-        throw new Error(response.message || "Xác thực thất bại");
+        throw new Error(response.message || t("errors.verificationFailed"));
       }
     } catch (error) {
       console.error("Identity verification error:", error);
       toast.error(
-        "Lỗi",
+        tCommon("error"),
         error instanceof Error
           ? error.message
-          : "Không thể xác thực danh tính. Vui lòng thử lại."
+          : t("errors.cannotVerifyIdentity")
       );
     } finally {
       setIsUploadingCCCD(false);
@@ -414,9 +411,7 @@ export default function ProfilePage() {
     <div className="space-y-4">
       {/* Page Header */}
       <div>
-        <h2 className="text-primary mt-2 font-bold text-3xl">
-          Thông tin cá nhân
-        </h2>
+        <h2 className="text-primary mt-2 font-bold text-3xl">{t("title")}</h2>
       </div>
 
       {/* Avatar Section */}
@@ -455,11 +450,13 @@ export default function ProfilePage() {
             </div>
             <div className="text-center sm:text-left">
               <h3 className="text-xl font-bold text-gray-900">
-                {formData.fullName || "Chưa cập nhật"}
+                {formData.fullName || t("notUpdated")}
               </h3>
               <p className="text-gray-600 mt-1">{formData.email}</p>
               <p className="text-sm text-gray-500 mt-2">
-                {account?.roles?.[0] === "LANDLORD" ? "Chủ nhà" : "Người thuê"}
+                {account?.roles?.[0] === "LANDLORD"
+                  ? t("landlord")
+                  : t("tenant")}
               </p>
               <Button
                 variant="outline"
@@ -473,12 +470,12 @@ export default function ProfilePage() {
                 {isUploadingAvatar ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Đang tải lên...
+                    {t("uploadingAvatar")}
                   </>
                 ) : (
                   <>
                     <Camera className="w-4 h-4 mr-2" />
-                    Thay đổi ảnh đại diện
+                    {t("changeAvatar")}
                   </>
                 )}
               </Button>
@@ -490,17 +487,17 @@ export default function ProfilePage() {
       {/* Personal Information Form */}
       <Card className="border-none shadow-sm bg-primary-foreground">
         <CardHeader>
-          <CardTitle>Thông tin cơ bản</CardTitle>
+          <CardTitle>{t("basicInfo")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Full Name */}
             <div className="space-y-2">
-              <Label htmlFor="fullName">Họ và tên</Label>
+              <Label htmlFor="fullName">{t("fullName")}</Label>
               <Input
                 id="fullName"
                 name="fullName"
-                placeholder="Nguyễn Văn A"
+                placeholder={t("fullNamePlaceholder")}
                 value={formData.fullName}
                 disabled
               />
@@ -508,7 +505,7 @@ export default function ProfilePage() {
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
@@ -525,7 +522,7 @@ export default function ProfilePage() {
             {/* Phone */}
             <div className="space-y-2">
               <Label htmlFor="phone">
-                Số điện thoại <span className="text-red-500">*</span>
+                {t("phone")} <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -533,7 +530,7 @@ export default function ProfilePage() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="0912345678"
+                  placeholder={t("phonePlaceholder")}
                   className="pl-10"
                   value={formData.phone}
                   onChange={handleInputChange}
@@ -543,13 +540,13 @@ export default function ProfilePage() {
 
             {/* CCCD */}
             <div className="space-y-2">
-              <Label htmlFor="cccd">CCCD/CMND</Label>
+              <Label htmlFor="cccd">{t("cccd")}</Label>
               <div className="relative">
                 <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
                   id="cccd"
                   name="cccd"
-                  placeholder="001234567890"
+                  placeholder={t("cccdPlaceholder")}
                   className="pl-10"
                   value={formData.cccd}
                   disabled
@@ -573,12 +570,12 @@ export default function ProfilePage() {
                       {faceImage ? (
                         <>
                           <CheckCircle2 className="w-4 h-4 mr-2" />
-                          Đã chụp ảnh khuôn mặt
+                          {t("capturedFacePhoto")}
                         </>
                       ) : (
                         <>
                           <Video className="w-4 h-4 mr-2" />
-                          Chụp ảnh khuôn mặt bằng camera
+                          {t("captureFacePhoto")}
                         </>
                       )}
                     </Button>
@@ -597,12 +594,12 @@ export default function ProfilePage() {
                       {cccdImage ? (
                         <>
                           <CheckCircle2 className="w-4 h-4" />
-                          Đã chọn ảnh CCCD
+                          {t("selectedCCCDPhoto")}
                         </>
                       ) : (
                         <>
                           <Upload className="w-4 h-4" />
-                          Upload ảnh CCCD
+                          {t("uploadCCCDPhoto")}
                         </>
                       )}
                     </label>
@@ -625,19 +622,18 @@ export default function ProfilePage() {
                     {isUploadingCCCD ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Đang xác thực...
+                        {t("verifying")}
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        Xác thực danh tính
+                        {t("verifyIdentity")}
                       </>
                     )}
                   </Button>
 
                   <p className="text-xs text-gray-500">
-                    Upload ảnh khuôn mặt và ảnh mặt trước CCCD để xác thực tài
-                    khoản
+                    {t("verifyInstruction")}
                   </p>
                 </div>
               )}
@@ -646,18 +642,16 @@ export default function ProfilePage() {
             {/* Bio */}
             {account?.roles?.[0] === "LANDLORD" && (
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="bio">Giới thiệu bản thân</Label>
+                <Label htmlFor="bio">{t("bio")}</Label>
                 <Textarea
                   id="bio"
                   name="bio"
-                  placeholder="Viết vài dòng giới thiệu về bản thân..."
+                  placeholder={t("bioPlaceholder")}
                   rows={4}
                   value={formData.bio}
                   onChange={handleInputChange}
                 />
-                <p className="text-xs text-gray-500">
-                  Giới thiệu này sẽ giúp người thuê hiểu rõ hơn về bạn
-                </p>
+                <p className="text-xs text-gray-500">{t("bioHint")}</p>
               </div>
             )}
           </div>
@@ -665,7 +659,7 @@ export default function ProfilePage() {
           {/* Account Info */}
           <div className="pt-6 border-t">
             <h4 className="font-semibold text-gray-900 mb-4">
-              Thông tin tài khoản
+              {t("accountInfo")}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -673,7 +667,7 @@ export default function ProfilePage() {
                   <Calendar className="w-5 h-5 text-[#DCBB87]" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Ngày tham gia</p>
+                  <p className="text-sm text-gray-600">{t("joinDate")}</p>
                   <p className="font-semibold text-gray-900">
                     {account?.createdAt
                       ? new Date(account.createdAt).toLocaleDateString()
@@ -694,13 +688,15 @@ export default function ProfilePage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Trạng thái xác thực</p>
+                  <p className="text-sm text-gray-600">
+                    {t("verificationStatus")}
+                  </p>
                   <p
                     className={`font-semibold ${
                       account?.isVerified ? "text-green-600" : "text-yellow-600"
                     }`}
                   >
-                    {account?.isVerified ? "Đã xác thực" : "Chưa xác thực"}
+                    {account?.isVerified ? t("verified") : t("notVerified")}
                   </p>
                 </div>
               </div>
@@ -714,7 +710,7 @@ export default function ProfilePage() {
               onClick={() => window.location.reload()}
               className="text-red-500 border-red-500"
             >
-              Hủy bỏ
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleSave}
@@ -724,12 +720,12 @@ export default function ProfilePage() {
               {isSaving ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Đang lưu...
+                  {t("saving")}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Lưu thay đổi
+                  {t("saveChanges")}
                 </>
               )}
             </Button>
@@ -741,11 +737,8 @@ export default function ProfilePage() {
       <Dialog open={isCameraOpen} onOpenChange={closeCamera}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Chụp ảnh khuôn mặt</DialogTitle>
-            <DialogDescription>
-              Hãy đảm bảo khuôn mặt của bạn được chiếu sáng tốt và nằm trong
-              khung hình
-            </DialogDescription>
+            <DialogTitle>{t("captureFace")}</DialogTitle>
+            <DialogDescription>{t("captureFaceDescription")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -781,7 +774,7 @@ export default function ProfilePage() {
                     onClick={closeCamera}
                     className="flex-1 border-red-500 text-red-500"
                   >
-                    Hủy
+                    {t("cancel")}
                   </Button>
                   <Button
                     type="button"
@@ -789,7 +782,7 @@ export default function ProfilePage() {
                     className="flex-1 bg-[#DCBB87] hover:bg-[#B8935A]"
                   >
                     <Camera className="w-4 h-4 mr-2" />
-                    Chụp ảnh
+                    {t("takePhoto")}
                   </Button>
                 </>
               ) : (
@@ -801,7 +794,7 @@ export default function ProfilePage() {
                     className="flex-1 text-primary"
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />
-                    Chụp lại
+                    {t("retake")}
                   </Button>
                   <Button
                     type="button"
@@ -809,7 +802,7 @@ export default function ProfilePage() {
                     className="flex-1 bg-[#DCBB87] hover:bg-[#B8935A]"
                   >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Xác nhận
+                    {t("confirm")}
                   </Button>
                 </>
               )}

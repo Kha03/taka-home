@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useFieldArray } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,8 @@ import { NewPropertyForm } from "@/schema/schema";
 import { useFormContextStrict } from "../form/useFormContextStrict";
 
 export function RoomTypes() {
+  const t = useTranslations("myProperties");
+  const tProperty = useTranslations("property");
   const { control, setValue, watch, getValues } =
     useFormContextStrict<NewPropertyForm>();
   const { fields, append, remove } = useFieldArray({
@@ -33,9 +36,9 @@ export function RoomTypes() {
           <div key={f.id} className="relative mb-8">
             <Card className="bg-primary-foreground border-2 border-dashed shadow-none pt-8">
               <div className="absolute -top-3 left-4 bg-accent px-2 py-1 rounded-[30px]">
-                <CardTitle className="text-sm text-primary-foreground font-semibold">{`Phòng loại ${
-                  idx + 1
-                }`}</CardTitle>
+                <CardTitle className="text-sm text-primary-foreground font-semibold">{`${t(
+                  "roomType"
+                )} ${idx + 1}`}</CardTitle>
               </div>
               <div className="absolute -top-3 right-4">
                 <Button
@@ -54,39 +57,45 @@ export function RoomTypes() {
                     <div className="h-6 w-6 bg-primary rounded-full flex items-center justify-center">
                       <Info className="w-3 h-3 text-white" />
                     </div>
-                    <p className="font-bold text-primary">Thông tin chi tiết</p>
+                    <p className="font-bold text-primary">
+                      {t("detailedInfo")}
+                    </p>
                   </div>
                   <div className="grid gap-3 md:grid-cols-2">
                     <Field
-                      label="Số phòng ngủ"
+                      label={t("numberOfBedrooms")}
                       name={`roomTypes.${idx}.bedrooms`}
                       type="number"
                       placeholder="0"
                       required
                     />
                     <Field
-                      label="Số phòng vệ sinh"
+                      label={t("numberOfBathrooms")}
                       name={`roomTypes.${idx}.bathrooms`}
                       type="number"
                       placeholder="0"
                       required
                     />
                     <SelectField
-                      label="Tình trạng nội thất"
+                      label={t("furnitureStatus")}
                       name="furnishing"
-                      options={["Đầy đủ", "Cơ bản", "Trống"]}
-                      placeholder="Chọn tình trạng nội thất"
+                      options={[
+                        t("furnitureFull"),
+                        t("furnitureBasic"),
+                        t("furnitureEmpty"),
+                      ]}
+                      placeholder={t("selectFurnitureStatus")}
                       required
                     />
                     <Field
-                      label="Diện tích"
+                      label={tProperty("area")}
                       name={`roomTypes.${idx}.area`}
                       type="number"
                       placeholder="m²"
                       required
                     />
                     <Field
-                      label="Giá thuê"
+                      label={t("rentPrice")}
                       name={`roomTypes.${idx}.price`}
                       type="number"
                       placeholder="VND"
@@ -97,7 +106,7 @@ export function RoomTypes() {
 
                   <div>
                     <Label className="mb-2 block">
-                      Vị trí phòng loại {idx + 1}
+                      {t("roomTypePosition")} {idx + 1}
                     </Label>
                     <div className="rounded-xl border-2 border-dotted p-4 bg-muted/30 border-accent">
                       <RoomSelector roomTypeIndex={idx} />
@@ -112,14 +121,14 @@ export function RoomTypes() {
                       <Info className="w-3 h-3 text-white" />
                     </div>
                     <p className="font-bold text-primary">
-                      Hình ảnh đính kèm (Tối đa 6 ảnh)
+                      {t("attachedImages")} ({t("maxImages")})
                     </p>
                   </div>
 
                   {/* Hero Image Upload */}
                   {!watch(`roomTypes.${idx}.images`)?.[0] && (
                     <ImageDrop
-                      label="Tải lên ảnh phòng (850 × 450)"
+                      label={t("uploadRoomImage")}
                       onPick={(src) => {
                         const currentImages =
                           getValues(`roomTypes.${idx}.images`) || [];
@@ -160,7 +169,7 @@ export function RoomTypes() {
                         </button>
                         {i === 0 && (
                           <div className="absolute bottom-1 left-1 bg-primary text-white text-xs px-2 py-0.5 rounded">
-                            Ảnh chính
+                            {t("mainImage")}
                           </div>
                         )}
                       </div>
@@ -195,15 +204,11 @@ export function RoomTypes() {
                                 "image/webp",
                               ].includes(file.type)
                             ) {
-                              setUploadError(
-                                "Chỉ chấp nhận file ảnh định dạng JPEG, PNG, WEBP"
-                              );
+                              setUploadError(t("onlyImageFormat"));
                               return;
                             }
                             if (file.size > 5 * 1024 * 1024) {
-                              setUploadError(
-                                "Kích thước ảnh không được vượt quá 5MB"
-                              );
+                              setUploadError(t("imageSizeLimit"));
                               return;
                             }
 
@@ -225,7 +230,7 @@ export function RoomTypes() {
                         <div className="flex flex-col items-center gap-1">
                           <ImageIcon className="h-5 w-5 text-accent" />
                           <span className="text-xs text-muted-foreground">
-                            Thêm ảnh
+                            {t("addImage")}
                           </span>
                         </div>
                       </DottedBox>
@@ -245,7 +250,7 @@ export function RoomTypes() {
       <div
         onClick={() =>
           append({
-            name: `Loại ${fields.length + 1}`,
+            name: `${t("roomType")} ${fields.length + 1}`,
             bedrooms: 1,
             bathrooms: 1,
             legalDoc: "Sổ hồng",
@@ -263,7 +268,7 @@ export function RoomTypes() {
           <Plus className="h-4 w-4 text-white" />
         </div>
         <span className="text-primary hover:text-accent transition-colors">
-          Thêm phân loại phòng
+          {t("addRoomType")}
         </span>
       </div>
     </div>

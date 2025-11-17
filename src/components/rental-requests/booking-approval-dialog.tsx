@@ -160,12 +160,9 @@ export function BookingApprovalDialog({
           <DialogHeader>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-6 w-6 text-green-500" />
-              <DialogTitle>Duyệt yêu cầu thành công!</DialogTitle>
+              <DialogTitle>{t("approvalSuccess")}</DialogTitle>
             </div>
-            <DialogDescription>
-              Yêu cầu thuê đã được duyệt. Booking đã cập nhật trạng thái đợi
-              người thuê kí.
-            </DialogDescription>
+            <DialogDescription>{t("approvalSuccessDesc")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -174,13 +171,15 @@ export function BookingApprovalDialog({
               <CardContent className="pt-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Mã hợp đồng</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("contractCode")}
+                    </p>
                     <p className="font-semibold text-lg">
                       {approvalResult.contractCode}
                     </p>
                   </div>
                   <Badge variant="default" className="bg-green-500">
-                    Đã tạo
+                    {t("created")}
                   </Badge>
                 </div>
 
@@ -189,7 +188,7 @@ export function BookingApprovalDialog({
                 {approvalResult.signedPdfUrl && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">
-                      File hợp đồng
+                      {t("contractFile")}
                     </p>
                     <Button
                       variant="outline"
@@ -198,7 +197,8 @@ export function BookingApprovalDialog({
                     >
                       <FileText className="h-4 w-4" />
                       <span className="flex-1 text-left text-primary">
-                        Hợp đồng thuê nhà - {approvalResult.contractCode}.pdf
+                        {t("rentalContract")} - {approvalResult.contractCode}
+                        .pdf
                       </span>
                       <Download className="h-4 w-4" />
                     </Button>
@@ -210,7 +210,7 @@ export function BookingApprovalDialog({
 
           <DialogFooter>
             <Button onClick={handleClose} className="w-full">
-              Đã hiểu
+              {t("understood")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -223,35 +223,36 @@ export function BookingApprovalDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="!max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Xác nhận duyệt yêu cầu thuê</DialogTitle>
-          <DialogDescription>
-            Vui lòng xem xét kỹ thông tin trước khi duyệt. Sau khi duyệt, hợp
-            đồng sẽ được tạo và gửi đến khách thuê để ký.
-          </DialogDescription>
+          <DialogTitle>{t("confirmApproval")}</DialogTitle>
+          <DialogDescription>{t("reviewBeforeApproval")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Thông tin khách thuê */}
           <Card className="bg-primary-foreground">
             <CardContent>
-              <h3 className="font-semibold mb-3">Thông tin khách thuê</h3>
+              <h3 className="font-semibold mb-3">{t("tenantInfo")}</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Họ và tên</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("fullName")}
+                  </p>
                   <p className="font-medium">{tenant.fullName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Số điện thoại</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("phoneNumber")}
+                  </p>
                   <p className="font-medium">{tenant.phone}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="text-sm text-muted-foreground">{t("email")}</p>
                   <p className="font-medium">{tenant.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">CCCD/CMND</p>
+                  <p className="text-sm text-muted-foreground">{t("idCard")}</p>
                   <p className="font-medium">
-                    {tenant.CCCD || "Chưa cập nhật"}
+                    {tenant.CCCD || t("notUpdated")}
                   </p>
                 </div>
               </div>
@@ -261,35 +262,43 @@ export function BookingApprovalDialog({
           {/* Thông tin bất động sản */}
           <Card className="bg-primary-foreground">
             <CardContent>
-              <h3 className="font-semibold mb-3">Thông tin bất động sản</h3>
+              <h3 className="font-semibold mb-3">{t("propertyInfo")}</h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-muted-foreground">Tên tài sản</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("propertyName")}
+                  </p>
                   <p className="font-medium">{property.title}</p>
                 </div>
                 {isBoarding && room && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Phòng</p>
+                    <p className="text-sm text-muted-foreground">{t("room")}</p>
                     <p className="font-medium">
                       {room.name} - {room.roomType.name}
                     </p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm text-muted-foreground">Địa chỉ</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("address")}
+                  </p>
                   <p className="font-medium">
                     {property.address}, {property.ward}, {property.province}
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Giá thuê</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("rentPrice")}
+                    </p>
                     <p className="font-medium text-primary">
-                      {price.toLocaleString("vi-VN")} VNĐ/tháng
+                      {price.toLocaleString("vi-VN")} {t("perMonth")}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Tiền cọc</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t("depositAmount")}
+                    </p>
                     <p className="font-medium text-primary">
                       {deposit.toLocaleString("vi-VN")} VNĐ
                     </p>
@@ -304,7 +313,7 @@ export function BookingApprovalDialog({
             <CardContent>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Xem trước hợp đồng
+                {t("contractPreview")}
               </h3>
               <div className="border rounded-lg overflow-hidden bg-gray-50">
                 <iframe
@@ -314,8 +323,7 @@ export function BookingApprovalDialog({
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                * Đây là mẫu hợp đồng mặc định. Hợp đồng thực tế sẽ được điền
-                thông tin cụ thể.
+                {t("defaultContractNote")}
               </p>
             </CardContent>
           </Card>
@@ -328,7 +336,7 @@ export function BookingApprovalDialog({
             disabled={dialogState !== "approval"}
             className="text-primary"
           >
-            Hủy
+            {t("cancel")}
           </Button>
           <Button
             onClick={() => setDialogState("signing-method")}
@@ -336,7 +344,7 @@ export function BookingApprovalDialog({
             className="gap-2"
           >
             <CheckCircle2 className="h-4 w-4" />
-            Xác nhận duyệt
+            {t("confirmApproveButton")}
           </Button>
         </DialogFooter>
       </DialogContent>

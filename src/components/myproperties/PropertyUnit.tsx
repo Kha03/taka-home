@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bath, Maximize2, MapPin, Home, Sofa } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/utils";
+import { useTranslations } from "next-intl";
 
 interface UnitBadge {
   code: string;
@@ -46,6 +47,7 @@ export function PropertyUnit({
   roomTypes,
   currency = "VND",
 }: PropertyUnitProps) {
+  const t = useTranslations("myProperties");
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("vi-VN").format(price);
 
@@ -71,17 +73,17 @@ export function PropertyUnit({
               <div className="grid grid-cols-2 gap-1">
                 <div className="p-3 text-center rounded-[12px] bg-[#00AE26]/20 text-[#00AE26] flex flex-col">
                   <span className="font-bold ">{rentedCount}</span>
-                  <span className="text-xs">Đã thuê</span>
+                  <span className="text-xs">{t("rented")}</span>
                 </div>
                 <div className="text-center rounded-[12px] bg-[#C3C3C3]/20 text-[#4F4F4F] p-3 flex flex-col">
                   <span className="font-bold">{emptyCount}</span>
-                  <span className="text-xs">Trống</span>
+                  <span className="text-xs">{t("empty")}</span>
                 </div>
               </div>
 
               <div className="mt-3 text-muted-foreground text-center">
                 <div className="text-sm text-muted-foreground mb-1">
-                  Tổng thu nhập/Tháng
+                  {t("totalIncomePerMonth")}
                 </div>
                 <div className="inline-block rounded-2xl bg-primary px-3 py-1.5 text-primary-foreground text-xs font-bold">
                   {formatPrice(monthlyIncome)} {currency}
@@ -153,7 +155,7 @@ export function PropertyUnit({
                         <div className="w-6 h-6 flex items-center justify-center rounded-full bg-[#818181]/20">
                           <Home className="w-4 h-4" />
                         </div>
-                        <p>Phòng ngủ</p>
+                        <p>{t("bedrooms")}</p>
                         <p className="font-extrabold ml-auto">
                           {roomType.bedrooms}
                         </p>
@@ -164,7 +166,7 @@ export function PropertyUnit({
                         <div className="w-6 h-6 flex items-center justify-center rounded-full bg-[#818181]/20">
                           <Maximize2 className="w-4 h-4" />
                         </div>
-                        <p>Diện tích</p>
+                        <p>{useTranslations("property")("area")}</p>
                         <p className="font-extrabold ml-auto">
                           {roomType.area} m²
                         </p>
@@ -175,7 +177,7 @@ export function PropertyUnit({
                         <div className="w-6 h-6 flex items-center justify-center rounded-full bg-[#818181]/20">
                           <Bath className="w-4 h-4" />
                         </div>
-                        <p>Phòng vệ sinh</p>
+                        <p>{t("bathrooms")}</p>
                         <p className="font-extrabold ml-auto">
                           {roomType.bathrooms}
                         </p>
@@ -186,7 +188,7 @@ export function PropertyUnit({
                         <div className="w-6 h-6 flex items-center justify-center rounded-full bg-[#818181]/20">
                           <Sofa className="w-4 h-4" />
                         </div>
-                        <p>Nội thất</p>
+                        <p>{t("furniture")}</p>
                         <p className="font-extrabold ml-auto">
                           {roomType.furniture}
                         </p>
@@ -213,7 +215,7 @@ export function PropertyUnit({
                       </div>
                       <div className="flex bg-[#f5f5f5] rounded-2xl py-2 justify-center">
                         <div className="text-sm text-muted-foreground">
-                          Giá thuê:
+                          {useTranslations("contract")("rentPrice")}:
                         </div>
                         <div className="text-sm font-bold text-secondary ml-1">
                           {roomType.price.toLocaleString("vi-VN")} VND

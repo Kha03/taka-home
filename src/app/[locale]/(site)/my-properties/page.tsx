@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import StatusTab from "@/components/ui/status-tab";
 import PropertyViewTab from "@/components/myproperties/property-view-tab";
 import PropertyFilter from "@/components/myproperties/property-filter";
@@ -22,6 +23,7 @@ import { PropertyUnitProps } from "@/components/myproperties/PropertyUnit";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function MyPropertiesPage() {
+  const t = useTranslations("myProperties");
   const [activeTab, setActiveTab] = useState("all");
   const [activeView, setActiveView] = useState("room"); // "room" or "unit"
   const [searchQuery, setSearchQuery] = useState("");
@@ -95,7 +97,8 @@ export default function MyPropertiesPage() {
   const convertToPropertyRooms = (property: Property): PropertyRoomProps[] => {
     // Nếu là APARTMENT hoặc HOUSING, trả về 1 item duy nhất
     if (property.type === "APARTMENT" || property.type === "HOUSING") {
-      const category = property.type === "APARTMENT" ? "Chung cư" : "Nhà riêng";
+      const category =
+        property.type === "APARTMENT" ? t("apartment") : t("privateHouse");
 
       return [
         {
@@ -109,7 +112,7 @@ export default function MyPropertiesPage() {
           bathrooms: property.bathrooms || 0,
           area: property.area || 0,
           address: `${property.address}, ${property.ward}, ${property.province}`,
-          furnitureStatus: property.furnishing || "Không rõ",
+          furnitureStatus: property.furnishing || t("unknown"),
           category: category,
           price: property.price || 0,
           currency: "VND",
@@ -135,8 +138,8 @@ export default function MyPropertiesPage() {
         bathrooms: room.roomType?.bathrooms || 0,
         area: room.roomType?.area || 0,
         address: `${property.address}, ${property.ward}, ${property.province}`,
-        furnitureStatus: room.roomType?.furnishing || "Không rõ",
-        category: "Nhà trọ",
+        furnitureStatus: room.roomType?.furnishing || t("unknown"),
+        category: t("boarding"),
         price: room.roomType?.price || 0,
         currency: "VND",
       }));
@@ -157,8 +160,8 @@ export default function MyPropertiesPage() {
         bathrooms: property.bathrooms || 0,
         area: property.area || 0,
         address: `${property.address}, ${property.ward}, ${property.province}`,
-        furnitureStatus: property.furnishing || "Không rõ",
-        category: "Khác",
+        furnitureStatus: property.furnishing || t("unknown"),
+        category: t("other"),
         price: property.price || 0,
         currency: "VND",
       },
@@ -233,13 +236,13 @@ export default function MyPropertiesPage() {
       bedrooms: roomTypeData.bedrooms,
       bathrooms: roomTypeData.bathrooms,
       area: roomTypeData.area,
-      furniture: roomTypeData.furniture,
+      furniture: roomTypeData.furniture || t("unknown"),
       images: roomTypeData.images,
       price: roomTypeData.price,
       floors: Array.from(roomTypeData.floors.entries())
         .sort(([a], [b]) => a - b)
         .map(([floorNum, rooms]) => ({
-          floor: `Tầng ${floorNum}`,
+          floor: `${t("floor")} ${floorNum}`,
           units: (rooms || []).map((room) => ({
             code: room.name,
             status: (room.isVisible ? "empty" : "rented") as "empty" | "rented",
@@ -310,9 +313,9 @@ export default function MyPropertiesPage() {
     }
 
     return [
-      { id: "all", label: "Tất cả", count: totalAll },
-      { id: "rented", label: "Đang cho thuê", count: totalRented },
-      { id: "empty", label: "Trống", count: totalEmpty },
+      { id: "all", label: t("all"), count: totalAll },
+      { id: "rented", label: t("rented"), count: totalRented },
+      { id: "empty", label: t("empty"), count: totalEmpty },
     ];
   }, [properties, activeView]);
 
@@ -445,7 +448,7 @@ export default function MyPropertiesPage() {
         {/* Properties List */}
         <div className="space-y-3">
           {loading ? (
-            <LoadingSpinner text="Đang tải dữ liệu" />
+            <LoadingSpinner text={t("loadingData")} />
           ) : activeView === "room" ? (
             // Room View
             (paginatedData as PropertyRoomProps[]).map((property) => (
@@ -480,9 +483,7 @@ export default function MyPropertiesPage() {
 
           {!loading && paginatedData.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
-                Không tìm thấy bất động sản nào
-              </p>
+              <p className="text-gray-500 text-lg">{t("noPropertiesFound")}</p>
             </div>
           )}
         </div>

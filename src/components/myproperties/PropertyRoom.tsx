@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils/utils";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { PropertyDetails } from "../property-detail/PropertyDetails";
 import { RentalRequestStatus } from "../rental-requests";
 
@@ -58,6 +59,7 @@ export function PropertyRoom({
   onApproveRequest,
   onRejectRequest,
 }: PropertyRoomProps) {
+  const t = useTranslations("contract");
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price);
   };
@@ -119,21 +121,25 @@ export function PropertyRoom({
               <div className="flex items-center gap-3 mb-2">
                 <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
                   <div className="text-xs text-[#8d8d8d]">
-                    Tình trạng nội thất
+                    {t("furnitureStatus")}
                   </div>
                   <div className="font-medium text-primary">
                     {furnitureStatus}
                   </div>
                 </div>
                 <div className="text-center p-3 border border-dashed rounded-lg border-[#e5e5e5]">
-                  <div className="text-xs text-[#8d8d8d]">Danh mục</div>
+                  <div className="text-xs text-[#8d8d8d]">
+                    {t("categoryLabel")}
+                  </div>
                   <div className="font-medium text-primary">{category}</div>
                 </div>
               </div>
 
               {/* Price */}
               <div className=" flex bg-[#f5f5f5] rounded-2xl py-2 justify-center">
-                <div className="text-sm text-muted-foreground">Giá thuê:</div>
+                <div className="text-sm text-muted-foreground">
+                  {t("rentPrice")}:
+                </div>
                 <div
                   className={cn("text-sm font-bold ml-1 text-secondary", {
                     "text-[#00AE26]": isRented,

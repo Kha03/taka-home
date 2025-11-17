@@ -1,11 +1,13 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 
 export function Stepper({ step }: { step: 1 | 2 }) {
+  const t = useTranslations("myProperties");
   const items = [
-    { id: 1, label: "Nhập thông tin BĐS" },
-    { id: 2, label: "Chờ xét duyệt" },
+    { id: 1, label: t("enterPropertyInfo") },
+    { id: 2, label: t("waitingApproval") },
   ] as const;
 
   return (

@@ -2,6 +2,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,6 +11,8 @@ import { useFormContextStrict } from "./useFormContextStrict";
 import { NewPropertyForm } from "@/schema/schema";
 
 export function DepositField({ roomIndex }: { roomIndex?: number }) {
+  const t = useTranslations("myProperties");
+  const tForm = useTranslations("form");
   const {
     watch,
     setValue,
@@ -52,7 +55,7 @@ export function DepositField({ roomIndex }: { roomIndex?: number }) {
   return (
     <div>
       <Label className="mb-2 text-[#4F4F4F] flex items-center gap-1 font-semibold">
-        Số tiền cọc
+        {t("deposit")}
       </Label>
       <div className="space-y-2">
         <div className="relative">
@@ -79,7 +82,7 @@ export function DepositField({ roomIndex }: { roomIndex?: number }) {
             htmlFor={checkboxId}
             className="text-sm text-muted-foreground cursor-pointer"
           >
-            Tiền cọc bằng giá thuê
+            {tForm("depositEqualRent")}
           </Label>
         </div>
       </div>

@@ -129,7 +129,7 @@ function StatusBadge({
       className={`${config.bg} w-[116px] rounded-[10px] p-5 flex flex-col items-center justify-center`}
     >
       {config.icon}
-      <p className="text-xs font-medium">{config.text}</p>
+      <p className="text-xs font-medium text-center">{config.text}</p>
     </div>
   );
 }

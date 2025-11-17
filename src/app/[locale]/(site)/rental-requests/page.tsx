@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import StatusTab from "@/components/ui/status-tab";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PropertyRoom } from "@/components/myproperties/PropertyRoom";
@@ -32,6 +33,7 @@ import { BookingApprovalDialog } from "@/components/rental-requests/booking-appr
 type RentalRequestStatus = "all" | "pending" | "approved" | "rejected";
 
 export default function RentalRequestsPage() {
+  const t = useTranslations("rentalRequests");
   const [activeTab, setActiveTab] = useState<RentalRequestStatus>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -59,7 +61,7 @@ export default function RentalRequestsPage() {
         }
       } catch (error) {
         console.error("Error fetching bookings:", error);
-        toast.error("Không thể tải danh sách yêu cầu thuê");
+        toast.error(t("cannotLoadRequests"));
       } finally {
         setLoading(false);
       }
@@ -92,9 +94,7 @@ export default function RentalRequestsPage() {
       const response = await bookingService.approveBooking(bookingId, method);
 
       if (response.data) {
-        toast.success(
-          "Duyệt yêu cầu thuê thành công! Vui lòng đợi người thuê xác nhận hợp đồng."
-        );
+        toast.success(t("approveSuccess"));
 
         // Refresh bookings
         const bookingsResponse = await bookingService.getMyBookings();
@@ -107,7 +107,7 @@ export default function RentalRequestsPage() {
       }
     } catch (error) {
       console.error("Error approving booking:", error);
-      toast.error("Không thể duyệt yêu cầu thuê. Vui lòng thử lại");
+      toast.error(t("cannotApprove"));
       throw error;
     }
   };
@@ -120,7 +120,7 @@ export default function RentalRequestsPage() {
       setRejecting(true);
       await bookingService.rejectBooking(bookingToReject);
 
-      toast.success("Đã từ chối yêu cầu thuê thành công");
+      toast.success(t("rejectSuccess"));
 
       // Refresh bookings
       const response = await bookingService.getMyBookings();
@@ -132,7 +132,7 @@ export default function RentalRequestsPage() {
       setBookingToReject(null);
     } catch (error) {
       console.error("Error rejecting booking:", error);
-      toast.error("Không thể từ chối yêu cầu thuê. Vui lòng thử lại");
+      toast.error(t("cannotReject"));
     } finally {
       setRejecting(false);
     }
@@ -187,10 +187,10 @@ export default function RentalRequestsPage() {
     ).length;
 
     return [
-      { id: "all", label: "Tất cả", count: allCount },
-      { id: "pending", label: "Chờ duyệt", count: pendingCount },
-      { id: "approved", label: "Đã duyệt", count: approvedCount },
-      { id: "rejected", label: "Đã từ chối", count: rejectedCount },
+      { id: "all", label: t("all"), count: allCount },
+      { id: "pending", label: t("pending"), count: pendingCount },
+      { id: "approved", label: t("approved"), count: approvedCount },
+      { id: "rejected", label: t("rejected"), count: rejectedCount },
     ];
   }, [bookings]);
 
@@ -241,8 +241,8 @@ export default function RentalRequestsPage() {
         : 0
       : property.area || 0;
     const furnishing = isBoarding
-      ? roomType?.furnishing || "Chưa có thông tin"
-      : property.furnishing || "Chưa có thông tin";
+      ? roomType?.furnishing || t("noInfo")
+      : property.furnishing || t("noInfo");
     const price = isBoarding
       ? parseFloat(roomType?.price || "0")
       : property.price || 0;
@@ -263,10 +263,10 @@ export default function RentalRequestsPage() {
       furnitureStatus: furnishing,
       category:
         property.type === "APARTMENT"
-          ? "Chung cư"
+          ? t("apartment")
           : property.type === "HOUSING"
-          ? "Nhà riêng"
-          : "Nhà trọ",
+          ? t("privateHouse")
+          : t("boarding"),
       price: price,
       currency: "VND",
       roomType: roomTypeName, // Loại phòng (VD: "Loại 1", "Loại 2") cho phòng trọ
@@ -304,7 +304,7 @@ export default function RentalRequestsPage() {
         {/* Loading State */}
         {loading ? (
           <div className="text-center py-12">
-            <LoadingSpinner size="xl" text="Đang tải..." />
+            <LoadingSpinner size="xl" text={t("loading")} />
           </div>
         ) : paginatedBookings.length === 0 ? (
           <div className="text-center py-12">
@@ -324,11 +324,9 @@ export default function RentalRequestsPage() {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Không tìm thấy yêu cầu nào
+              {t("noRequestsFound")}
             </h3>
-            <p className="text-gray-500">
-              Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-            </p>
+            <p className="text-gray-500">{t("tryChangeFilter")}</p>
           </div>
         ) : (
           <>
@@ -390,11 +388,8 @@ export default function RentalRequestsPage() {
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Xác nhận từ chối</DialogTitle>
-            <DialogDescription>
-              Bạn có chắc chắn muốn từ chối yêu cầu thuê này không? Hành động
-              này không thể hoàn tác.
-            </DialogDescription>
+            <DialogTitle>{t("confirmReject")}</DialogTitle>
+            <DialogDescription>{t("confirmRejectMessage")}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
@@ -403,14 +398,14 @@ export default function RentalRequestsPage() {
               disabled={rejecting}
               className="text-primary"
             >
-              Hủy
+              {t("cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleRejectBooking}
               disabled={rejecting}
             >
-              {rejecting ? "Đang xử lý..." : "Từ chối"}
+              {rejecting ? t("processing") : t("rejectButton")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/utils";
 import {
@@ -18,24 +19,24 @@ import { Button } from "@/components/ui/button";
 import { getAccountFromStorage } from "@/lib/utils/auth-utils";
 
 interface SidebarItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: React.ReactNode;
   roles: ("TENANT" | "LANDLORD")[];
 }
 
 // Định nghĩa menu items cho từng role
-const SIDEBAR_ITEMS: SidebarItem[] = [
+const getSidebarItems = (): SidebarItem[] => [
   // Chung cho cả 2 role
   {
-    label: "Thông tin cá nhân",
+    labelKey: "sidebar.personalInfo",
     href: "/profile",
     icon: <User className="w-5 h-5" />,
     roles: ["TENANT", "LANDLORD"],
   },
   // Chỉ cho Landlord
   {
-    label: "Dashboard",
+    labelKey: "sidebar.dashboard",
     href: "/profile/dashboard",
     icon: <LayoutDashboard className="w-5 h-5" />,
     roles: ["LANDLORD"],
@@ -43,19 +44,19 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   // Chung cho cả 2 role
 
   {
-    label: "Ví điện tử",
+    labelKey: "sidebar.wallet",
     href: "/profile/wallet",
     icon: <Wallet className="w-5 h-5" />,
     roles: ["TENANT", "LANDLORD"],
   },
   {
-    label: "Thông báo",
+    labelKey: "sidebar.notifications",
     href: "/profile/notifications",
     icon: <Bell className="w-5 h-5" />,
     roles: ["TENANT", "LANDLORD"],
   },
   {
-    label: "Cài đặt",
+    labelKey: "sidebar.settings",
     href: "/profile/settings",
     icon: <Settings className="w-5 h-5" />,
     roles: ["TENANT", "LANDLORD"],
@@ -67,6 +68,7 @@ export default function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const t = useTranslations("profile");
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<"TENANT" | "LANDLORD">("TENANT");
   const [userName, setUserName] = useState<string>("");
@@ -84,7 +86,7 @@ export default function ProfileLayout({
   }, []);
 
   // Filter menu items dựa trên role
-  const filteredMenuItems = SIDEBAR_ITEMS.filter((item) =>
+  const filteredMenuItems = getSidebarItems().filter((item) =>
     item.roles.includes(userRole)
   );
 
@@ -113,7 +115,7 @@ export default function ProfileLayout({
                 </div>
                 <h3 className="font-bold text-lg text-gray-900">{userName}</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  {userRole === "LANDLORD" ? "Chủ nhà" : "Người thuê"}
+                  {userRole === "LANDLORD" ? t("landlord") : t("tenant")}
                 </p>
               </div>
 
@@ -131,7 +133,7 @@ export default function ProfileLayout({
                         )}
                       >
                         {item.icon}
-                        <span>{item.label}</span>
+                        <span>{t(item.labelKey)}</span>
                       </Button>
                     </Link>
                   );
@@ -144,7 +146,7 @@ export default function ProfileLayout({
                   onClick={handleLogout}
                 >
                   <LogOut className="w-5 h-5" />
-                  <span>Đăng xuất</span>
+                  <span>{t("sidebar.logout")}</span>
                 </Button>
               </nav>
             </div>

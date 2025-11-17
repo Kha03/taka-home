@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { contractService } from "@/lib/api/services";
 import {
   BlockchainContractHistoryResponse,
@@ -35,6 +36,7 @@ import { useAuth } from "@/contexts/auth-context";
 type OrgName = "OrgTenant" | "OrgLandlord";
 
 export default function BlockchainHistoryPage() {
+  const t = useTranslations("blockchain");
   const { user } = useAuth();
 
   // State management
@@ -65,7 +67,7 @@ export default function BlockchainHistoryPage() {
     const trimmedId = contractId.trim();
 
     if (!trimmedId) {
-      setError("Vui lòng nhập ID hợp đồng");
+      setError(t("enterContractId"));
       return;
     }
 
@@ -82,12 +84,10 @@ export default function BlockchainHistoryPage() {
       if (response.code === 200 && response.data) {
         setContractHistory(response.data);
       } else {
-        setError(response.message || "Không thể tải lịch sử hợp đồng");
+        setError(response.message || t("cannotLoadContractHistory"));
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Đã xảy ra lỗi khi tra cứu"
-      );
+      setError(err instanceof Error ? err.message : t("errorOccurred"));
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ export default function BlockchainHistoryPage() {
   // Payment history search handler
   const handleSearchPayment = async () => {
     if (!contractId.trim()) {
-      setError("Vui lòng tra cứu hợp đồng trước khi xem lịch thanh toán");
+      setError(t("searchContractFirst"));
       return;
     }
 
@@ -113,12 +113,10 @@ export default function BlockchainHistoryPage() {
       if (response.code === 200 && response.data) {
         setPaymentHistory(response.data);
       } else {
-        setError(response.message || "Không thể tải lịch thanh toán");
+        setError(response.message || t("cannotLoadPaymentHistory"));
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Đã xảy ra lỗi khi tra cứu"
-      );
+      setError(err instanceof Error ? err.message : t("errorOccurred"));
     } finally {
       setLoading(false);
     }
@@ -135,12 +133,8 @@ export default function BlockchainHistoryPage() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <header className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold text-primary">
-            Tra Cứu Lịch Sử Blockchain
-          </h1>
-          <p className="text-muted-foreground">
-            Tra cứu lịch sử hợp đồng và thanh toán được lưu trữ trên blockchain
-          </p>
+          <h1 className="text-3xl font-bold text-primary">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("description")}</p>
         </header>
 
         {/* Main Content */}
@@ -148,11 +142,11 @@ export default function BlockchainHistoryPage() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="contract">
               <FileText className="mr-2 h-4 w-4" />
-              Lịch Sử Hợp Đồng
+              {t("contractHistory")}
             </TabsTrigger>
             <TabsTrigger value="payment">
               <Receipt className="mr-2 h-4 w-4" />
-              Lịch Thanh Toán
+              {t("paymentHistory")}
             </TabsTrigger>
           </TabsList>
 
@@ -160,17 +154,17 @@ export default function BlockchainHistoryPage() {
           <TabsContent value="contract" className="space-y-4">
             <Card className="bg-primary-foreground">
               <CardHeader>
-                <CardTitle>Tra Cứu Hợp Đồng</CardTitle>
+                <CardTitle>{t("searchContract")}</CardTitle>
                 <CardDescription>
-                  Nhập mã hợp đồng để tra cứu lịch sử trên blockchain
+                  {t("searchContractDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contractId">Mã Hợp Đồng</Label>
+                  <Label htmlFor="contractId">{t("contractId")}</Label>
                   <Input
                     id="contractId"
-                    placeholder="VD: CT-20251025-LJU6IZ"
+                    placeholder={t("contractIdPlaceholder")}
                     value={contractId}
                     onChange={(e) => setContractId(e.target.value)}
                     onKeyDown={(e) =>
@@ -187,12 +181,12 @@ export default function BlockchainHistoryPage() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang tra cứu...
+                      {t("searching")}
                     </>
                   ) : (
                     <>
                       <Search className="mr-2 h-4 w-4" />
-                      Tra Cứu
+                      {t("search")}
                     </>
                   )}
                 </Button>
@@ -209,10 +203,11 @@ export default function BlockchainHistoryPage() {
             {hasContractResults && (
               <Card className="bg-primary-foreground">
                 <CardHeader>
-                  <CardTitle>Lịch Sử Hợp Đồng</CardTitle>
+                  <CardTitle>{t("contractHistoryResults")}</CardTitle>
                   <CardDescription>
-                    Tìm thấy {contractHistory.data.length} giao dịch trên
-                    blockchain
+                    {t("foundTransactions", {
+                      count: contractHistory.data.length,
+                    })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -224,7 +219,7 @@ export default function BlockchainHistoryPage() {
             {contractHistory?.data && contractHistory.data.length === 0 && (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  Không tìm thấy lịch sử cho hợp đồng này
+                  {t("noContractHistory")}
                 </CardContent>
               </Card>
             )}
@@ -234,15 +229,14 @@ export default function BlockchainHistoryPage() {
           <TabsContent value="payment" className="space-y-4">
             <Card className="bg-primary-foreground">
               <CardHeader>
-                <CardTitle>Tra Cứu Thanh Toán</CardTitle>
+                <CardTitle>{t("searchPayment")}</CardTitle>
                 <CardDescription>
-                  Lọc lịch thanh toán theo trạng thái (Yêu cầu tra cứu hợp đồng
-                  trước)
+                  {t("searchPaymentDescription")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="paymentStatus">Trạng Thái</Label>
+                  <Label htmlFor="paymentStatus">{t("status")}</Label>
                   <Select
                     value={paymentStatus}
                     onValueChange={(value) =>
@@ -250,12 +244,14 @@ export default function BlockchainHistoryPage() {
                     }
                   >
                     <SelectTrigger id="paymentStatus">
-                      <SelectValue placeholder="Chọn trạng thái" />
+                      <SelectValue placeholder={t("selectStatus")} />
                     </SelectTrigger>
                     <SelectContent className="bg-primary-foreground">
-                      <SelectItem value="PAID">Đã thanh toán</SelectItem>
-                      <SelectItem value="SCHEDULED">Đã lên lịch</SelectItem>
-                      <SelectItem value="OVERDUE">Quá hạn</SelectItem>
+                      <SelectItem value="PAID">{t("paid")}</SelectItem>
+                      <SelectItem value="SCHEDULED">
+                        {t("scheduled")}
+                      </SelectItem>
+                      <SelectItem value="OVERDUE">{t("overdue")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -268,12 +264,12 @@ export default function BlockchainHistoryPage() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Đang tra cứu...
+                      {t("searching")}
                     </>
                   ) : (
                     <>
                       <Search className="mr-2 h-4 w-4" />
-                      Tra Cứu
+                      {t("search")}
                     </>
                   )}
                 </Button>
@@ -290,9 +286,9 @@ export default function BlockchainHistoryPage() {
             {hasPaymentResults && (
               <Card className="bg-primary-foreground">
                 <CardHeader>
-                  <CardTitle>Lịch Thanh Toán</CardTitle>
+                  <CardTitle>{t("paymentHistoryResults")}</CardTitle>
                   <CardDescription>
-                    Lịch thanh toán của hợp đồng {contractId}
+                    {t("paymentHistoryOf", { contractId })}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -307,7 +303,7 @@ export default function BlockchainHistoryPage() {
             {paymentHistory?.data && paymentHistory.data.length === 0 && (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  Không tìm thấy lịch thanh toán
+                  {t("noPaymentHistory")}
                 </CardContent>
               </Card>
             )}

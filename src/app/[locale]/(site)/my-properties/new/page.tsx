@@ -31,8 +31,11 @@ import { Field } from "@/components/property-form/form/Field";
 import { SelectField } from "@/components/property-form/form/SelectField";
 import { FormSchema, NewPropertyForm } from "@/schema/schema";
 import { toast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
 
 export default function NewPropertyPage() {
+  const t = useTranslations("myProperties");
+  const tForm = useTranslations("form");
   const router = useRouter();
   const methods = useForm<NewPropertyForm>({
     resolver: zodResolver(FormSchema) as any,
@@ -366,10 +369,7 @@ export default function NewPropertyPage() {
         } catch {
           // Don't fail the whole process if image upload fails
           // Just show a warning
-          toast.warning(
-            "Lỗi tải ảnh",
-            "Bất động sản đã được tạo thành công, nhưng có lỗi khi tải ảnh lên. Bạn có thể tải ảnh lên sau."
-          );
+          toast.warning(t("imageUploadError"), t("imageUploadErrorMessage"));
         }
 
         // Redirect to pending approval page
@@ -437,21 +437,23 @@ export default function NewPropertyPage() {
                       <div className="h-6 w-6 bg-primary rounded-full flex items-center justify-center">
                         <Info className="w-3 h-3 text-white" />
                       </div>
-                      <p className="font-bold text-primary">Thông tin chung</p>
+                      <p className="font-bold text-primary">
+                        {t("generalInfo")}
+                      </p>
                     </div>
 
                     <div className="mb-6">
                       <Field
-                        label="Tên bất động sản"
+                        label={t("propertyName")}
                         required
                         name="title"
-                        placeholder="Nhập tiêu đề"
+                        placeholder={t("enterTitle")}
                       />
                     </div>
 
                     <div>
                       <Label className="mb-3 flex items-center gap-1">
-                        Danh mục bất động sản
+                        {t("propertyCategory")}
                       </Label>
                       <RadioGroup
                         value={kind}
@@ -466,7 +468,7 @@ export default function NewPropertyPage() {
                             htmlFor="kind-apart"
                             className="text-[#4F4F4F]"
                           >
-                            Chung cư
+                            {t("apartment")}
                           </Label>
                         </div>
                         <div className="flex items-center gap-2">
@@ -475,7 +477,7 @@ export default function NewPropertyPage() {
                             htmlFor="kind-housing"
                             className="text-[#4F4F4F]"
                           >
-                            Nhà riêng
+                            {t("privateHouse")}
                           </Label>
                         </div>
                         <div className="flex items-center gap-2">
@@ -484,49 +486,56 @@ export default function NewPropertyPage() {
                             htmlFor="kind-board"
                             className="text-[#4F4F4F]"
                           >
-                            Phòng trọ
+                            {t("boarding")}
                           </Label>
                         </div>
                       </RadioGroup>
                     </div>
 
                     <Label className="mb-2 text-[#4F4F4F] flex items-center gap-1 font-semibold">
-                      Địa chỉ
+                      {t("address")}
                       <CircleAlert className="h-4 w-4 text-[#FA0000]" />
                     </Label>
                     <div className="grid gap-3 md:grid-cols-2">
                       <AddressSelector />
                       <Field
                         name="street"
-                        placeholder="Ví dụ: 123 Nguyễn Huệ"
+                        placeholder={tForm("streetExample")}
                       />
                       <SelectField
                         name="legalDoc"
-                        options={["Sổ hồng", "HĐMB", "Khác"]}
-                        placeholder="Giấy tờ pháp lý"
+                        options={[
+                          tForm("pinkBook"),
+                          tForm("saleContract"),
+                          tForm("other"),
+                        ]}
+                        placeholder={t("legalDoc")}
                       />
                     </div>
                     {kind === "APARTMENT" ? (
                       <>
                         <Label className="mb-2 text-[#4F4F4F] flex items-center gap-1 font-semibold">
-                          Vị trí
+                          {t("position")}
                           <CircleAlert className="h-4 w-4 text-[#FA0000]" />
                         </Label>
                         <div className="grid gap-3 md:grid-cols-3">
-                          <Field name="unit" placeholder="Mã căn" />
-                          <Field name="block" placeholder="Block/tháp" />
-                          <Field name="floor" placeholder="Tầng số" />
+                          <Field name="unit" placeholder={t("unitCode")} />
+                          <Field name="block" placeholder={t("blockTower")} />
+                          <Field name="floor" placeholder={t("floorNumber")} />
                         </div>
                       </>
                     ) : kind === "HOUSING" ? (
                       <>
                         <Label className="mb-2 text-[#4F4F4F] flex items-center gap-1 font-semibold">
-                          Thông tin nhà
+                          {t("houseInfo")}
                           <CircleAlert className="h-4 w-4 text-[#FA0000]" />
                         </Label>
                         <div className="grid gap-3 md:grid-cols-2">
-                          <Field name="unit" placeholder="Mã nhà" />
-                          <Field name="floor" placeholder="Số tầng" />
+                          <Field name="unit" placeholder={t("houseCode")} />
+                          <Field
+                            name="floor"
+                            placeholder={t("numberOfFloors")}
+                          />
                         </div>
                       </>
                     ) : (
@@ -534,14 +543,14 @@ export default function NewPropertyPage() {
                         <BoardingStructure />
                         <div className="grid gap-3 md:grid-cols-2">
                           <Field
-                            label="Giá điện"
+                            label={t("electricityPrice")}
                             name="electricityPrice"
                             type="number"
                             placeholder="VND/kWh"
                             required
                           />
                           <Field
-                            label="Giá nước"
+                            label={t("waterPrice")}
                             name="waterPrice"
                             type="number"
                             placeholder="VND/m³"
@@ -552,11 +561,11 @@ export default function NewPropertyPage() {
                     )}
                     <div>
                       <Label className="text-[#4F4F4F] font-semibold text-sm mb-3">
-                        Mô tả chi tiết
+                        {t("detailedDescription")}
                       </Label>
                       <Textarea
                         rows={5}
-                        placeholder="Nhập mô tả chi tiết về bất động sản..."
+                        placeholder={t("descriptionPlaceholder")}
                         {...methods.register("description")}
                         className={cn(
                           "w-full bg-[#F4F4F4] focus-visible:border-secondary focus-visible:ring-2 focus-visible:ring-secondary/20 focus:outline-none transition-colors placeholder:text-sm text-sm",
@@ -589,14 +598,14 @@ export default function NewPropertyPage() {
                         <Info className="w-3 h-3 text-white" />
                       </div>
                       <p className="font-bold text-primary">
-                        Hình ảnh đính kèm (Tối đa 6 ảnh)
+                        {t("attachedImages")} ({t("maxImages")})
                       </p>
                     </div>
 
                     {/* Hero Image Upload */}
                     {!methods.watch("gallery")?.[0] && (
                       <ImageDrop
-                        label="Tải lên ảnh Bất động sản (850 × 450)"
+                        label={t("uploadPropertyImage")}
                         onPick={(src) => {
                           const currentGallery =
                             methods.getValues("gallery") || [];
@@ -634,7 +643,7 @@ export default function NewPropertyPage() {
                           </button>
                           {i === 0 && (
                             <div className="absolute bottom-1 left-1 bg-primary text-white text-xs px-2 py-0.5 rounded">
-                              Ảnh chính
+                              {t("mainImage")}
                             </div>
                           )}
                         </div>
@@ -699,7 +708,7 @@ export default function NewPropertyPage() {
                           <div className="flex flex-col items-center gap-1">
                             <ImageIcon className="h-5 w-5 text-accent" />
                             <span className="text-xs text-muted-foreground">
-                              Thêm ảnh
+                              {t("addImage")}
                             </span>
                           </div>
                         </DottedBox>
@@ -720,29 +729,33 @@ export default function NewPropertyPage() {
                           <Info className="w-3 h-3 text-white" />
                         </div>
                         <p className="font-bold text-primary">
-                          Thông tin chi tiết
+                          {t("detailedInfo")}
                         </p>
                       </div>
                       <div className="grid gap-3 md:grid-cols-2">
                         <Field
-                          label="Số phòng ngủ"
+                          label={t("numberOfBedrooms")}
                           name="bedrooms"
                           type="number"
                           placeholder="0"
                           required
                         />
                         <Field
-                          label="Số phòng vệ sinh"
+                          label={t("numberOfBathrooms")}
                           name="bathrooms"
                           type="number"
                           placeholder="0"
                           required
                         />
                         <SelectField
-                          label="Tình trạng nội thất"
+                          label={t("furnitureStatus")}
                           name="furnishing"
-                          options={["Đầy đủ", "Cơ bản", "Trống"]}
-                          placeholder="Chọn tình trạng nội thất"
+                          options={[
+                            t("furnitureFull"),
+                            t("furnitureBasic"),
+                            t("furnitureEmpty"),
+                          ]}
+                          placeholder={t("selectFurnitureStatus")}
                           required
                         />
                       </div>
@@ -754,19 +767,19 @@ export default function NewPropertyPage() {
                           <Info className="w-3 h-3 text-white" />
                         </div>
                         <p className="font-bold text-primary">
-                          Diện tích & Giá
+                          {t("areaAndPrice")}
                         </p>
                       </div>
                       <div className="space-y-3">
                         <Field
-                          label="Diện tích"
+                          label={t("area")}
                           name="area"
                           type="number"
                           placeholder="m²"
                           required
                         />
                         <Field
-                          label="Giá thuê"
+                          label={t("rentPrice")}
                           name="price"
                           type="number"
                           placeholder="VND"
@@ -783,7 +796,7 @@ export default function NewPropertyPage() {
                         <Info className="w-3 h-3 text-white" />
                       </div>
                       <p className="font-bold text-primary">
-                        Thông tin chi tiết
+                        {t("detailedInfo")}
                       </p>
                     </div>
                     <RoomTypes />
@@ -821,7 +834,7 @@ export default function NewPropertyPage() {
                     className="rounded-[8px] bg-[#e5e5e5] border-0 hover:bg-[#b1b1b1] text-[#4f4f4f]"
                   >
                     <X className="h-4 w-4" />
-                    Hủy
+                    {t("cancel")}
                   </Button>
 
                   <Button
@@ -830,9 +843,7 @@ export default function NewPropertyPage() {
                     className="rounded-[8px] bg-accent border-0 hover:bg-[#e59400] text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Play className="h-4 w-4" />
-                    {isSubmitting
-                      ? "Đang tạo bất động sản..."
-                      : "Tạo bất động sản"}
+                    {isSubmitting ? t("creatingProperty") : t("createProperty")}
                   </Button>
                 </div>
               </div>
