@@ -20,9 +20,8 @@ import { Link } from "@/lib/i18n/navigation";
 export function UserMenu() {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   const { isLandlord, isAdmin } = useRole();
-  const t = useTranslations("auth");
-  const tNav = useTranslations("nav");
-  const tCommon = useTranslations("common");
+  const tAuth = useTranslations("auth");
+  const t = useTranslations("nav");
 
   // Show loading skeleton while checking auth
   if (isLoading) {
@@ -38,10 +37,10 @@ export function UserMenu() {
     return (
       <div className="flex items-center gap-2">
         <Button size="sm" asChild className="bg-accent hover:bg-accent/90">
-          <Link href="/signin">{t("signin")}</Link>
+          <Link href="/signin">{tAuth("signin")}</Link>
         </Button>
         <Button size="sm" asChild>
-          <Link href="/signup">{t("signup")}</Link>
+          <Link href="/signup">{tAuth("signup")}</Link>
         </Button>
       </div>
     );
@@ -90,19 +89,19 @@ export function UserMenu() {
               <DropdownMenuItem asChild>
                 <Link href="/my-properties/new" className="cursor-pointer">
                   <Plus className="mr-2 h-4 w-4" />
-                  <span>{tNav("createProperty")}</span>
+                  <span>{t("createProperty")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/my-properties" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>{tNav("myProperties")}</span>
+                  <span>{t("myProperties")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/rental-requests" className="cursor-pointer">
                   <History className="mr-2 h-4 w-4" />
-                  <span>{tNav("rentalRequests")}</span>
+                  <span>{t("rentalRequests")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -115,7 +114,7 @@ export function UserMenu() {
               <DropdownMenuItem asChild>
                 <Link href="/property-approval" className="cursor-pointer">
                   <ShieldCheck className="mr-2 h-4 w-4" />
-                  <span>{tNav("propertyApproval")}</span>
+                  <span>{t("propertyApproval")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -126,13 +125,13 @@ export function UserMenu() {
           <DropdownMenuItem asChild>
             <Link href="/profile" className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
-              <span>{tNav("profile")}</span>
+              <span>{t("profile")}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/blockchain-history" className="cursor-pointer">
               <History className="mr-2 h-4 w-4" />
-              <span>{tNav("blockchainHistory")}</span>
+              <span>{t("blockchainHistory")}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

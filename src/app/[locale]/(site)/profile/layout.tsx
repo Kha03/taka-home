@@ -8,8 +8,6 @@ import { cn } from "@/lib/utils/utils";
 import {
   User,
   LayoutDashboard,
-  Building2,
-  FileText,
   Wallet,
   Bell,
   Settings,

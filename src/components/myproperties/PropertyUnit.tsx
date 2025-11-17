@@ -48,6 +48,8 @@ export function PropertyUnit({
   currency = "VND",
 }: PropertyUnitProps) {
   const t = useTranslations("myProperties");
+  const tProperty = useTranslations("property");
+  const tContract = useTranslations("contract");
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("vi-VN").format(price);
 
@@ -166,7 +168,7 @@ export function PropertyUnit({
                         <div className="w-6 h-6 flex items-center justify-center rounded-full bg-[#818181]/20">
                           <Maximize2 className="w-4 h-4" />
                         </div>
-                        <p>{useTranslations("property")("area")}</p>
+                        <p>{tProperty("area")}</p>
                         <p className="font-extrabold ml-auto">
                           {roomType.area} m²
                         </p>
@@ -215,7 +217,7 @@ export function PropertyUnit({
                       </div>
                       <div className="flex bg-[#f5f5f5] rounded-2xl py-2 justify-center">
                         <div className="text-sm text-muted-foreground">
-                          {useTranslations("contract")("rentPrice")}:
+                          {tContract("rentPrice")}:
                         </div>
                         <div className="text-sm font-bold text-secondary ml-1">
                           {roomType.price.toLocaleString("vi-VN")} VND
