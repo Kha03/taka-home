@@ -33,6 +33,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { translateError } from "@/lib/constants/error-messages";
+import { useTranslations } from "next-intl";
 
 const editUserSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -65,6 +67,7 @@ export function EditUserDialog({
   onOpenChange,
   onSuccess,
 }: EditUserDialogProps) {
+  const t = useTranslations("admin");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<EditUserFormValues>({
@@ -116,17 +119,20 @@ export function EditUserDialog({
       const response = await usersService.updateUser(user.id, updateData);
 
       if (response.code === 200) {
-        toast.success("Cập nhật thông tin người dùng thành công");
+        toast.success(t("updateUserSuccess"));
         onOpenChange(false);
         onSuccess?.();
       } else {
-        toast.error(
-          response.message || "Không thể cập nhật thông tin người dùng"
+        const errorMessage = translateError(
+          response.message,
+          t("cannotUpdateUser")
         );
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error("Có lỗi xảy ra khi cập nhật thông tin người dùng");
+      const errorMessage = translateError(error, t("errorUpdatingUser"));
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

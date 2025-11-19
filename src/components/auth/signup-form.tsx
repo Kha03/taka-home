@@ -44,12 +44,12 @@ export function SignUpForm() {
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError(t("passwordMismatch"));
+      setError(t("validation.passwordMismatch"));
       return;
     }
 
     if (formData.password.length < 6) {
-      setError(t("passwordTooShort"));
+      setError(t("validation.minLength", { min: 6 }));
       return;
     }
 

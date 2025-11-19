@@ -18,6 +18,7 @@ import {
 import { ContractExtension } from "@/types/contracts";
 import { Wallet, CreditCard, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { translateError } from "@/lib/constants/error-messages";
 
 interface ExtensionEscrowDepositDialogProps {
   open: boolean;
@@ -83,7 +84,11 @@ export function ExtensionEscrowDepositDialog({
       }
     } catch (err) {
       console.error("Payment error:", err);
-      toast.error("Lỗi", "Không thể tạo thanh toán. Vui lòng thử lại");
+      const errorMessage = translateError(
+        err,
+        "Không thể tạo thanh toán. Vui lòng thử lại"
+      );
+      toast.error("Lỗi", errorMessage);
     } finally {
       setIsProcessing(false);
     }

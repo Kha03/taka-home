@@ -15,7 +15,7 @@ function isTokenExpired(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     if (!payload.exp) return true;
-    
+
     // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
     return payload.exp * 1000 < Date.now();
   } catch {
@@ -60,12 +60,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const savedUser = localStorage.getItem("user");
         const token = localStorage.getItem("accessToken");
         const refreshToken = localStorage.getItem("refreshToken");
-        
+
         // If no localStorage but has cookies, try to get from cookies
         if (!token && !refreshToken) {
           const cookieToken = getCookie("accessToken");
           const cookieRefreshToken = getCookie("refreshToken");
-          
+
           if (cookieToken || cookieRefreshToken) {
             if (cookieToken) {
               localStorage.setItem("accessToken", cookieToken);
@@ -73,13 +73,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (cookieRefreshToken) {
               localStorage.setItem("refreshToken", cookieRefreshToken);
             }
-            
+
             // If we have token, try to decode and get user info
             if (cookieToken && !isTokenExpired(cookieToken)) {
               try {
                 // First, try to get account_info from localStorage
                 const accountInfoStr = localStorage.getItem("account_info");
-                
+
                 if (accountInfoStr) {
                   // Use account_info if available (has full user data)
                   const accountInfo = JSON.parse(accountInfoStr);
@@ -87,12 +87,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     id: accountInfo.user.id,
                     email: accountInfo.email,
                     fullName: accountInfo.user.fullName,
-                    avatarUrl: accountInfo.user.avatarUrl || "/assets/imgs/avatar.png",
+                    avatarUrl:
+                      accountInfo.user.avatarUrl || "/assets/imgs/avatar.png",
                     status: accountInfo.user.status,
                     CCCD: accountInfo.user.CCCD || "",
                     roles: accountInfo.roles || [],
                   };
-                  
+
                   localStorage.setItem("user", JSON.stringify(user));
                   setUser(user);
                   return;
@@ -108,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     CCCD: "",
                     roles: payload.roles || [],
                   };
-                  
+
                   localStorage.setItem("user", JSON.stringify(user));
                   setUser(user);
                   return;
@@ -119,25 +120,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         }
-        
+
         if (savedUser && token) {
           // Check if token is expired
           const isExpired = isTokenExpired(token);
-          
+
           if (isExpired && refreshToken) {
             // Token expired but we have refresh token, try to refresh
             try {
               const response = await authService.refreshToken(refreshToken);
-              
+
               if (response.code === 200 && response.data) {
-                const { accessToken, refreshToken: newRefreshToken } = response.data;
-                
+                const { accessToken, refreshToken: newRefreshToken } =
+                  response.data;
+
                 // Update tokens in localStorage
                 localStorage.setItem("accessToken", accessToken);
                 if (newRefreshToken) {
                   localStorage.setItem("refreshToken", newRefreshToken);
                 }
-                
+
                 // Update cookies
                 setCookie("accessToken", accessToken, {
                   expires: 1,
@@ -145,7 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   secure: process.env.NODE_ENV === "production",
                   sameSite: "lax",
                 });
-                
+
                 if (newRefreshToken) {
                   setCookie("refreshToken", newRefreshToken, {
                     expires: 7,
@@ -154,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     sameSite: "lax",
                   });
                 }
-                
+
                 // Keep existing user data (already in localStorage)
                 const userObj = JSON.parse(savedUser);
                 setUser(userObj);
@@ -174,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } else if (!isExpired) {
             // Token is still valid, use it
             setUser(JSON.parse(savedUser));
-            
+
             // Sync cookies
             setCookie("accessToken", token, {
               expires: 1,
@@ -182,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               secure: process.env.NODE_ENV === "production",
               sameSite: "lax",
             });
-            
+
             if (refreshToken) {
               setCookie("refreshToken", refreshToken, {
                 expires: 7,
@@ -209,7 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     };
-    
+
     checkAuth();
   }, []);
 
@@ -245,10 +247,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
-        
+
         // Store full account info for profile and other pages
         localStorage.setItem("account_info", JSON.stringify(account));
-        
+
         // Lưu tokens vào cookies
         setCookie("accessToken", accessToken, {
           expires: 1, // 1 day
@@ -256,7 +258,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
         });
-        
+
         setCookie("refreshToken", refreshToken, {
           expires: 7, // 7 days
           path: "/",
@@ -272,13 +274,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Translate error message from backend
       return {
         success: false,
-        error: translateError(response.message, "Mật khẩu không đúng"),
+        error: translateError(
+          response.message,
+          "Thông tin đăng nhập không chính xác"
+        ),
       };
     } catch (error) {
       console.error("Login error:", error);
       return {
         success: false,
-        error: translateError(error, "Đã có lỗi xảy ra. Vui lòng thử lại."),
+        error: translateError(
+          error,
+          "Không thể kết nối đến máy chủ. Vui lòng thử lại"
+        ),
       };
     } finally {
       setIsLoading(false);
@@ -325,10 +333,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("user", JSON.stringify(user));
           localStorage.setItem("accessToken", accessToken);
           localStorage.setItem("refreshToken", refreshToken);
-          
+
           // Store full account info for profile and other pages
           localStorage.setItem("account_info", JSON.stringify(account));
-          
+
           // Lưu tokens vào cookies
           setCookie("accessToken", accessToken, {
             expires: 1, // 1 day
@@ -336,7 +344,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
           });
-          
+
           setCookie("refreshToken", refreshToken, {
             expires: 7, // 7 days
             path: "/",
@@ -353,7 +361,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Translate error message from backend
       return {
         success: false,
-        error: translateError(response.message, "Đăng ký thất bại. Vui lòng thử lại."),
+        error: translateError(
+          response.message,
+          "Đăng ký thất bại. Vui lòng thử lại."
+        ),
       };
     } catch (error) {
       console.error("Register error:", error);
@@ -378,11 +389,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("user");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
-      
+
       // Xóa cookies
       deleteCookie("accessToken", { path: "/" });
       deleteCookie("refreshToken", { path: "/" });
-      
+
       setUser(null);
       router.push("/signin");
     }
@@ -410,7 +421,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Store token and user data (using same keys as normal login)
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("accessToken", token); // For compatibility
-      
+
       // Lưu token vào cookie
       setCookie("accessToken", token, {
         expires: 7,

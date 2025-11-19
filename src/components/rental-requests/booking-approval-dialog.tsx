@@ -18,6 +18,8 @@ import { FileText, Download, CheckCircle2, AlertCircle } from "lucide-react";
 import type { Booking } from "@/lib/api/services/booking";
 import { signingOption } from "@/lib/api/services/booking";
 import { SigningMethodDialog } from "@/components/contracts/signing-method-dialog";
+import { translateError } from "@/lib/constants/error-messages";
+import { toast } from "sonner";
 
 interface BookingApprovalDialogProps {
   open: boolean;
@@ -66,6 +68,8 @@ export function BookingApprovalDialog({
       setDialogState("result");
     } catch (error) {
       console.error("Error approving booking:", error);
+      const errorMessage = translateError(error, t("cannotApprove"));
+      toast.error(errorMessage);
       setDialogState("approval");
       onOpenChange(false);
     }

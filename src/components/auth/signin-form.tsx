@@ -54,7 +54,7 @@ export function SignInForm({ errorFromUrl }: SignInFormProps) {
 
     // Validate password length
     if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setError(t("validation.minLength", { min: 6 }));
       return;
     }
 

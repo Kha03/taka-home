@@ -15,6 +15,7 @@ import {
 } from "@/lib/api/services/payment";
 import { bookingToContract } from "@/lib/contracts/mappers";
 import type { ContractVM } from "@/types/contracts";
+import { translateError } from "@/lib/constants/error-messages";
 
 // Cache for invoice data with TTL
 type InvoiceCacheEntry = { data: Invoice[]; timestamp: number };
@@ -328,7 +329,11 @@ export function useContracts() {
         } catch (e) {
           console.error(e);
           toast.dismiss();
-          toast.error("Không thể tạo thanh toán. Vui lòng thử lại");
+          const errorMessage = translateError(
+            e,
+            "Kh\u00f4ng th\u1ec3 t\u1ea1o thanh to\u00e1n. Vui l\u00f2ng th\u1eed l\u1ea1i"
+          );
+          toast.error(errorMessage);
         }
       },
 
@@ -345,7 +350,11 @@ export function useContracts() {
         } catch (e) {
           console.error(e);
           toast.dismiss();
-          toast.error("Không thể xác nhận bàn giao. Vui lòng thử lại");
+          const errorMessage = translateError(
+            e,
+            "Kh\u00f4ng th\u1ec3 x\u00e1c nh\u1eadn b\u00e0n giao. Vui l\u00f2ng th\u1eed l\u1ea1i"
+          );
+          toast.error(errorMessage);
         }
       },
     }),

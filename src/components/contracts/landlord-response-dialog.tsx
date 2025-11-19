@@ -17,6 +17,7 @@ import { contractService } from "@/lib/api/services/contract";
 import { ContractExtension } from "@/types/contracts";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { translateError } from "@/lib/constants/error-messages";
 
 interface LandlordResponseDialogProps {
   open: boolean;
@@ -57,8 +58,13 @@ export function LandlordResponseDialog({
       toast.success("Thành công", "Đã gửi phản hồi yêu cầu gia hạn");
       onOpenChange(false);
       onSuccess();
-    } catch {
-      toast.error("Lỗi", "Không thể gửi phản hồi. Vui lòng thử lại");
+    } catch (error) {
+      console.error("Error sending landlord response:", error);
+      const errorMessage = translateError(
+        error,
+        "Không thể gửi phản hồi. Vui lòng thử lại"
+      );
+      toast.error("Lỗi", errorMessage);
     } finally {
       setLoading(false);
     }

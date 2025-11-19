@@ -188,14 +188,16 @@ const PROPERTY_ERRORS_VI = {
   ROOM_TYPE_REQUIRED_FIELDS_MISSING: "Thiếu thông tin bắt buộc của loại phòng",
   TARGET_ROOM_TYPE_ID_REQUIRED: "Yêu cầu mã loại phòng đích",
   TARGET_ROOM_TYPE_NOT_FOUND: "Không tìm thấy loại phòng đích",
-  TARGET_ROOM_TYPE_NOT_IN_PROPERTY: "Loại phòng đích không thuộc bất động sản này",
+  TARGET_ROOM_TYPE_NOT_IN_PROPERTY:
+    "Loại phòng đích không thuộc bất động sản này",
   INVALID_MOVE_TARGET: "Đích chuyển không hợp lệ",
   CANNOT_MOVE_TO_SELF: "Không thể chuyển về chính nó",
   ROOM_MOVE_FAILED: "Chuyển phòng thất bại",
   PROPERTY_UPDATE_FAILED: "Cập nhật bất động sản thất bại",
   PROPERTY_APPROVE_FAILED: "Phê duyệt bất động sản thất bại",
   PROPERTIES_APPROVE_FAILED: "Phê duyệt nhiều bất động sản thất bại",
-  ROOM_TYPE_NOT_FOUND_FOR_PROPERTY: "Không tìm thấy loại phòng cho bất động sản",
+  ROOM_TYPE_NOT_FOUND_FOR_PROPERTY:
+    "Không tìm thấy loại phòng cho bất động sản",
   ADDRESS_REQUIRED: "Yêu cầu địa chỉ",
   PROPERTY_HAS_ACTIVE_BOOKINGS: "Bất động sản có đặt phòng đang hoạt động",
 } as const;
@@ -252,7 +254,8 @@ const INVOICE_ERRORS_VI = {
   INVALID_READING_VALUES: "Giá trị chỉ số không hợp lệ",
   INVOICE_NOT_FOUND: "Không tìm thấy hóa đơn",
   NOT_AUTHORIZED_TO_VIEW_INVOICE: "Không có quyền xem hóa đơn",
-  DAMAGE_COMPENSATION_TIMING_INVALID: "Thời gian bồi thường thiệt hại không hợp lệ",
+  DAMAGE_COMPENSATION_TIMING_INVALID:
+    "Thời gian bồi thường thiệt hại không hợp lệ",
   DUPLICATE_SERVICE_TYPE: "Loại dịch vụ bị trùng",
   FILE_UPLOAD_REQUIRED: "Yêu cầu tải lên tệp",
   UNSUPPORTED_FILE_TYPE: "Loại tệp không được hỗ trợ",
@@ -268,7 +271,8 @@ const BOOKING_ERRORS_VI = {
   PROPERTY_NOT_FOUND: "Không tìm thấy bất động sản",
   INVALID_BOOKING_STATUS: "Trạng thái đặt phòng không hợp lệ",
   PROPERTY_ID_OR_ROOM_ID_REQUIRED: "Yêu cầu mã bất động sản hoặc mã phòng",
-  CANNOT_PROVIDE_BOTH_PROPERTY_AND_ROOM: "Không thể cung cấp cả mã bất động sản và mã phòng",
+  CANNOT_PROVIDE_BOTH_PROPERTY_AND_ROOM:
+    "Không thể cung cấp cả mã bất động sản và mã phòng",
   PROPERTY_ALREADY_BOOKED: "Bất động sản đã được đặt",
   BOARDING_PROPERTY_USE_ROOM_ID: "Nhà trọ cần sử dụng mã phòng",
   ROOM_ALREADY_BOOKED: "Phòng đã được đặt",
@@ -300,16 +304,22 @@ const CONTRACT_ERRORS_VI = {
   ONLY_LANDLORD_CAN_SIGN: "Chỉ chủ nhà mới có thể ký",
   ONLY_TENANT_CAN_SIGN: "Chỉ người thuê mới có thể ký",
   TERMINATION_REQUEST_NOT_FOUND: "Không tìm thấy yêu cầu chấm dứt hợp đồng",
-  TERMINATION_FORBIDDEN_NOT_PARTY: "Không có quyền - bạn không phải bên tham gia hợp đồng",
+  TERMINATION_FORBIDDEN_NOT_PARTY:
+    "Không có quyền - bạn không phải bên tham gia hợp đồng",
   TERMINATION_CONTRACT_NOT_ACTIVE: "Hợp đồng không hoạt động để chấm dứt",
   TERMINATION_REQUEST_ALREADY_PENDING: "Đã có yêu cầu chấm dứt đang chờ xử lý",
   TERMINATION_INVALID_END_MONTH_FORMAT: "Định dạng tháng kết thúc không hợp lệ",
-  TERMINATION_END_MONTH_EXCEEDS_CONTRACT: "Tháng kết thúc vượt quá thời hạn hợp đồng",
-  TERMINATION_MINIMUM_TWO_MONTHS_REQUIRED: "Yêu cầu tối thiểu hai tháng trước khi chấm dứt",
+  TERMINATION_END_MONTH_EXCEEDS_CONTRACT:
+    "Tháng kết thúc vượt quá thời hạn hợp đồng",
+  TERMINATION_MINIMUM_TWO_MONTHS_REQUIRED:
+    "Yêu cầu tối thiểu hai tháng trước khi chấm dứt",
   TERMINATION_REQUEST_ALREADY_PROCESSED: "Yêu cầu chấm dứt đã được xử lý",
-  TERMINATION_FORBIDDEN_NOT_OTHER_PARTY: "Không có quyền - bạn không phải bên kia của hợp đồng",
-  TERMINATION_FORBIDDEN_CANNOT_RESPOND_OWN: "Không thể phản hồi yêu cầu của chính mình",
-  TERMINATION_CANCEL_FORBIDDEN_NOT_CREATOR: "Không thể hủy - bạn không phải người tạo yêu cầu",
+  TERMINATION_FORBIDDEN_NOT_OTHER_PARTY:
+    "Không có quyền - bạn không phải bên kia của hợp đồng",
+  TERMINATION_FORBIDDEN_CANNOT_RESPOND_OWN:
+    "Không thể phản hồi yêu cầu của chính mình",
+  TERMINATION_CANCEL_FORBIDDEN_NOT_CREATOR:
+    "Không thể hủy - bạn không phải người tạo yêu cầu",
   TERMINATION_CANCEL_ONLY_PENDING: "Chỉ có thể hủy yêu cầu đang chờ xử lý",
 } as const;
 
@@ -418,12 +428,12 @@ export function getErrorMessage(
   defaultMessage: string = "Đã có lỗi xảy ra. Vui lòng thử lại."
 ): string {
   if (!errorCode) return defaultMessage;
-  
+
   // Check if errorCode is in our map
   if (errorCode in ERROR_MESSAGES_VI) {
     return ERROR_MESSAGES_VI[errorCode as ErrorCode];
   }
-  
+
   // Return default message if not found
   return defaultMessage;
 }
@@ -443,12 +453,12 @@ export function translateError(
     const message = (error as { message: string }).message;
     return getErrorMessage(message, defaultMessage);
   }
-  
+
   // If error is a string, try to translate it directly
   if (typeof error === "string") {
     return getErrorMessage(error, defaultMessage);
   }
-  
+
   return defaultMessage;
 }
 

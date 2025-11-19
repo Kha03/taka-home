@@ -14,6 +14,7 @@ import { contractService } from "@/lib/api/services/contract";
 import { ContractExtension } from "@/types/contracts";
 import { Loader2, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { translateError } from "@/lib/constants/error-messages";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,8 +61,13 @@ export function TenantDecisionDialog({
       );
       onOpenChange(false);
       onSuccess();
-    } catch {
-      toast.error("Lỗi", "Không thể gửi quyết định. Vui lòng thử lại");
+    } catch (error) {
+      console.error("Error accepting extension:", error);
+      const errorMessage = translateError(
+        error,
+        "Không thể gửi quyết định. Vui lòng thử lại"
+      );
+      toast.error("Lỗi", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -76,8 +82,13 @@ export function TenantDecisionDialog({
       setRejectDialogOpen(false);
       onOpenChange(false);
       onSuccess();
-    } catch {
-      toast.error("Lỗi", "Không thể từ chối. Vui lòng thử lại");
+    } catch (error) {
+      console.error("Error rejecting extension:", error);
+      const errorMessage = translateError(
+        error,
+        "Không thể từ chối. Vui lòng thử lại"
+      );
+      toast.error("Lỗi", errorMessage);
     } finally {
       setLoading(false);
     }

@@ -29,6 +29,7 @@ import {
 } from "@/lib/api/services/booking";
 import { toast } from "sonner";
 import { BookingApprovalDialog } from "@/components/rental-requests/booking-approval-dialog";
+import { translateError } from "@/lib/constants/error-messages";
 
 type RentalRequestStatus = "all" | "pending" | "approved" | "rejected";
 
@@ -61,14 +62,16 @@ export default function RentalRequestsPage() {
         }
       } catch (error) {
         console.error("Error fetching bookings:", error);
-        toast.error(t("cannotLoadRequests"));
+        const errorMessage = translateError(error, t("cannotLoadRequests"));
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
     };
 
     fetchBookings();
-  }, []); // Chỉ fetch một lần khi mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Xử lý mở dialog xác nhận từ chối
   const handleRejectClick = (bookingId: string) => {
@@ -107,7 +110,8 @@ export default function RentalRequestsPage() {
       }
     } catch (error) {
       console.error("Error approving booking:", error);
-      toast.error(t("cannotApprove"));
+      const errorMessage = translateError(error, t("cannotApprove"));
+      toast.error(errorMessage);
       throw error;
     }
   };
@@ -132,7 +136,8 @@ export default function RentalRequestsPage() {
       setBookingToReject(null);
     } catch (error) {
       console.error("Error rejecting booking:", error);
-      toast.error(t("cannotReject"));
+      const errorMessage = translateError(error, t("cannotReject"));
+      toast.error(errorMessage);
     } finally {
       setRejecting(false);
     }
@@ -192,7 +197,7 @@ export default function RentalRequestsPage() {
       { id: "approved", label: t("approved"), count: approvedCount },
       { id: "rejected", label: t("rejected"), count: rejectedCount },
     ];
-  }, [bookings]);
+  }, [bookings, t]);
 
   // Pagination
   const totalPages = Math.ceil(filteredBookings.length / PAGE_SIZE);

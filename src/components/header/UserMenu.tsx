@@ -140,7 +140,7 @@ export function UserMenu() {
             className="cursor-pointer text-red-600"
           >
             <LogOut className="mr-2 h-4 w-4" />
-            <span>{t("signout")}</span>
+            <span>{tAuth("signout")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

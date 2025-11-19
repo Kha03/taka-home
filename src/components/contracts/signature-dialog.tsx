@@ -22,6 +22,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { SigningMethodDialog } from "@/components/contracts/signing-method-dialog";
 import { signingOption } from "@/lib/api/services/booking";
+import { translateError } from "@/lib/constants/error-messages";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface SignatureDialogProps {
@@ -105,8 +106,13 @@ export function SignatureDialog({
         setSigningStep("idle");
         onSuccess();
       }, 2000);
-    } catch {
-      toast.error("Lỗi", "Không thể ký hợp đồng. Vui lòng thử lại");
+    } catch (error) {
+      console.error("Error signing contract:", error);
+      const errorMessage = translateError(
+        error,
+        "Không thể ký hợp đồng. Vui lòng thử lại"
+      );
+      toast.error("Lỗi", errorMessage);
       setSigningStep("idle");
     } finally {
       setSigningLoading(false);
@@ -153,7 +159,8 @@ export function SignatureDialog({
       toast.error(tCommon("error"), t("noContractFile"));
     } catch (error) {
       console.error("Error fetching contract file:", error);
-      toast.error("Lỗi", "Không thể tải file hợp đồng");
+      const errorMessage = translateError(error, "Không thể tải file hợp đồng");
+      toast.error("Lỗi", errorMessage);
     }
   };
 
