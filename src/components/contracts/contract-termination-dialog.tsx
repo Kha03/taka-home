@@ -112,10 +112,7 @@ export function ContractTerminationDialog({
       });
 
       if (response.code === 201) {
-        toast.success(
-          t("success", { ns: "common" }),
-          t("terminationSuccess")
-        );
+        toast.success(t("success", { ns: "common" }), t("terminationSuccess"));
         // Reset form
         setSelectedDate(undefined);
         setReason("");
@@ -144,9 +141,7 @@ export function ContractTerminationDialog({
 
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {t("terminationNote")}
-          </AlertDescription>
+          <AlertDescription>{t("terminationNote")}</AlertDescription>
         </Alert>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -238,7 +233,8 @@ export function ContractTerminationDialog({
           {/* Reason Textarea */}
           <div className="flex flex-col space-y-2">
             <Label>
-              {t("terminationReason")} <span className="text-red-500">{t("required")}</span>
+              {t("terminationReason")}{" "}
+              <span className="text-red-500">{t("required")}</span>
             </Label>
             <Textarea
               placeholder={t("terminationReasonPlaceholder")}

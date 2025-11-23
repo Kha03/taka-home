@@ -64,7 +64,9 @@ export function PaymentModal({
         <div className="space-y-6 py-4">
           {/* Amount Display */}
           <div className="rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-            <p className="text-sm font-medium opacity-90">{t("paymentAmount")}</p>
+            <p className="text-sm font-medium opacity-90">
+              {t("paymentAmount")}
+            </p>
             <p className="mt-2 text-3xl font-bold">{formatCurrency(amount)}</p>
           </div>
 

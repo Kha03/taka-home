@@ -104,7 +104,8 @@ export function ContractTerminationRespondDialog({
                   )}
                 </p>
                 <p>
-                  <strong>{t("terminationReason")}:</strong> {termination.reason}
+                  <strong>{t("terminationReason")}:</strong>{" "}
+                  {termination.reason}
                 </p>
               </div>
             </AlertDescription>

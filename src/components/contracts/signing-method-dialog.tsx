@@ -53,9 +53,7 @@ export function SigningMethodDialog({
             <FileSignature className="w-5 h-5" />
             {t("selectSigningMethod")}
           </DialogTitle>
-          <DialogDescription>
-            {t("selectSigningMethodDesc")}
-          </DialogDescription>
+          <DialogDescription>{t("selectSigningMethodDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -150,7 +148,8 @@ export function SigningMethodDialog({
           {/* Warning Notice */}
           <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
             <p className="text-xs text-amber-800 dark:text-amber-200">
-              <span className="font-medium">{t("signingNote")}</span> {t("signingWarning")}
+              <span className="font-medium">{t("signingNote")}</span>{" "}
+              {t("signingWarning")}
             </p>
           </div>
         </div>

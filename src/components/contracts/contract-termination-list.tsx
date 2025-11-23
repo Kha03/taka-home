@@ -179,7 +179,9 @@ export function ContractTerminationList({
                 <div className="flex items-start gap-2">
                   <MessageSquare className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{t("terminationReason")}</p>
+                    <p className="text-sm font-medium">
+                      {t("terminationReason")}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {termination.reason}
                     </p>
@@ -189,7 +191,9 @@ export function ContractTerminationList({
                 <div className="flex items-start gap-2">
                   <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{t("requestSentDate")}</p>
+                    <p className="text-sm font-medium">
+                      {t("requestSentDate")}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {format(
                         new Date(termination.createdAt),
@@ -203,7 +207,7 @@ export function ContractTerminationList({
 
               {/* Response Details (if any) */}
               {termination.status !== "PENDING" && termination.approvedBy && (
-                  <div className="border-t pt-4 space-y-3">
+                <div className="border-t pt-4 space-y-3">
                   <div className="flex items-start gap-2">
                     <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
                     <div className="flex-1">
@@ -218,7 +222,9 @@ export function ContractTerminationList({
                     <div className="flex items-start gap-2">
                       <MessageSquare className="h-4 w-4 mt-0.5 text-muted-foreground" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">{t("responseNoteLabel")}</p>
+                        <p className="text-sm font-medium">
+                          {t("responseNoteLabel")}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           {termination.responseNote}
                         </p>
@@ -230,7 +236,9 @@ export function ContractTerminationList({
                     <div className="flex items-start gap-2">
                       <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">{t("respondDate")}</p>
+                        <p className="text-sm font-medium">
+                          {t("respondDate")}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           {format(
                             new Date(termination.respondedAt),
