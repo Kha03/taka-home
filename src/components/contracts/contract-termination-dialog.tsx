@@ -113,8 +113,8 @@ export function ContractTerminationDialog({
 
       if (response.code === 201) {
         toast.success(
-          "Thành công",
-          "Yêu cầu hủy hợp đồng đã được gửi thành công"
+          t("success", { ns: "common" }),
+          t("terminationSuccess")
         );
         // Reset form
         setSelectedDate(undefined);
@@ -126,8 +126,8 @@ export function ContractTerminationDialog({
     } catch (error) {
       console.error("Error creating termination request:", error);
       toast.error(
-        "Lỗi",
-        getApiErrorMessage(error, "Không thể gửi yêu cầu hủy hợp đồng")
+        t("error", { ns: "common" }),
+        getApiErrorMessage(error, t("terminationError"))
       );
     } finally {
       setIsSubmitting(false);
@@ -145,9 +145,7 @@ export function ContractTerminationDialog({
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Lưu ý:</strong> Thời gian kết thúc phải sau ít nhất 1 tháng
-            so với tháng hiện tại và không được vượt quá thời hạn hợp đồng (
-            {format(contractEnd, "MM/yyyy", { locale: vi })}).
+            {t("terminationNote")}
           </AlertDescription>
         </Alert>
 
@@ -230,7 +228,7 @@ export function ContractTerminationDialog({
               </PopoverContent>
             </Popover>
             <p className="text-sm text-muted-foreground">
-              Chọn tháng mà bạn muốn kết thúc hợp đồng (sau ít nhất 1 tháng)
+              {t("selectMonthHelp")}
             </p>
             {errors.date && (
               <p className="text-sm text-red-500">{errors.date}</p>
@@ -240,16 +238,16 @@ export function ContractTerminationDialog({
           {/* Reason Textarea */}
           <div className="flex flex-col space-y-2">
             <Label>
-              Lý do hủy hợp đồng <span className="text-red-500">*</span>
+              {t("terminationReason")} <span className="text-red-500">{t("required")}</span>
             </Label>
             <Textarea
-              placeholder="Vui lòng cho biết lý do bạn muốn hủy hợp đồng trước hạn..."
+              placeholder={t("terminationReasonPlaceholder")}
               className="min-h-[120px] resize-none"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
             <p className="text-sm text-muted-foreground">
-              Giải thích rõ lý do để bên kia có thể xem xét (10-500 ký tự)
+              {t("terminationReasonHelp")}
             </p>
             {errors.reason && (
               <p className="text-sm text-red-500">{errors.reason}</p>

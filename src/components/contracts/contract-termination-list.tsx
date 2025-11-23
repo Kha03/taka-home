@@ -51,7 +51,7 @@ export function ContractTerminationList({
       }
     } catch (err) {
       console.error("Error fetching termination requests:", err);
-      setError("Không thể tải danh sách yêu cầu hủy hợp đồng");
+      setError(t("cannotLoadTerminationList"));
     } finally {
       setLoading(false);
     }
@@ -71,21 +71,21 @@ export function ContractTerminationList({
             className="border-yellow-500 text-yellow-600"
           >
             <Clock className="mr-1 h-3 w-3" />
-            Đang chờ
+            {t("pending")}
           </Badge>
         );
       case "APPROVED":
         return (
           <Badge variant="outline" className="border-green-500 text-green-600">
             <CheckCircle2 className="mr-1 h-3 w-3" />
-            Đã chấp nhận
+            {t("approved")}
           </Badge>
         );
       case "REJECTED":
         return (
           <Badge variant="outline" className="border-red-500 text-red-600">
             <XCircle className="mr-1 h-3 w-3" />
-            Đã từ chối
+            {t("rejected")}
           </Badge>
         );
     }
@@ -94,7 +94,7 @@ export function ContractTerminationList({
   const getRoleBadge = (role: "LANDLORD" | "TENANT") => {
     return (
       <Badge variant="secondary">
-        {role === "LANDLORD" ? "Chủ nhà" : "Người thuê"}
+        {role === "LANDLORD" ? t("landlord") : t("tenant")}
       </Badge>
     );
   };
@@ -146,7 +146,7 @@ export function ContractTerminationList({
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <CardTitle className="text-lg">
-                    Yêu cầu hủy hợp đồng
+                    {t("terminationRequestTitle")}
                   </CardTitle>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <User className="h-4 w-4" />
@@ -164,7 +164,7 @@ export function ContractTerminationList({
                   <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">
-                      Tháng kết thúc mong muốn
+                      {t("desiredEndMonth")}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {format(
@@ -179,7 +179,7 @@ export function ContractTerminationList({
                 <div className="flex items-start gap-2">
                   <MessageSquare className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Lý do</p>
+                    <p className="text-sm font-medium">{t("terminationReason")}</p>
                     <p className="text-sm text-muted-foreground">
                       {termination.reason}
                     </p>
@@ -189,7 +189,7 @@ export function ContractTerminationList({
                 <div className="flex items-start gap-2">
                   <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Ngày gửi yêu cầu</p>
+                    <p className="text-sm font-medium">{t("requestSentDate")}</p>
                     <p className="text-sm text-muted-foreground">
                       {format(
                         new Date(termination.createdAt),
@@ -203,11 +203,11 @@ export function ContractTerminationList({
 
               {/* Response Details (if any) */}
               {termination.status !== "PENDING" && termination.approvedBy && (
-                <div className="border-t pt-4 space-y-3">
+                  <div className="border-t pt-4 space-y-3">
                   <div className="flex items-start gap-2">
                     <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Người phản hồi</p>
+                      <p className="text-sm font-medium">{t("responder")}</p>
                       <p className="text-sm text-muted-foreground">
                         {termination.approvedBy.fullName}
                       </p>
@@ -218,7 +218,7 @@ export function ContractTerminationList({
                     <div className="flex items-start gap-2">
                       <MessageSquare className="h-4 w-4 mt-0.5 text-muted-foreground" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Ghi chú phản hồi</p>
+                        <p className="text-sm font-medium">{t("responseNoteLabel")}</p>
                         <p className="text-sm text-muted-foreground">
                           {termination.responseNote}
                         </p>
@@ -230,7 +230,7 @@ export function ContractTerminationList({
                     <div className="flex items-start gap-2">
                       <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Ngày phản hồi</p>
+                        <p className="text-sm font-medium">{t("respondDate")}</p>
                         <p className="text-sm text-muted-foreground">
                           {format(
                             new Date(termination.respondedAt),
@@ -251,7 +251,7 @@ export function ContractTerminationList({
                     onClick={() => setSelectedTermination(termination)}
                     className="w-full"
                   >
-                    Phản hồi yêu cầu
+                    {t("respondToRequest")}
                   </Button>
                 </div>
               )}

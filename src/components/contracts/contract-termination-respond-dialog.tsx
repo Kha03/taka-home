@@ -56,10 +56,10 @@ export function ContractTerminationRespondDialog({
 
       if (response.code === 200) {
         toast.success(
-          "Thành công",
+          t("success", { ns: "common" }),
           status === "APPROVED"
-            ? "Đã chấp nhận yêu cầu hủy hợp đồng"
-            : "Đã từ chối yêu cầu hủy hợp đồng"
+            ? t("acceptedTermination")
+            : t("rejectedTermination")
         );
         setResponseNote("");
         setSelectedAction(null);
@@ -69,8 +69,8 @@ export function ContractTerminationRespondDialog({
     } catch (error) {
       console.error("Error responding to termination request:", error);
       toast.error(
-        "Lỗi",
-        getApiErrorMessage(error, "Không thể phản hồi yêu cầu hủy hợp đồng")
+        t("error", { ns: "common" }),
+        getApiErrorMessage(error, t("cannotRespondTermination"))
       );
     } finally {
       setIsSubmitting(false);
@@ -96,7 +96,7 @@ export function ContractTerminationRespondDialog({
             <AlertDescription>
               <div className="space-y-2">
                 <p>
-                  <strong>Tháng kết thúc mong muốn:</strong>{" "}
+                  <strong>{t("desiredEndMonthLabel")}:</strong>{" "}
                   {format(
                     new Date(termination.requestedEndMonth + "-01"),
                     "MMMM yyyy",
@@ -104,7 +104,7 @@ export function ContractTerminationRespondDialog({
                   )}
                 </p>
                 <p>
-                  <strong>Lý do:</strong> {termination.reason}
+                  <strong>{t("terminationReason")}:</strong> {termination.reason}
                 </p>
               </div>
             </AlertDescription>

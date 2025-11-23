@@ -116,7 +116,8 @@ export const config = {
     // Match all pathnames except for
     // - API routes
     // - _next (Next.js internals)
-    // - static files (images, fonts, etc.)
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
+    // - static files (images, fonts, PDFs, etc.)
+    // - contract PDFs
+    "/((?!api|_next/static|_next/image|favicon.ico|contract|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|pdf)).*)",
   ],
 };

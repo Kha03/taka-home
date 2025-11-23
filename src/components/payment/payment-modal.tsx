@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,8 @@ export function PaymentModal({
   amount,
   onPaymentSuccess,
 }: PaymentModalProps) {
+  const t = useTranslations("payment");
+  const tCommon = useTranslations("common");
   const [selectedMethod, setSelectedMethod] = useState<"VNPAY" | "WALLET">(
     "VNPAY"
   );
@@ -54,21 +57,21 @@ export function PaymentModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Chọn Phương Thức Thanh Toán
+            {t("selectPaymentMethod")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           {/* Amount Display */}
           <div className="rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-            <p className="text-sm font-medium opacity-90">Số tiền thanh toán</p>
+            <p className="text-sm font-medium opacity-90">{t("paymentAmount")}</p>
             <p className="mt-2 text-3xl font-bold">{formatCurrency(amount)}</p>
           </div>
 
           {/* Payment Methods */}
           <div className="space-y-3">
             <Label className="text-base font-semibold text-gray-900">
-              Phương thức thanh toán
+              {t("method")}
             </Label>
             <RadioGroup
               value={selectedMethod}
@@ -92,7 +95,7 @@ export function PaymentModal({
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900">VNPay</p>
-                    <p className="text-sm text-gray-500">Ví điện tử VNPay</p>
+                    <p className="text-sm text-gray-500">{t("vnpayWallet")}</p>
                   </div>
                 </Label>
               </div>
@@ -114,7 +117,7 @@ export function PaymentModal({
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900">Wallet</p>
                     <p className="text-sm text-gray-500">
-                      Sử dụng số dư trong ví
+                      {t("useWalletBalance")}
                     </p>
                   </div>
                 </Label>
@@ -130,14 +133,14 @@ export function PaymentModal({
               className="flex-1 border-0 bg-accent hover:bg-accent/90"
               disabled={isProcessing}
             >
-              Hủy
+              {tCommon("cancel")}
             </Button>
             <Button
               onClick={handlePayment}
               className="flex-1"
               disabled={isProcessing}
             >
-              {isProcessing ? "Đang xử lý..." : "Xác Nhận Thanh Toán"}
+              {isProcessing ? t("processing") : t("confirmPayment")}
             </Button>
           </div>
         </div>

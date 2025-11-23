@@ -51,10 +51,10 @@ export function SigningMethodDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSignature className="w-5 h-5" />
-            Chọn phương thức ký hợp đồng
+            {t("selectSigningMethod")}
           </DialogTitle>
           <DialogDescription>
-            Vui lòng chọn phương thức ký số phù hợp với bạn
+            {t("selectSigningMethodDesc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -86,7 +86,7 @@ export function SigningMethodDialog({
                       className="flex items-center gap-2 cursor-pointer font-semibold text-base"
                     >
                       <Smartphone className="w-5 h-5 text-primary" />
-                      VNPT SmartCA
+                      {t("vnptSmartCA")}
                       <span className="ml-auto">
                         <CheckCircle2
                           className={`w-5 h-5 ${
@@ -98,8 +98,7 @@ export function SigningMethodDialog({
                       </span>
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Ký số điện tử qua ứng dụng VNPT SmartCA trên điện thoại.
-                      Yêu cầu đã có chứng thư số từ VNPT.
+                      {t("vnptSmartCADesc")}
                     </p>
                   </div>
                 </div>
@@ -128,7 +127,7 @@ export function SigningMethodDialog({
                       className="flex items-center gap-2 cursor-pointer font-semibold text-base"
                     >
                       <Shield className="w-5 h-5 text-primary" />
-                      Ký tự động (Self CA)
+                      {t("selfCA")}
                       <span className="ml-auto">
                         <CheckCircle2
                           className={`w-5 h-5 ${
@@ -140,8 +139,7 @@ export function SigningMethodDialog({
                       </span>
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Thực hiện xác nhận kí số của hợp đồng một cách tự động qua
-                      hệ thống của chúng tôi.
+                      {t("selfCADesc")}
                     </p>
                   </div>
                 </div>
@@ -152,9 +150,7 @@ export function SigningMethodDialog({
           {/* Warning Notice */}
           <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
             <p className="text-xs text-amber-800 dark:text-amber-200">
-              <span className="font-medium">Lưu ý:</span> Bằng việc ký hợp đồng,
-              {t("confirmReadTerms")}. Hãy chọn phương thức ký phù hợp với nhu
-              cầu của bạn.
+              <span className="font-medium">{t("signingNote")}</span> {t("signingWarning")}
             </p>
           </div>
         </div>
@@ -166,18 +162,18 @@ export function SigningMethodDialog({
             disabled={loading}
             className="text-red-500 border-red-500"
           >
-            Hủy
+            {t("cancel", { ns: "common" })}
           </Button>
           <Button onClick={handleConfirm} disabled={loading}>
             {loading ? (
               <>
                 <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Đang xử lý...
+                {t("processing", { ns: "payment" })}
               </>
             ) : (
               <>
                 <FileSignature className="w-4 h-4 mr-2" />
-                Xác nhận và ký
+                {t("confirmAndSign")}
               </>
             )}
           </Button>

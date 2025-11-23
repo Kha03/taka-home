@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,7 @@ export function BookingApprovalDialog({
   onConfirmApprove,
 }: BookingApprovalDialogProps) {
   const t = useTranslations("rentalRequests");
+  const locale = useLocale();
   type DialogState = "approval" | "signing-method" | "approving" | "result";
   const [dialogState, setDialogState] = useState<DialogState>("approval");
   const [selectedSigningMethod, setSelectedSigningMethod] =
@@ -102,9 +103,15 @@ export function BookingApprovalDialog({
     : parseFloat(property.deposit || "0");
 
   // Determine contract PDF path based on property type
-  const contractPdfPath = isBoarding
-    ? "/contract/HopDongChoThueNhaTro.pdf"
-    : "/contract/HopDongChoThueNhaNguyenCan.pdf";
+  // Use window.location.origin to get the correct URL
+  const contractPdfPath =
+    typeof window !== "undefined"
+      ? isBoarding
+        ? `${window.location.origin}/contract/HopDongChoThueNhaTro.pdf`
+        : `${window.location.origin}/contract/HopDongChoThueNhaNguyenCan.pdf`
+      : isBoarding
+      ? "/contract/HopDongChoThueNhaTro.pdf"
+      : "/contract/HopDongChoThueNhaNguyenCan.pdf";
 
   const contractTitle = isBoarding
     ? "Hợp đồng cho thuê phòng trọ"
