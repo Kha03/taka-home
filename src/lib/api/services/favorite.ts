@@ -107,10 +107,17 @@ export class FavoriteService {
   }
 
   /**
-   * Xóa khỏi danh sách yêu thích
+   * Xóa property khỏi danh sách yêu thích (APARTMENT/HOUSING)
    */
-  async removeFavorite(favoriteId: string): Promise<ApiResponse<void>> {
-    return await apiClient.delete<void>(`${this.basePath}/${favoriteId}`);
+  async removeFavoriteProperty(propertyId: string): Promise<ApiResponse<void>> {
+    return await apiClient.delete<void>(`${this.basePath}/${propertyId}`);
+  }
+
+  /**
+   * Xóa roomType khỏi danh sách yêu thích (BOARDING)
+   */
+  async removeFavoriteRoomType(roomTypeId: string): Promise<ApiResponse<void>> {
+    return await apiClient.delete<void>(`${this.basePath}/${roomTypeId}`);
   }
 
   /**
@@ -153,34 +160,6 @@ export class FavoriteService {
     } catch (error) {
       console.error("Error checking favorite roomType:", error);
       return false;
-    }
-  }
-
-  /**
-   * Lấy favorite ID từ propertyId hoặc roomTypeId
-   */
-  async getFavoriteId(
-    propertyId?: string,
-    roomTypeId?: string
-  ): Promise<string | null> {
-    try {
-      const response = await this.getFavorites();
-      if (response.code === 200 && response.data) {
-        const favorite = response.data.find((item) => {
-          if (propertyId && item.property) {
-            return item.property.id === propertyId;
-          }
-          if (roomTypeId && item.roomType) {
-            return item.roomType.id === roomTypeId;
-          }
-          return false;
-        });
-        return favorite ? favorite.id : null;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error getting favorite ID:", error);
-      return null;
     }
   }
 }

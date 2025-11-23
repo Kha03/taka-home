@@ -33,7 +33,6 @@ export function PropertyDetailView({
   const [isLiked, setIsLiked] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [isFavoriting, setIsFavoriting] = useState(false);
-  const [favoriteId, setFavoriteId] = useState<string | null>(null);
 
   const thumbnailsPerView = 4;
 
@@ -182,29 +181,11 @@ export function PropertyDetailView({
           const roomTypeId = property.id;
           const isFav = await favoriteService.isFavoriteRoomType(roomTypeId);
           setIsLiked(isFav);
-          
-          // Lấy favoriteId để có thể xóa sau này
-          if (isFav) {
-            const favId = await favoriteService.getFavoriteId(
-              undefined,
-              roomTypeId
-            );
-            setFavoriteId(favId);
-          }
         } else {
           // Đối với APARTMENT/HOUSING: kiểm tra propertyId
           const propertyId = property.id;
           const isFav = await favoriteService.isFavoriteProperty(propertyId);
           setIsLiked(isFav);
-          
-          // Lấy favoriteId để có thể xóa sau này
-          if (isFav) {
-            const favId = await favoriteService.getFavoriteId(
-              propertyId,
-              undefined
-            );
-            setFavoriteId(favId);
-          }
         }
       } catch (error) {
         console.error("Error checking favorite status:", error);
@@ -280,40 +261,50 @@ export function PropertyDetailView({
     setIsFavoriting(true);
     
     try {
-      // Nếu đã yêu thích, thì xóa khỏi danh sách
-      if (isLiked && favoriteId) {
-        const response = await favoriteService.removeFavorite(favoriteId);
+      // Kiểm tra xem đây là RoomType (BOARDING) hay Property (APARTMENT/HOUSING)
+      if (isRoomTypeDetail(property)) {
+        const roomTypeId = property.id;
         
-        if (response.code === 200) {
-          setIsLiked(false);
-          setFavoriteId(null);
-          toast.success("Đã xóa khỏi danh sách yêu thích", "Đã xóa thành công");
+        if (isLiked) {
+          // Nếu đã yêu thích, thì xóa khỏi danh sách
+          const response = await favoriteService.removeFavoriteRoomType(roomTypeId);
+          
+          if (response.code === 200) {
+            setIsLiked(false);
+            toast.success("Đã xóa khỏi danh sách yêu thích", "Đã xóa thành công");
+          } else {
+            toast.error("Xóa yêu thích thất bại", response.message || "Vui lòng thử lại");
+          }
         } else {
-          toast.error("Xóa yêu thích thất bại", response.message || "Vui lòng thử lại");
-        }
-      } else {
-        // Nếu chưa yêu thích, thêm vào danh sách
-        // Kiểm tra xem đây là RoomType (BOARDING) hay Property (APARTMENT/HOUSING)
-        if (isRoomTypeDetail(property)) {
-          // Đối với BOARDING: gọi API với roomTypeId
-          const roomTypeId = property.id;
+          // Nếu chưa yêu thích, thêm vào danh sách
           const response = await favoriteService.addFavoriteRoomType(roomTypeId);
           
           if (response.code === 200 && response.data) {
             setIsLiked(true);
-            setFavoriteId(response.data.id);
             toast.success("Đã thêm vào danh sách yêu thích", "Phòng trọ đã được lưu thành công");
           } else {
             toast.error("Thêm yêu thích thất bại", response.message || "Vui lòng thử lại");
           }
+        }
+      } else {
+        const propertyId = property.id;
+        
+        if (isLiked) {
+          // Nếu đã yêu thích, thì xóa khỏi danh sách
+          const response = await favoriteService.removeFavoriteProperty(propertyId);
+          
+          if (response.code === 200) {
+            setIsLiked(false);
+            toast.success("Đã xóa khỏi danh sách yêu thích", "Đã xóa thành công");
+          } else {
+            toast.error("Xóa yêu thích thất bại", response.message || "Vui lòng thử lại");
+          }
         } else {
-          // Đối với APARTMENT/HOUSING: gọi API với propertyId
-          const propertyId = property.id;
+          // Nếu chưa yêu thích, thêm vào danh sách
           const response = await favoriteService.addFavoriteProperty(propertyId);
           
           if (response.code === 200 && response.data) {
             setIsLiked(true);
-            setFavoriteId(response.data.id);
             toast.success("Đã thêm vào danh sách yêu thích", "Bất động sản đã được lưu thành công");
           } else {
             toast.error("Thêm yêu thích thất bại", response.message || "Vui lòng thử lại");
