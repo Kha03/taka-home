@@ -116,6 +116,7 @@
     "house": "House",
     "villa": "Villa",
     "office": "Office",
+    "boarding": "Boarding House",
     "errorLoadingRoomInfo": "Cannot load room information",
     "errorLoadingPropertyInfo": "Cannot load property information",
     "errorLoadingData": "An error occurred while loading data",

@@ -85,7 +85,7 @@ export function PropertyMainContent({ property }: PropertyMainContentProps) {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
 
-    return t("updateDateFormat").replace("{date}", `${day}/${month}/${year}`);
+    return t("updateDateFormat", { date: `${day}/${month}/${year}` });
   };
 
   return (

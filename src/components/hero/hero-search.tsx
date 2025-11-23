@@ -25,7 +25,7 @@ export function HeroSearch() {
       case PropertyTypeEnum.APARTMENT:
         return t("apartment");
       case PropertyTypeEnum.BOARDING:
-        return "Nhà trọ"; // Add to translations later
+        return t("boarding"); // Add to translations later
       case PropertyTypeEnum.HOUSING:
         return t("house");
       default:

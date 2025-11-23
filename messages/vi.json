@@ -117,6 +117,7 @@
     "house": "Nhà riêng",
     "villa": "Biệt thự",
     "office": "Văn phòng",
+    "boarding": "Nhà trọ",
     "errorLoadingRoomInfo": "Không thể tải thông tin phòng trọ",
     "errorLoadingPropertyInfo": "Không thể tải thông tin bất động sản",
     "errorLoadingData": "Đã có lỗi xảy ra khi tải dữ liệu",
