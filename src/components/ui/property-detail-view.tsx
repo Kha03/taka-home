@@ -17,6 +17,8 @@ import MapLocation from "../property-detail/MapLocation";
 import { PropertyDescription } from "../property-detail/PropertyDescription";
 import { PropertyMainContent } from "../property-detail/PropertyMainContent";
 import { PropertySidebar } from "../property-detail/PropertySidebar";
+import { favoriteService } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 interface PropertyDetailViewProps {
   property: Property | RoomTypeDetail;
@@ -30,6 +32,7 @@ export function PropertyDetailView({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [isFavoriting, setIsFavoriting] = useState(false);
 
   const thumbnailsPerView = 4;
 
@@ -169,6 +172,29 @@ export function PropertyDetailView({
 
   const mapLocation = getMapLocation();
 
+  // Load favorite status khi component mount
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      try {
+        if (isRoomTypeDetail(property)) {
+          // Đối với BOARDING: kiểm tra roomTypeId
+          const roomTypeId = property.id;
+          const isFav = await favoriteService.isFavoriteRoomType(roomTypeId);
+          setIsLiked(isFav);
+        } else {
+          // Đối với APARTMENT/HOUSING: kiểm tra propertyId
+          const propertyId = property.id;
+          const isFav = await favoriteService.isFavoriteProperty(propertyId);
+          setIsLiked(isFav);
+        }
+      } catch (error) {
+        console.error("Error checking favorite status:", error);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [property]);
+
   // Tính index bắt đầu của "trang" hiện tại cho strip
   useEffect(() => {
     if (!carouselApi) return;
@@ -226,6 +252,73 @@ export function PropertyDetailView({
   const canScrollPrev = images.length > 1;
   const canScrollNext = images.length > 1;
 
+  /**
+   * Handler cho button yêu thích (toggle add/remove)
+   */
+  const handleFavoriteClick = async () => {
+    if (isFavoriting) return; // Prevent double clicks
+    
+    setIsFavoriting(true);
+    
+    try {
+      // Kiểm tra xem đây là RoomType (BOARDING) hay Property (APARTMENT/HOUSING)
+      if (isRoomTypeDetail(property)) {
+        const roomTypeId = property.id;
+        
+        if (isLiked) {
+          // Nếu đã yêu thích, thì xóa khỏi danh sách
+          const response = await favoriteService.removeFavoriteRoomType(roomTypeId);
+          
+          if (response.code === 200) {
+            setIsLiked(false);
+            toast.success("Đã xóa khỏi danh sách yêu thích", "Đã xóa thành công");
+          } else {
+            toast.error("Xóa yêu thích thất bại", response.message || "Vui lòng thử lại");
+          }
+        } else {
+          // Nếu chưa yêu thích, thêm vào danh sách
+          const response = await favoriteService.addFavoriteRoomType(roomTypeId);
+          
+          if (response.code === 200 && response.data) {
+            setIsLiked(true);
+            toast.success("Đã thêm vào danh sách yêu thích", "Phòng trọ đã được lưu thành công");
+          } else {
+            toast.error("Thêm yêu thích thất bại", response.message || "Vui lòng thử lại");
+          }
+        }
+      } else {
+        const propertyId = property.id;
+        
+        if (isLiked) {
+          // Nếu đã yêu thích, thì xóa khỏi danh sách
+          const response = await favoriteService.removeFavoriteProperty(propertyId);
+          
+          if (response.code === 200) {
+            setIsLiked(false);
+            toast.success("Đã xóa khỏi danh sách yêu thích", "Đã xóa thành công");
+          } else {
+            toast.error("Xóa yêu thích thất bại", response.message || "Vui lòng thử lại");
+          }
+        } else {
+          // Nếu chưa yêu thích, thêm vào danh sách
+          const response = await favoriteService.addFavoriteProperty(propertyId);
+          
+          if (response.code === 200 && response.data) {
+            setIsLiked(true);
+            toast.success("Đã thêm vào danh sách yêu thích", "Bất động sản đã được lưu thành công");
+          } else {
+            toast.error("Thêm yêu thích thất bại", response.message || "Vui lòng thử lại");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast.error("Có lỗi xảy ra", "Không thể thực hiện thao tác. Vui lòng đăng nhập để sử dụng tính năng này.");
+    } finally {
+      setIsFavoriting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Main Content Grid */}
@@ -247,7 +340,8 @@ export function PropertyDetailView({
                   variant="default"
                   size="sm"
                   className="bg-primary/20 hover:bg-primary/10 backdrop-blur-sm"
-                  onClick={() => setIsLiked(!isLiked)}
+                  onClick={handleFavoriteClick}
+                  disabled={isFavoriting}
                 >
                   <Heart
                     className={`h-4 w-4 ${

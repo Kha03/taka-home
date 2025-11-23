@@ -15,3 +15,4 @@ export { chatbotService } from "./chatbot";
 export { contractService, ContractService } from "./contract";
 export { statisticsService, StatisticsService } from "./statistics";
 export { usersService, UsersService } from "./users";
+export { favoriteService, FavoriteService } from "./favorite";
