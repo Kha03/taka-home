@@ -18,7 +18,14 @@ export {
   VietnamAddressService,
 } from "./services/vietnam-address";
 export { bookingService, BookingService } from "./services/booking";
-export { favoriteService, FavoriteService } from "./services/favorite";
+export { 
+  favoriteService, 
+  FavoriteService,
+  type FavoriteItem,
+  type FavoriteProperty,
+  type FavoriteRoomType,
+  type Favorite,
+} from "./services/favorite";
 
 /**
  * Helper function để handle API errors một cách consistent
