@@ -1056,8 +1056,20 @@
     "issueDate": "Ngày phát hành",
     "dueDate": "Hạn thanh toán",
     "status": "Trạng thái",
+    "serviceType": "Loại dịch vụ",
     "itemDescription": "Mô tả mục",
     "amount": "Số tiền",
+    "serviceTypes": {
+      "ELECTRICITY": "Tiền điện",
+      "WATER": "Tiền nước",
+      "PARKING": "Tiền giữ xe",
+      "INTERNET": "Tiền internet",
+      "CLEANING": "Tiền vệ sinh",
+      "SECURITY": "Tiền bảo vệ",
+      "DAMAGE_COMPENSATION": "Bồi thường thiệt hại",
+      "RENT": "Tiền thuê nhà",
+      "OTHER": "Khác"
+    },
     "paymentStatus": {
       "PAID": "Đã thanh toán",
       "PENDING": "Chờ thanh toán",

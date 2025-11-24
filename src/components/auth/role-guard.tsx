@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import type { UserRole } from "@/lib/auth/roles";

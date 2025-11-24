@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { authService } from "@/lib/api/services/auth";
 import { User } from "@/lib/api";
 import { setCookie, deleteCookie, getCookie } from "@/lib/utils/cookie-utils";

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { CheckCircle2, Clock, Home } from "lucide-react";
 import { useTranslations } from "next-intl";
 

@@ -20,6 +20,7 @@ export interface InvoiceItem {
   id: string;
   description: string;
   amount: number;
+  serviceType?: ServiceTypeEnum; // Loại dịch vụ (nếu backend trả về)
 }
 
 export interface Invoice {

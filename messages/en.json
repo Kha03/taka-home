@@ -1053,8 +1053,20 @@
     "issueDate": "Issue Date",
     "dueDate": "Due Date",
     "status": "Status",
+    "serviceType": "Service Type",
     "itemDescription": "Item Description",
     "amount": "Amount",
+    "serviceTypes": {
+      "ELECTRICITY": "Electricity",
+      "WATER": "Water",
+      "PARKING": "Parking",
+      "INTERNET": "Internet",
+      "CLEANING": "Cleaning",
+      "SECURITY": "Security",
+      "DAMAGE_COMPENSATION": "Damage Compensation",
+      "RENT": "Rent",
+      "OTHER": "Other"
+    },
     "paymentStatus": {
       "PAID": "Paid",
       "PENDING": "Pending Payment",

@@ -15,7 +15,7 @@ import { bookingService } from "@/lib/api/services/booking";
 import { statisticsService } from "@/lib/api/services";
 import { translateError } from "@/lib/constants/error-messages";
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { toast } from "@/hooks/use-toast";
 
 interface Review {

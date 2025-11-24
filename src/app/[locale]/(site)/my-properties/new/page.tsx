@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

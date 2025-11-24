@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Calendar, FileText, DollarSign, CreditCard } from "lucide-react";
 import type { Invoice } from "@/lib/api/services/invoice";
+import { ServiceTypeEnum } from "@/lib/api/services/invoice";
 import { isPaymentOverdue } from "@/lib/utils/utils";
 
 interface InvoiceDetailDialogProps {
@@ -145,22 +146,95 @@ export default function InvoiceDetailDialog({
 
             <div className="space-y-3">
               {invoice.items.length > 0 ? (
-                invoice.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-3 bg-white border rounded-lg hover:border-gray-300 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
-                        {item.description}
-                      </p>
+                invoice.items.map((item) => {
+                  // Get service type label - prefer serviceType field, fallback to detecting from description
+                  const getServiceTypeLabel = () => {
+                    // If serviceType is provided by backend, use it
+                    if (item.serviceType) {
+                      return t(`serviceTypes.${item.serviceType}`);
+                    }
+
+                    // Otherwise, try to detect from description
+                    const lowerDesc = item.description.toLowerCase();
+                    if (
+                      lowerDesc.includes("điện") ||
+                      lowerDesc.includes("electric")
+                    ) {
+                      return t("serviceTypes.ELECTRICITY");
+                    }
+                    if (
+                      lowerDesc.includes("nước") ||
+                      lowerDesc.includes("water")
+                    ) {
+                      return t("serviceTypes.WATER");
+                    }
+                    if (
+                      lowerDesc.includes("xe") ||
+                      lowerDesc.includes("parking")
+                    ) {
+                      return t("serviceTypes.PARKING");
+                    }
+                    if (
+                      lowerDesc.includes("internet") ||
+                      lowerDesc.includes("wifi")
+                    ) {
+                      return t("serviceTypes.INTERNET");
+                    }
+                    if (
+                      lowerDesc.includes("vệ sinh") ||
+                      lowerDesc.includes("cleaning")
+                    ) {
+                      return t("serviceTypes.CLEANING");
+                    }
+                    if (
+                      lowerDesc.includes("bảo vệ") ||
+                      lowerDesc.includes("security")
+                    ) {
+                      return t("serviceTypes.SECURITY");
+                    }
+                    if (
+                      lowerDesc.includes("thiệt hại") ||
+                      lowerDesc.includes("damage") ||
+                      lowerDesc.includes("compensation")
+                    ) {
+                      return t("serviceTypes.DAMAGE_COMPENSATION");
+                    }
+                    if (
+                      lowerDesc.includes("thuê") ||
+                      lowerDesc.includes("rent")
+                    ) {
+                      return t("serviceTypes.RENT");
+                    }
+                    return t("serviceTypes.OTHER");
+                  };
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-3 bg-white border rounded-lg hover:border-gray-300 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-medium"
+                            >
+                              {getServiceTypeLabel()}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {item.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                          <DollarSign className="w-4 h-4 text-gray-500" />
+                          {formatCurrency(item.amount)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                      <DollarSign className="w-4 h-4 text-gray-500" />
-                      {formatCurrency(item.amount)}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-center py-4 text-gray-500">
                   {t("noPaymentDetails")}
