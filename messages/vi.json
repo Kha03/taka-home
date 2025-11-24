@@ -1187,6 +1187,7 @@
       "CONTRACT_NOT_ACTIVE": "Hợp đồng không hoạt động",
       "CONTRACT_ACCESS_FORBIDDEN": "Truy cập hợp đồng bị cấm",
       "CONTRACT_FILE_NOT_FOUND": "Không tìm thấy file hợp đồng",
+      "CONTRACT_EXPIRED": "Hợp đồng đã hết hạn",
       "ACCESS_DENIED": "Truy cập bị từ chối",
       "PRESIGNED_URL_GENERATION_FAILED": "Tạo URL đã ký thất bại",
       "INVALID_DATE_PROVIDED": "Ngày không hợp lệ",
@@ -1254,6 +1255,14 @@
       "NOT_FOUND": "Không tìm thấy tài nguyên",
       "CONFLICT": "Xung đột xảy ra",
       "VALIDATION_ERROR": "Lỗi xác thực dữ liệu"
+    },
+    "report": {
+      "REPORTER_NO_RENTED_PROPERTY": "Người báo cáo không thuê bất động sản này",
+      "REPORT_ALREADY_EXISTS": "Bạn đã báo cáo bất động sản này rồi"
+    },
+    "favorite": {
+      "FAVORITE_NOT_FOUND": "Không tìm thấy mục yêu thích",
+      "JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED": "Phải là bất động sản hoặc loại phòng"
     }
   }
 }

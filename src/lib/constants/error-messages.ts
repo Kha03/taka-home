@@ -37,6 +37,7 @@ const USER_ERRORS_VI = {
   NO_IMAGE_UPLOADED: "Chưa tải lên hình ảnh",
   INVALID_IMAGE_TYPE: "Loại hình ảnh không hợp lệ",
   INVALID_IMAGE_BUFFER: "Dữ liệu hình ảnh không hợp lệ",
+  USER_NOT_VERIFIED_FOR_ACTION: "Người dùng chưa được xác minh để thực hiện hành động này",
 } as const;
 
 // ============= WALLET ERRORS =============
@@ -168,6 +169,8 @@ const REVIEW_ERRORS_VI = {
 // ============= REPORT ERRORS =============
 const REPORT_ERRORS_VI = {
   REPORT_NOT_FOUND: "Không tìm thấy báo cáo",
+  REPORTER_NO_RENTED_PROPERTY: "Người báo cáo không thuê bất động sản này",
+  REPORT_ALREADY_EXISTS: "Báo cáo đã tồn tại",
 } as const;
 
 // ============= PROPERTY ERRORS =============
@@ -289,6 +292,7 @@ const CONTRACT_ERRORS_VI = {
   CONTRACT_NOT_OWNED_BY_USER: "Hợp đồng không thuộc sở hữu của bạn",
   CONTRACT_ALREADY_SIGNED: "Hợp đồng đã được ký",
   CONTRACT_NOT_ACTIVE: "Hợp đồng không hoạt động",
+  CONTRACT_EXPIRED: "Hợp đồng đã hết hạn",
   BOOKING_NOT_FOUND: "Không tìm thấy đặt phòng",
   PROPERTY_NOT_FOUND: "Không tìm thấy bất động sản",
   TENANT_NOT_FOUND: "Không tìm thấy người thuê",
@@ -385,6 +389,13 @@ const GENERIC_ERRORS_VI = {
   UNKNOWN_ERROR: "Có lỗi xảy ra",
 } as const;
 
+// ============= FAVORITE ERRORS =============
+const FAVORITE_ERRORS_VI = {
+  FAVORITE_NOT_FOUND: "Không tìm thấy mục yêu thích",
+  JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED:
+    "Phải là bất động sản hoặc loại phòng",
+} as const;
+
 // ============= COMBINED ERROR MAP =============
 export const ERROR_MESSAGES_VI = {
   ...AUTH_ERRORS_VI,
@@ -412,6 +423,7 @@ export const ERROR_MESSAGES_VI = {
   ...PENALTY_ERRORS_VI,
   ...MAINTENANCE_ERRORS_VI,
   ...GENERIC_ERRORS_VI,
+  ...FAVORITE_ERRORS_VI,
 } as const;
 
 // Type for error codes

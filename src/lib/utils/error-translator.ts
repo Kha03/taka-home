@@ -22,6 +22,7 @@ const ERROR_CODE_MAP: Record<string, string> = {
   FILE_SIZE_TOO_LARGE: "errors.user.FILE_SIZE_TOO_LARGE",
   INVALID_FILE_TYPE: "errors.user.INVALID_FILE_TYPE",
   INVALID_IMAGE_TYPE: "errors.user.INVALID_IMAGE_TYPE",
+  USER_NOT_VERIFIED_FOR_ACTION: "errors.user.USER_NOT_VERIFIED_FOR_ACTION",
 
   // Wallet errors
   INSUFFICIENT_BALANCE: "errors.wallet.INSUFFICIENT_BALANCE",
@@ -47,6 +48,7 @@ const ERROR_CODE_MAP: Record<string, string> = {
   CONTRACT_NOT_OWNED_BY_USER: "errors.contract.CONTRACT_NOT_OWNED_BY_USER",
   CONTRACT_ALREADY_SIGNED: "errors.contract.CONTRACT_ALREADY_SIGNED",
   CONTRACT_NOT_ACTIVE: "errors.contract.CONTRACT_NOT_ACTIVE",
+  CONTRACT_EXPIRED: "errors.contract.CONTRACT_EXPIRED",
   ONLY_TENANT_CAN_SIGN: "errors.contract.ONLY_TENANT_CAN_SIGN",
   ONLY_LANDLORD_CAN_SIGN: "errors.contract.ONLY_LANDLORD_CAN_SIGN",
 
@@ -74,6 +76,15 @@ const ERROR_CODE_MAP: Record<string, string> = {
   FORBIDDEN: "errors.generic.FORBIDDEN",
   NOT_FOUND: "errors.generic.NOT_FOUND",
   VALIDATION_ERROR: "errors.generic.VALIDATION_ERROR",
+
+  // Report errors
+  REPORTER_NO_RENTED_PROPERTY: "errors.report.REPORTER_NO_RENTED_PROPERTY",
+  REPORT_ALREADY_EXISTS: "errors.report.REPORT_ALREADY_EXISTS",
+
+  // Favorite errors
+  FAVORITE_NOT_FOUND: "errors.favorite.FAVORITE_NOT_FOUND",
+  JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED:
+    "errors.favorite.JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED",
 };
 
 /**
