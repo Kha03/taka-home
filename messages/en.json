@@ -1184,6 +1184,7 @@
       "CONTRACT_NOT_ACTIVE": "Contract is not active",
       "CONTRACT_ACCESS_FORBIDDEN": "Access to contract is forbidden",
       "CONTRACT_FILE_NOT_FOUND": "Contract file not found",
+      "CONTRACT_EXPIRED": "Contract has expired",
       "ACCESS_DENIED": "Access denied",
       "PRESIGNED_URL_GENERATION_FAILED": "Failed to generate presigned URL",
       "INVALID_DATE_PROVIDED": "Invalid date provided",
@@ -1251,6 +1252,14 @@
       "NOT_FOUND": "Resource not found",
       "CONFLICT": "Conflict occurred",
       "VALIDATION_ERROR": "Validation error"
+    },
+    "report": {
+      "REPORTER_NO_RENTED_PROPERTY": "Reporter has no rented this property",
+      "REPORT_ALREADY_EXISTS": "You have already reported this property"
+    },
+    "favorite": {
+      "FAVORITE_NOT_FOUND": "Favorite not found",
+      "JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED": "Must property or room type"
     }
   },
   "profile": {
