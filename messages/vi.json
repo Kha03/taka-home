@@ -488,6 +488,7 @@
     "vnpayWallet": "Ví điện tử VNPay",
     "useWalletBalance": "Sử dụng số dư trong ví",
     "confirmPayment": "Xác Nhận Thanh Toán",
+    "processing": "Đang xử lý...",
     "status": "Trạng thái thanh toán",
     "paid": "Đã thanh toán",
     "pending": "Chờ thanh toán",
