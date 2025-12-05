@@ -21,6 +21,8 @@ export const VALIDATION_MESSAGES = {
     street: "Vui lòng nhập số nhà, tên đường",
   },
   description: {
+    required: "Mô tả chi tiết là bắt buộc",
+    min: "Mô tả phải có ít nhất 10 ký tự",
     max: "Mô tả không được vượt quá 1500 ký tự",
   },
   electricityPrice: {
@@ -78,8 +80,8 @@ export const FormSchema = z
 
     description: z
       .string()
-      .max(1500, VALIDATION_MESSAGES.description.max)
-      .optional(),
+      .min(10, VALIDATION_MESSAGES.description.min)
+      .max(1500, VALIDATION_MESSAGES.description.max),
 
     // Details
     bedrooms: z.coerce.number().min(0).optional(),
