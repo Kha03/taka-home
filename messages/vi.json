@@ -669,7 +669,11 @@
     "streetExample": "Ví dụ: 123 Nguyễn Huệ",
     "pinkBook": "Sổ hồng",
     "saleContract": "HĐMB",
-    "other": "Khác"
+    "other": "Khác",
+    "uploadLegalDoc": "Tải lên giấy tờ",
+    "legalDocUploaded": "Đã tải lên giấy tờ pháp lý",
+    "changeLegalDoc": "Thay đổi",
+    "uploadImageOnly": "Chỉ cho phép tải lên file ảnh"
   },
   "propertyDetail": {
     "justUpdated": "Vừa mới cập nhật",

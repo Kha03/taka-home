@@ -86,6 +86,7 @@ export const FormSchema = z
     bathrooms: z.coerce.number().min(0).optional(),
     furnishing: z.string().optional(),
     legalDoc: z.string().optional(),
+    legalDocumentFile: z.string().optional(), // Store base64 or URL of legal document
     area: z.coerce.number().optional(),
     price: z.coerce.number().optional(),
     deposit: z.coerce.number().min(0).optional(),

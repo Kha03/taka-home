@@ -66,6 +66,7 @@ export default function NewPropertyPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [legalDocFileName, setLegalDocFileName] = useState<string | null>(null);
 
   // Helper function to convert base64/URL string to File object
   const dataURLtoFile = async (
@@ -99,6 +100,36 @@ export default function NewPropertyPage() {
       console.error("Error converting data URL to File:", error);
       return null;
     }
+  };
+
+  // Handler for legal document upload
+  const handleLegalDocumentUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type (only images)
+    const validImageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    if (!validImageTypes.includes(file.type)) {
+      toast.error(tForm("uploadImageOnly"));
+      return;
+    }
+
+    // Convert file to base64 and store in form
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      methods.setValue("legalDocumentFile", base64String);
+      setLegalDocFileName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Handler to remove legal document
+  const handleRemoveLegalDocument = () => {
+    methods.setValue("legalDocumentFile", undefined);
+    setLegalDocFileName(null);
   };
 
   // Helper function to safely convert to number
@@ -372,6 +403,30 @@ export default function NewPropertyPage() {
           toast.warning(t("imageUploadError"), t("imageUploadErrorMessage"));
         }
 
+        // Upload legal document if present
+        if (values.legalDocumentFile && createdProperty?.id) {
+          try {
+            const legalDocFile = await dataURLtoFile(
+              values.legalDocumentFile,
+              `legal-document-${Date.now()}.jpg`
+            );
+            
+            if (legalDocFile) {
+              await propertyService.uploadLegalDocument(
+                createdProperty.id,
+                legalDocFile
+              );
+            }
+          } catch (error) {
+            console.error("Error uploading legal document:", error);
+            // Don't fail the whole process if legal document upload fails
+            toast.warning(
+              "Cảnh báo",
+              "Không thể tải lên giấy tờ pháp lý. Vui lòng thử lại sau."
+            );
+          }
+        }
+
         // Redirect to pending approval page
         router.push("/my-properties/pending-approval");
       } else {
@@ -408,6 +463,8 @@ export default function NewPropertyPage() {
     }
   };
   const kind = methods.watch("kind");
+  const legalDoc = methods.watch("legalDoc");
+  const legalDocumentFile = methods.watch("legalDocumentFile");
   return (
     <div className="min-h-screen bg-[#FFF7E9] p-4">
       <FormProvider {...methods}>
@@ -502,15 +559,70 @@ export default function NewPropertyPage() {
                         name="street"
                         placeholder={tForm("streetExample")}
                       />
-                      <SelectField
-                        name="legalDoc"
-                        options={[
-                          tForm("pinkBook"),
-                          tForm("saleContract"),
-                          tForm("other"),
-                        ]}
-                        placeholder={t("legalDoc")}
-                      />
+                      
+                      {/* Legal Document Selector - takes 1 column when no selection, 2 columns when selected */}
+                      {!(legalDoc === tForm("pinkBook") || legalDoc === tForm("saleContract")) ? (
+                        <SelectField
+                          name="legalDoc"
+                          options={[
+                            tForm("pinkBook"),
+                            tForm("saleContract"),
+                            tForm("other"),
+                          ]}
+                          placeholder={t("legalDoc")}
+                        />
+                      ) : (
+                        <>
+                          {/* Dropdown takes first column */}
+                          <SelectField
+                            name="legalDoc"
+                            options={[
+                              tForm("pinkBook"),
+                              tForm("saleContract"),
+                              tForm("other"),
+                            ]}
+                            placeholder={t("legalDoc")}
+                          />
+                          
+                          {/* Upload button takes second column */}
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="file"
+                              id="legal-document-upload"
+                              accept="image/*"
+                              onChange={handleLegalDocumentUpload}
+                              className="hidden"
+                            />
+                            {!legalDocumentFile ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => document.getElementById("legal-document-upload")?.click()}
+                                className="w-full h-11 text-[#4F4F4F] hover:bg-[#E8E8E8] border-border/100"
+                              >
+                                <ImageIcon className="w-4 h-4 mr-2" />
+                                {tForm("uploadLegalDoc")}
+                              </Button>
+                            ) : (
+                              <div className="flex items-center gap-2 w-full">
+                                <div className="flex-1 h-11 bg-[#E8F5E9] rounded-md px-3 flex items-center gap-2 text-sm text-[#2E7D32]">
+                                  <ImageIcon className="w-4 h-4" />
+                                  <span className="truncate">{legalDocFileName || tForm("legalDocUploaded")}</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleRemoveLegalDocument}
+                                  className="h-11 px-3"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
                     </div>
                     {kind === "APARTMENT" ? (
                       <>

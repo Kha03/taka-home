@@ -674,7 +674,11 @@
     "streetExample": "Example: 123 Nguyen Hue",
     "pinkBook": "Pink Book",
     "saleContract": "Sale Contract",
-    "other": "Other"
+    "other": "Other",
+    "uploadLegalDoc": "Upload Document",
+    "legalDocUploaded": "Legal document uploaded",
+    "changeLegalDoc": "Change",
+    "uploadImageOnly": "Only image files allowed"
   },
   "propertyDetail": {
     "justUpdated": "Just updated",

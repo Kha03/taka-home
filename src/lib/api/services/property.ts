@@ -146,6 +146,22 @@ export class PropertyService {
   }
 
   /**
+   * Upload legal document (sổ hồng/HĐMB) for property
+   */
+  async uploadLegalDocument(
+    propertyId: string,
+    legalDocument: File
+  ): Promise<ApiResponse<{ legalUrl: string }>> {
+    const formData = new FormData();
+    formData.append("legalDocument", legalDocument);
+
+    return await apiClient.post<{ legalUrl: string }>(
+      `${this.basePath}/${propertyId}/legal-document`,
+      formData
+    );
+  }
+
+  /**
    * Lấy chi tiết một room type theo ID
    */
   async getRoomTypeById(id: string): Promise<ApiResponse<RoomTypeDetail>> {
