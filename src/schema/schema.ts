@@ -25,6 +25,9 @@ export const VALIDATION_MESSAGES = {
     min: "Mô tả phải có ít nhất 10 ký tự",
     max: "Mô tả không được vượt quá 1500 ký tự",
   },
+  gallery: {
+    min: "Vui lòng tải lên ít nhất 1 ảnh bất động sản",
+  },
   electricityPrice: {
     min: "Giá điện phải lớn hơn hoặc bằng 0",
   },
@@ -94,7 +97,7 @@ export const FormSchema = z
     deposit: z.coerce.number().min(0).optional(),
 
     heroImage: z.string().optional(),
-    gallery: z.array(z.string()).max(8).default([]),
+    gallery: z.array(z.string()).min(1, VALIDATION_MESSAGES.gallery.min).max(8),
 
     // Boarding groups
     roomTypes: z.array(RoomTypeSchema).default([]),
