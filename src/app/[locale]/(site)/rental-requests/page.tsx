@@ -31,7 +31,12 @@ import { toast } from "sonner";
 import { BookingApprovalDialog } from "@/components/rental-requests/booking-approval-dialog";
 import { translateError } from "@/lib/constants/error-messages";
 
-type RentalRequestStatus = "all" | "pending" | "approved" | "rejected";
+type RentalRequestStatus =
+  | "all"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "cancelled";
 
 export default function RentalRequestsPage() {
   const t = useTranslations("rentalRequests");
@@ -168,6 +173,8 @@ export default function RentalRequestsPage() {
           );
         case "rejected":
           return booking.status === "REJECTED";
+        case "cancelled":
+          return booking.status === "CANCELLED";
         default:
           return true;
       }
@@ -190,12 +197,16 @@ export default function RentalRequestsPage() {
     const rejectedCount = bookings.filter(
       (b) => b.status === "REJECTED"
     ).length;
+    const cancelledCount = bookings.filter(
+      (b) => b.status === "CANCELLED"
+    ).length;
 
     return [
       { id: "all", label: t("all"), count: allCount },
       { id: "pending", label: t("pending"), count: pendingCount },
       { id: "approved", label: t("approved"), count: approvedCount },
       { id: "rejected", label: t("rejected"), count: rejectedCount },
+      { id: "cancelled", label: t("cancelled"), count: cancelledCount },
     ];
   }, [bookings, t]);
 
@@ -219,12 +230,14 @@ export default function RentalRequestsPage() {
     const roomType = room?.roomType;
 
     // Map booking status to rental request status
-    const mapStatus = (status: string): "pending" | "approved" | "rejected" => {
+    const mapStatus = (
+      status: string
+    ): "pending" | "approved" | "rejected" | "cancelled" => {
       if (status === "PENDING_LANDLORD") return "pending";
       if (status === "REJECTED") return "rejected";
+      if (status === "CANCELLED") return "cancelled";
       // Tất cả status khác (ngoài PENDING_LANDLORD, REJECTED, CANCELLED) là đã duyệt
-      if (status !== "CANCELLED") return "approved";
-      return "rejected"; // CANCELLED cũng hiển thị như rejected
+      return "approved";
     };
 
     // Lấy thông tin tùy theo loại property

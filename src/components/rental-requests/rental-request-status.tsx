@@ -10,7 +10,7 @@ interface RentalRequestStatusProps {
     avatar: string;
     phone?: string;
   };
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "cancelled";
   reason?: string;
   timestamp: string;
   onApprove?: () => void;
@@ -27,6 +27,7 @@ export function RentalRequestStatus({
 }: RentalRequestStatusProps) {
   const t = useTranslations("rentalRequests");
   const isRejected = status === "rejected";
+  const isCancelled = status === "cancelled";
   const isPending = status === "pending";
 
   return (
@@ -35,6 +36,8 @@ export function RentalRequestStatus({
         "flex items-center gap-3 rounded-[50px] p-2",
         isRejected
           ? "bg-[#FA0000]/10"
+          : isCancelled
+          ? "bg-[#FFA500]/20"
           : isPending
           ? "bg-[#818181]/10"
           : "bg-[#00AE26]/20"
@@ -64,13 +67,19 @@ export function RentalRequestStatus({
           <p
             className={cn(
               "text-sm",
-              isRejected ? "text-red-600" : "text-[#4F4F4F]"
+              isRejected
+                ? "text-red-600"
+                : isCancelled
+                ? "text-orange-600"
+                : "text-[#4F4F4F]"
             )}
           >
             {isPending
               ? t("requestSent")
               : isRejected
               ? t("requestRejected")
+              : isCancelled
+              ? t("requestCancelled")
               : t("requestApproved")}
           </p>
           <span className="text-xs text-[#C0C0C0]">{timestamp}</span>

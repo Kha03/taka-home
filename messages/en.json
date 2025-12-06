@@ -988,6 +988,7 @@
   },
   "rentalRequests": {
     "requestRejected": "Rental request rejected",
+    "requestCancelled": "Đã hết hạn",
     "requestSent": "Rental request sent",
     "signingContract": "Signing contract",
     "autoSigningInstruction": "The system is automatically signing the contract with digital signature. Please wait a moment...",
@@ -1033,6 +1034,7 @@
     "pending": "Pending",
     "approved": "Approved",
     "rejected": "Rejected",
+    "cancelled": "Expired",
     "apartment": "Apartment",
     "privateHouse": "Private House",
     "boarding": "Boarding House",

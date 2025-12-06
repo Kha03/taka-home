@@ -992,6 +992,7 @@
   },
   "rentalRequests": {
     "requestRejected": "Đã từ chối yêu cầu thuê",
+    "requestCancelled": "Đã hết hạn",
     "requestSent": "Đã gửi yêu cầu thuê",
     "signingContract": "Đang ký hợp đồng",
     "autoSigningInstruction": "Hệ thống đang tự động ký hợp đồng bằng chữ ký số. Vui lòng đợi trong giây lát...",
@@ -1037,6 +1038,7 @@
     "pending": "Chờ duyệt",
     "approved": "Đã duyệt",
     "rejected": "Đã từ chối",
+    "cancelled": "Đã hết hiệu lực",
     "apartment": "Chung cư",
     "privateHouse": "Nhà riêng",
     "boarding": "Nhà trọ",

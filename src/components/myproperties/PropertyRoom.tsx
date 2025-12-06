@@ -31,7 +31,7 @@ export interface PropertyRoomProps {
       avatar: string;
       phone?: string;
     };
-    status: "pending" | "approved" | "rejected";
+    status: "pending" | "approved" | "rejected" | "cancelled";
     reason?: string;
     timestamp: string;
   }>;
