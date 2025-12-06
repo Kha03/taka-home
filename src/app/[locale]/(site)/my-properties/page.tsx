@@ -347,11 +347,9 @@ export default function MyPropertiesPage() {
       });
     }
 
-    // Filter by location
+    // Filter by location (province)
     if (location && location !== "all") {
-      list = list.filter((p) =>
-        p.address.toLowerCase().includes(location.replace("-", " "))
-      );
+      list = list.filter((p) => p.province === location);
     }
 
     // Filter by property type
@@ -391,11 +389,9 @@ export default function MyPropertiesPage() {
       );
     }
 
-    // Filter by location
+    // Filter by location (province)
     if (location && location !== "all") {
-      list = list.filter((p) =>
-        p.address.toLowerCase().includes(location.replace("-", " "))
-      );
+      list = list.filter((p) => p.province === location);
     }
 
     return list.map(convertToPropertyUnit);

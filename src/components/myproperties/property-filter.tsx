@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useVietnameseAddress } from "@/hooks/use-vietnamese-address";
 
 interface PropertyFilterProps {
   searchQuery: string;
@@ -28,6 +29,7 @@ export default function PropertyFilter({
   setPropertyType,
 }: PropertyFilterProps) {
   const t = useTranslations("myProperties");
+  const { provinces, loadingProvinces } = useVietnameseAddress();
 
   return (
     <div className="flex gap-3 items-center">
@@ -49,21 +51,23 @@ export default function PropertyFilter({
         />
       </div>
 
-      <Select value={location} onValueChange={setLocation}>
+      <Select
+        value={location}
+        onValueChange={setLocation}
+        disabled={loadingProvinces}
+      >
         <SelectTrigger className="bg-primary-foreground text-secondary font-bold border-secondary rounded-full px-6 h-11 shadow-secondary min-w-[160px] data-[placeholder]:text-secondary">
-          <SelectValue placeholder={t("location")} />
+          <SelectValue
+            placeholder={loadingProvinces ? "Đang tải..." : t("location")}
+          />
         </SelectTrigger>
         <SelectContent className="bg-primary-foreground">
           <SelectItem value="all">{t("nationwide")}</SelectItem>
-          <SelectItem value="ho-chi-minh">TP. Hồ Chí Minh</SelectItem>
-          <SelectItem value="ha-noi">Hà Nội</SelectItem>
-          <SelectItem value="da-nang">Đà Nẵng</SelectItem>
-          <SelectItem value="can-tho">Cần Thơ</SelectItem>
-          <SelectItem value="hai-phong">Hải Phòng</SelectItem>
-          <SelectItem value="bien-hoa">Biên Hòa</SelectItem>
-          <SelectItem value="nha-trang">Nha Trang</SelectItem>
-          <SelectItem value="hue">Huế</SelectItem>
-          <SelectItem value="thu-duc">Thủ Đức</SelectItem>
+          {provinces.map((province) => (
+            <SelectItem key={province.code} value={province.name}>
+              {province.name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
