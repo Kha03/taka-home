@@ -481,6 +481,42 @@ export default function NewPropertyPage() {
               console.log("=== VALIDATION ERRORS ===");
               console.log("Validation failed with errors:", errors);
               console.log("Form values at error:", methods.getValues());
+              
+              // Show toast notification for validation errors
+              const errorMessages: string[] = [];
+              
+              if (errors.title) {
+                errorMessages.push(errors.title.message as string);
+              }
+              if (errors.province) {
+                errorMessages.push(errors.province.message as string);
+              }
+              if (errors.ward) {
+                errorMessages.push(errors.ward.message as string);
+              }
+              if (errors.street) {
+                errorMessages.push(errors.street.message as string);
+              }
+              if (errors.description) {
+                errorMessages.push(errors.description.message as string);
+              }
+              if (errors.gallery) {
+                errorMessages.push(errors.gallery.message as string);
+              }
+              if (errors.area) {
+                errorMessages.push(errors.area.message as string);
+              }
+              if (errors.price) {
+                errorMessages.push(errors.price.message as string);
+              }
+              
+              // Show first error as toast
+              if (errorMessages.length > 0) {
+                toast.error(
+                  "Vui lòng kiểm tra lại thông tin",
+                  errorMessages[0]
+                );
+              }
             })}
             className="space-y-6"
           >
