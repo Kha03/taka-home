@@ -1,8 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Blocks, MapPin, Search } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { useRouter } from "@/lib/i18n/navigation";
+import { Blocks, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 // Helper function to format numbers consistently
@@ -50,6 +52,13 @@ const locationData: LocationData[] = [
 ];
 
 function MapCard() {
+  const t = useTranslations("hero");
+  const router = useRouter();
+
+  const handleSearch = () => {
+    router.push("/search");
+  };
+
   return (
     <Card className="h-[378px] max-w-full p-0">
       <CardContent className="p-0 relative w-full h-full">
@@ -63,10 +72,11 @@ function MapCard() {
         <div className="h-full w-full absolute inset-0 bg-black/10 flex items-center justify-center">
           <Button
             size="lg"
+            onClick={handleSearch}
             className="bg-accent text-primary-foreground px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:bg-accent/90"
           >
             <Search className="h-6 w-6 mr-1" />
-            Tìm ngay
+            {t("searchButton")}
           </Button>
         </div>
       </CardContent>

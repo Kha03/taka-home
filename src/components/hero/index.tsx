@@ -1,15 +1,25 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
 // app/(home)/_components/hero.tsx
 import { Waterfall } from "next/font/google";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { HeroSearch } from "./hero-search";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/lib/i18n/navigation";
 const waterfall = Waterfall({
   subsets: ["latin"],
   weight: ["400"],
 });
 
 export function Hero() {
+  const t = useTranslations("property");
+  const router = useRouter();
+
+  const handlePropertyTypeClick = (type: "HOUSING" | "APARTMENT") => {
+    router.push(`/search?type=${type}`);
+  };
+
   return (
     <section className="relative isolate h-[425px]">
       {/* BG image */}
@@ -31,15 +41,17 @@ export function Hero() {
         <div className="flex justify-center gap-4">
           <Button
             variant={"outline"}
+            onClick={() => handlePropertyTypeClick("HOUSING")}
             className="border-white rounded-[30px] text-sm font-medium"
           >
-            Nhà ở <img src="/assets/icons/swap-right.svg" alt="" />
+            {t("house")} <img src="/assets/icons/swap-right.svg" alt="" />
           </Button>
           <Button
             variant={"outline"}
+            onClick={() => handlePropertyTypeClick("APARTMENT")}
             className="border-white rounded-[30px] text-sm font-medium"
           >
-            Căn hộ/Chung cư <img src="/assets/icons/swap-right.svg" alt="" />
+            {t("apartment")} <img src="/assets/icons/swap-right.svg" alt="" />
           </Button>
         </div>
         <div className="space-y-[-40px] w-full">
