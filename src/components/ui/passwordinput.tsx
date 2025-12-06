@@ -10,6 +10,7 @@ export function PasswordInput({
   onChange,
   placeholder = "Nhập mật khẩu",
   required,
+  showStrength = true,
 }: {
   id: string;
   name: string;
@@ -18,6 +19,7 @@ export function PasswordInput({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
+  showStrength?: boolean;
 }) {
   const [visible, setVisible] = React.useState(false);
 
@@ -68,14 +70,16 @@ export function PasswordInput({
         </Button>
       </div>
 
-      <div className="h-1 w-full rounded bg-muted overflow-hidden">
-        <div
-          className={`h-1 rounded transition-all duration-300 ${getStrengthColor(
-            score
-          )}`}
-          style={{ width: `${(score / 4) * 100}%` }}
-        />
-      </div>
+      {showStrength && (
+        <div className="h-1 w-full rounded bg-muted overflow-hidden">
+          <div
+            className={`h-1 rounded transition-all duration-300 ${getStrengthColor(
+              score
+            )}`}
+            style={{ width: `${(score / 4) * 100}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

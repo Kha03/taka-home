@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { PasswordInput } from "@/components/ui/passwordinput";
 import { useAuth } from "@/contexts/auth-context";
 import {
   handleGoogleAuth,
@@ -90,16 +91,14 @@ export function SignInForm({ errorFromUrl }: SignInFormProps) {
 
         <div className="space-y-1.5">
           <Label htmlFor="password">{t("password")}</Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             placeholder="••••••••"
             value={formData.password}
             onChange={handleChange}
             required
-            autoComplete="current-password"
-            disabled={isLoading}
+            showStrength={false}
           />
         </div>
 
