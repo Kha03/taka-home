@@ -1123,7 +1123,8 @@
       "NO_IMAGE_UPLOADED": "Chưa tải lên hình ảnh",
       "INVALID_IMAGE_TYPE": "Loại hình ảnh không hợp lệ",
       "INVALID_IMAGE_BUFFER": "Dữ liệu hình ảnh không hợp lệ",
-      "USER_NOT_VERIFIED_FOR_ACTION": "Người dùng chưa được xác thực cho hành động này"
+      "USER_NOT_VERIFIED_FOR_ACTION": "Người dùng chưa được xác thực cho hành động này",
+      "USER_NOT_VERIFIED_CCCD": "Người dùng chưa xác thực CCCD"
     },
     "wallet": {
       "AMOUNT_MUST_BE_POSITIVE": "Số tiền phải là số dương",

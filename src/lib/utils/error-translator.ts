@@ -85,6 +85,9 @@ const ERROR_CODE_MAP: Record<string, string> = {
   FAVORITE_NOT_FOUND: "errors.favorite.FAVORITE_NOT_FOUND",
   JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED:
     "errors.favorite.JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED",
+
+  // Certificate errors
+  USER_NOT_VERIFIED_CCCD: "errors.user.USER_NOT_VERIFIED_CCCD",
 };
 
 /**

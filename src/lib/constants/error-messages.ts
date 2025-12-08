@@ -141,6 +141,7 @@ const CERTIFICATE_ERRORS_VI = {
   ASN1_STRUCTURE_MISSING: "Thiếu cấu trúc ASN1",
   CERTIFICATE_INFO_EXTRACTION_FAILED: "Trích xuất thông tin chứng thư thất bại",
   CERTIFICATE_PEM_CONVERSION_FAILED: "Chuyển đổi PEM chứng thư thất bại",
+  USER_NOT_VERIFIED_CCCD: "Người dùng chưa xác minh CCCD",
 } as const;
 
 // ============= S3 STORAGE ERRORS =============

@@ -1119,7 +1119,8 @@
       "NO_IMAGE_UPLOADED": "No image uploaded",
       "INVALID_IMAGE_TYPE": "Invalid image type",
       "INVALID_IMAGE_BUFFER": "Invalid image buffer",
-      "USER_NOT_VERIFIED_FOR_ACTION": "User not verified for this action"
+      "USER_NOT_VERIFIED_FOR_ACTION": "User not verified for this action",
+      "USER_NOT_VERIFIED_CCCD": "User's ID card not verified"
     },
     "wallet": {
       "AMOUNT_MUST_BE_POSITIVE": "Amount must be positive",
