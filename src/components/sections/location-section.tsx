@@ -85,6 +85,22 @@ function MapCard() {
 }
 
 function LocationCard({ location }: { location: LocationData }) {
+  const router = useRouter();
+
+  const handleLocationClick = () => {
+    // Navigate to search page with province filter
+    const params = new URLSearchParams({
+      isApproved: "true",
+      province: location.name,
+      page: "1",
+      limit: "10",
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    });
+    
+    router.push(`/search?${params.toString()}`);
+  };
+
   const getCardClasses = () => {
     const baseClasses =
       "p-0 group cursor-pointer h-[200px] overflow-hidden rounded-[12px] shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]";
@@ -102,7 +118,7 @@ function LocationCard({ location }: { location: LocationData }) {
   };
 
   return (
-    <Card className={getCardClasses()}>
+    <Card className={getCardClasses()} onClick={handleLocationClick}>
       <CardContent className="p-0 h-full relative">
         <div className="relative h-full overflow-hidden">
           <Image
