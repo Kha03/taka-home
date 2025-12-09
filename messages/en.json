@@ -80,6 +80,7 @@
     "myProperties": "My Properties",
     "createProperty": "Post New Property",
     "rentalRequests": "Rental Requests",
+    "verifySignature": "Verify Signature",
     "contracts": "Contracts",
     "chat": "Chat",
     "profile": "Profile",
@@ -1268,6 +1269,24 @@
       "FAVORITE_NOT_FOUND": "Favorite not found",
       "JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED": "Must property or room type"
     }
+  },
+  "verifySignature": {
+    "title": "Verify Digital Signature",
+    "menuItem": "Verify Signature",
+    "description": "Use this tool to verify digital signatures signed with SELF_CA method (digital certificate provided by the system)",
+    "uploadPdf": "Upload PDF File",
+    "uploadPdfDesc": "Select or drag & drop PDF file with digital signature to verify",
+    "selectSignature": "Select signature to verify",
+    "signatureFirst": "First signature",
+    "signatureSecond": "Second signature",
+    "verifyButton": "Verify Signature",
+    "uploadFile": "Upload file",
+    "dragDropHere": "Drag & drop PDF file here",
+    "or": "or",
+    "clickToUpload": "click to select file",
+    "fileSelected": "File selected",
+    "onlyPdf": "Only PDF files accepted",
+    "maxSize": "Maximum size: 10MB"
   },
   "profile": {
     "title": "Personal Information",

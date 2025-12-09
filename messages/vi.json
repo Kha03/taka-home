@@ -81,6 +81,7 @@
     "myProperties": "BĐS của tôi",
     "createProperty": "Đăng tin mới",
     "rentalRequests": "Yêu cầu thuê",
+    "verifySignature": "Kiểm tra chữ ký",
     "contracts": "Hợp đồng",
     "chat": "Trò chuyện",
     "profile": "Hồ sơ",
@@ -1272,5 +1273,23 @@
       "FAVORITE_NOT_FOUND": "Không tìm thấy mục yêu thích",
       "JUST_ONE_OF_PROPERTY_ROOMTYPE_REQUIRED": "Phải là bất động sản hoặc loại phòng"
     }
+  },
+  "verifySignature": {
+    "title": "Kiểm tra chữ ký số",
+    "menuItem": "Kiểm tra chữ ký",
+    "description": "Sử dụng công cụ này để kiểm tra chữ ký số được ký bằng phương pháp SELF_CA (chứng thư số do hệ thống tự cung cấp)",
+    "uploadPdf": "Tải lên file PDF",
+    "uploadPdfDesc": "Chọn hoặc kéo thả file PDF có chữ ký số cần kiểm tra",
+    "selectSignature": "Chọn chữ ký cần kiểm tra",
+    "signatureFirst": "Chữ ký thứ nhất",
+    "signatureSecond": "Chữ ký thứ hai",
+    "verifyButton": "Xác thực chữ ký",
+    "uploadFile": "Tải lên file",
+    "dragDropHere": "Kéo thả file PDF vào đây",
+    "or": "hoặc",
+    "clickToUpload": "nhấp để chọn file",
+    "fileSelected": "Đã chọn file",
+    "onlyPdf": "Chỉ chấp nhận file PDF",
+    "maxSize": "Kích thước tối đa: 10MB"
   }
 }

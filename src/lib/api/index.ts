@@ -26,6 +26,14 @@ export {
   type FavoriteRoomType,
   type Favorite,
 } from "./services/favorite";
+export { 
+  smartcaService, 
+  SmartCAService,
+  type SignerInfo,
+  type SignatureInfo,
+  type VerifySignatureResult,
+  type VerifySignatureResponse,
+} from "./services/smartca";
 
 /**
  * Helper function để handle API errors một cách consistent
