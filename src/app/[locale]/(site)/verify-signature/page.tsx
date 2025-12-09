@@ -245,7 +245,7 @@ export default function VerifySignaturePage() {
                   <SelectTrigger className="w-full h-12 bg-[#F4F4F4] border-border/50">
                     <SelectValue placeholder={t("selectSignature")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     <SelectItem value="0">{t("signatureFirst")}</SelectItem>
                     <SelectItem value="1">{t("signatureSecond")}</SelectItem>
                   </SelectContent>
