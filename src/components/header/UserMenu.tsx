@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WalletBalance } from "@/components/wallet/wallet-balance";
-import { LogOut, User, Plus, History, ShieldCheck } from "lucide-react";
+import { LogOut, User, Plus, History, ShieldCheck, FileCheck } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 
 export function UserMenu() {
@@ -102,6 +102,12 @@ export function UserMenu() {
                 <Link href="/rental-requests" className="cursor-pointer">
                   <History className="mr-2 h-4 w-4" />
                   <span>{t("rentalRequests")}</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/verify-signature" className="cursor-pointer">
+                  <FileCheck className="mr-2 h-4 w-4" />
+                  <span>{t("verifySignature")}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
