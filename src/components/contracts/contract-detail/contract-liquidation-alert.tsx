@@ -54,12 +54,14 @@ export function ContractLiquidationAlert({
               <p
                 className="text-sm text-amber-800 mb-3"
                 dangerouslySetInnerHTML={{
-                  __html: t("contractEndsIn", {
-                    days: daysUntilEnd,
-                    date: endDate.toLocaleDateString(
-                      locale === "vi" ? "vi-VN" : "en-US"
+                  __html: t("contractEndsIn")
+                    .replace("{days}", daysUntilEnd.toString())
+                    .replace(
+                      "{date}",
+                      endDate.toLocaleDateString(
+                        locale === "vi" ? "vi-VN" : "en-US"
+                      )
                     ),
-                  }),
                 }}
               />
               <div className="flex items-center gap-3">
