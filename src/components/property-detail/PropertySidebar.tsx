@@ -415,7 +415,7 @@ export function PropertySidebar({
               onClick={handleCreateBooking}
               disabled={isCreatingBooking || isRented}
             >
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 mr-1" />
               {isCreatingBooking ? t("sending") : t("rentalRequest")}
             </Button>
 
