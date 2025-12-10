@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, FileText } from "lucide-react";
 import { useState } from "react";
 import { CreateInvoiceDialog } from "@/components/contracts/create-invoice-dialog";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface ContractLiquidationAlertProps {
   contractId: string;
@@ -22,6 +22,7 @@ export function ContractLiquidationAlert({
   onInvoiceCreated,
 }: ContractLiquidationAlertProps) {
   const t = useTranslations("contract");
+  const locale = useLocale();
   const [showCreateInvoiceDialog, setShowCreateInvoiceDialog] = useState(false);
 
   // Check if contract is within last 7 days
@@ -55,7 +56,9 @@ export function ContractLiquidationAlert({
                 dangerouslySetInnerHTML={{
                   __html: t("contractEndsIn", {
                     days: daysUntilEnd,
-                    date: endDate.toLocaleDateString("vi-VN"),
+                    date: endDate.toLocaleDateString(
+                      locale === "vi" ? "vi-VN" : "en-US"
+                    ),
                   }),
                 }}
               />
