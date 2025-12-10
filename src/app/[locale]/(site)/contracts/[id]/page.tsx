@@ -21,6 +21,7 @@ export default function ContractDetailPage() {
   const params = useParams();
   const router = useRouter();
   const bookingId = params.id as string;
+  const locale = params.locale as string;
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,7 +98,7 @@ export default function ContractDetailPage() {
             </p>
             <Button
               variant="link"
-              onClick={() => router.push("/contracts")}
+              onClick={() => router.push(`/${locale}/contracts`)}
               className="w-full"
             >
               {t("backToContractList")}
@@ -114,7 +115,7 @@ export default function ContractDetailPage() {
         {/* Back Button */}
         <Button
           variant="link"
-          onClick={() => router.push("/contracts")}
+          onClick={() => router.push(`/${locale}/contracts`)}
           className="mb-4 text-primary hover:text-primary/80"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
