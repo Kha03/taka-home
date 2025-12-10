@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { FileText, Upload, CheckCircle2, FileCheck, AlertCircle, User } from "lucide-react";
+import {
+  FileText,
+  Upload,
+  CheckCircle2,
+  FileCheck,
+  AlertCircle,
+  User,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -24,7 +31,8 @@ export default function VerifySignaturePage() {
   const [signatureIndex, setSignatureIndex] = useState<string>("0");
   const [isDragging, setIsDragging] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verificationResult, setVerificationResult] = useState<VerifySignatureResult | null>(null);
+  const [verificationResult, setVerificationResult] =
+    useState<VerifySignatureResult | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -84,23 +92,18 @@ export default function VerifySignaturePage() {
       console.log("=== VERIFY RESPONSE ===");
       console.log("Full response:", response);
       console.log("Response.data:", response.data);
-      console.log("Response.data.data:", response.data?.data);
-      console.log("Response.data.data.isValid:", response.data?.data?.isValid);
 
-      // Backend trả về nested structure: response.data.data chứa kết quả thực tế
-      if (response && response.data && response.data.data) {
-        const verificationData = response.data.data;
+      // ApiResponse structure: { code, message, data: VerifySignatureResult }
+      if (response && response.data) {
+        const verificationData = response.data;
         setVerificationResult(verificationData);
-        
-        // Check isValid from response.data.data
+
+        // Check isValid from response.data
         const isValid = verificationData.isValid;
         console.log("Final isValid value:", isValid);
-        
+
         if (isValid === true) {
-          toast.success(
-            "Xác thực thành công",
-            "Chữ ký số hợp lệ"
-          );
+          toast.success("Xác thực thành công", "Chữ ký số hợp lệ");
         } else {
           toast.warning(
             "Xác thực thất bại",
@@ -112,10 +115,15 @@ export default function VerifySignaturePage() {
       }
     } catch (error: unknown) {
       console.error("Verification error:", error);
-      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       toast.error(
         "Lỗi xác thực",
-        err?.response?.data?.message || err?.message || "Không thể xác thực chữ ký"
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể xác thực chữ ký"
       );
     } finally {
       setIsVerifying(false);
@@ -241,7 +249,10 @@ export default function VerifySignaturePage() {
                 <Label className="text-[#4F4F4F] font-semibold text-base mb-3 block">
                   {t("selectSignature")}
                 </Label>
-                <Select value={signatureIndex} onValueChange={setSignatureIndex}>
+                <Select
+                  value={signatureIndex}
+                  onValueChange={setSignatureIndex}
+                >
                   <SelectTrigger className="w-full h-12 bg-[#F4F4F4] border-border/50">
                     <SelectValue placeholder={t("selectSignature")} />
                   </SelectTrigger>
@@ -345,7 +356,9 @@ export default function VerifySignaturePage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Hiệu lực từ:</span>
+                      <span className="text-muted-foreground">
+                        Hiệu lực từ:
+                      </span>
                       <span>
                         {new Date(
                           verificationResult.signerInfo.validFrom
@@ -353,7 +366,9 @@ export default function VerifySignaturePage() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Hiệu lực đến:</span>
+                      <span className="text-muted-foreground">
+                        Hiệu lực đến:
+                      </span>
                       <span>
                         {new Date(
                           verificationResult.signerInfo.validTo
@@ -375,11 +390,14 @@ export default function VerifySignaturePage() {
                     <div className="flex justify-between items-start">
                       <span className="text-muted-foreground">Byte Range:</span>
                       <span className="font-mono text-xs text-right">
-                        [{verificationResult.signatureInfo.byteRange.join(", ")}]
+                        [{verificationResult.signatureInfo.byteRange.join(", ")}
+                        ]
                       </span>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-muted-foreground">Content Digest:</span>
+                      <span className="text-muted-foreground">
+                        Content Digest:
+                      </span>
                       <span className="font-mono text-xs break-all bg-gray-50 p-2 rounded">
                         {verificationResult.signatureInfo.contentDigest}
                       </span>
