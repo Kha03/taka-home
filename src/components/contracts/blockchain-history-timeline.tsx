@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { PDFHashComparator } from "./pdf-hash-comparator";
 
 interface BlockchainHistoryTimelineProps {
   history: BlockchainContractHistoryItem[];
@@ -219,11 +220,18 @@ export function BlockchainHistoryTimeline({
                 {/* Fully Signed Hash */}
                 {value.fullySignedHash && (
                   <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span className="font-medium text-sm">
-                        {t("completedHash")}
-                      </span>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-sm">
+                          {t("completedHash")}
+                        </span>
+                      </div>
+                      <PDFHashComparator
+                        contractId={value.contractId}
+                        blockchainHash={value.fullySignedHash}
+                        label={t("verifyContract")}
+                      />
                     </div>
                     <p className="text-xs font-mono break-all text-muted-foreground">
                       {value.fullySignedHash}
@@ -343,11 +351,18 @@ export function BlockchainHistoryTimeline({
                         </div>
                         {ext.extensionAgreementHash && (
                           <div className="mt-2 p-2 bg-muted/50 rounded border border-muted">
-                            <div className="flex items-center gap-2 mb-1">
-                              <FileSignature className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs font-medium text-muted-foreground">
-                                {t("extensionAgreementHash")}
-                              </span>
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <div className="flex items-center gap-2">
+                                <FileSignature className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-xs font-medium text-muted-foreground">
+                                  {t("extensionAgreementHash")}
+                                </span>
+                              </div>
+                              <PDFHashComparator
+                                contractId={value.contractId}
+                                blockchainHash={ext.extensionAgreementHash}
+                                label={t("verifyExtension")}
+                              />
                             </div>
                             <p className="text-xs font-mono break-all text-muted-foreground">
                               {ext.extensionAgreementHash}

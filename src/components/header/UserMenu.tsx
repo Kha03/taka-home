@@ -14,7 +14,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WalletBalance } from "@/components/wallet/wallet-balance";
-import { LogOut, User, Plus, History, ShieldCheck, FileCheck } from "lucide-react";
+import {
+  LogOut,
+  User,
+  Plus,
+  History,
+  ShieldCheck,
+  FileCheck,
+} from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 
 export function UserMenu() {
@@ -57,9 +64,13 @@ export function UserMenu() {
     <div className="flex items-center gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Button variant="ghost" className="relative h-12 w-12 rounded-full">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={user.avatarUrl} alt={user.fullName} />
+              <AvatarImage
+                src={user.avatarUrl}
+                alt={user.fullName}
+                className="object-cover"
+              />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </Button>
