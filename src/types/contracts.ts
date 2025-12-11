@@ -216,7 +216,7 @@ export interface BlockchainContractValue {
   terminationReason?: string;
   terminatedAt?: string;
   terminatedBy?: string;
-  terminatedByRole?: "landlord" | "tenant";
+  terminatedByRole?: "landlord" | "tenant" | "admin";
 }
 
 export interface BlockchainContractHistoryItem {
