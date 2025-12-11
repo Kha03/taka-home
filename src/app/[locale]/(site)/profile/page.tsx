@@ -34,6 +34,7 @@ import { getAccountFromStorage } from "@/lib/utils/auth-utils";
 import type { Account } from "@/lib/api/types";
 import { authService } from "@/lib/api/services/auth";
 import { usersService } from "@/lib/api/services";
+import { useAuth } from "@/contexts/auth-context";
 
 interface ProfileFormData {
   fullName: string;
@@ -47,6 +48,7 @@ interface ProfileFormData {
 export default function ProfilePage() {
   const t = useTranslations("profile");
   const tCommon = useTranslations("common");
+  const { user: authUser, updateUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -60,7 +62,6 @@ export default function ProfilePage() {
     bio: "",
     avatarUrl: "",
   });
-  const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [faceImage, setFaceImage] = useState<File | null>(null);
   const [cccdImage, setCccdImage] = useState<File | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -84,9 +85,6 @@ export default function ProfilePage() {
             bio: "", // TODO: Add bio to user model
             avatarUrl: accountData.user?.avatarUrl || "",
           });
-          setAvatarPreview(
-            accountData.user?.avatarUrl || "/assets/imgs/avatar.png"
-          );
         }
       } catch {
         toast.error(tCommon("error"), t("errors.cannotLoadProfile"));
@@ -120,13 +118,6 @@ export default function ProfilePage() {
         return;
       }
 
-      // Create preview immediately
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-
       // Upload to server
       setIsUploadingAvatar(true);
       try {
@@ -138,7 +129,7 @@ export default function ProfilePage() {
           // Update formData
           setFormData((prev) => ({ ...prev, avatarUrl }));
 
-          // Update localStorage and state
+          // Update account_info
           if (account) {
             const updatedAccount = {
               ...account,
@@ -154,6 +145,9 @@ export default function ProfilePage() {
             setAccount(updatedAccount);
           }
 
+          // Update AuthContext - this will sync to header
+          updateUser({ avatarUrl });
+
           toast.success(tCommon("success"), t("success.avatarUpdated"));
         } else {
           throw new Error(response.message || t("errors.cannotUploadAvatar"));
@@ -166,8 +160,6 @@ export default function ProfilePage() {
             ? error.message
             : t("errors.cannotUploadAvatar")
         );
-        // Revert preview on error
-        setAvatarPreview(account?.user?.avatarUrl || "/assets/imgs/avatar.png");
       } finally {
         setIsUploadingAvatar(false);
       }
@@ -420,7 +412,10 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative group">
               <Avatar className="w-32 h-32 border-4 border-[#DCBB87]/20">
-                <AvatarImage src={avatarPreview} alt="Avatar" />
+                <AvatarImage
+                  src={authUser?.avatarUrl || "/assets/imgs/avatar.png"}
+                  alt="Avatar"
+                />
                 <AvatarFallback className="bg-gradient-to-br from-[#DCBB87] to-[#B8935A] text-white text-3xl">
                   {formData.fullName.charAt(0).toUpperCase()}
                 </AvatarFallback>
