@@ -145,6 +145,7 @@ export function LandlordResponseDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
+            className="text-primary"
           >
             Hủy
           </Button>
