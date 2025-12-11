@@ -185,7 +185,9 @@ export function TenantDecisionDialog({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Hủy</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading} className="text-primary">
+              Hủy
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReject}
               disabled={loading}
