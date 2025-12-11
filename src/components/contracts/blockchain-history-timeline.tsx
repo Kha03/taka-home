@@ -380,6 +380,50 @@ export function BlockchainHistoryTimeline({
                 </div>
               )}
 
+              {/* Termination Details */}
+              {value.status === "CANCELLED" && value.terminationReason && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <h4 className="font-medium text-sm">
+                      {t("terminationDetails")}
+                    </h4>
+                  </div>
+                  <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {t("terminationReason")}:
+                        </span>
+                        <p className="text-sm mt-1">{value.terminationReason}</p>
+                      </div>
+                      {value.terminatedAt && (
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {t("terminatedAt")}:
+                          </span>
+                          <p className="text-sm mt-1">
+                            {formatDateTime(value.terminatedAt)}
+                          </p>
+                        </div>
+                      )}
+                      {value.terminatedBy && (
+                        <div>
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {t("terminatedBy")}:
+                          </span>
+                          <p className="text-sm mt-1">
+                            {value.terminatedByRole === "landlord"
+                              ? t("landlordLabel")
+                              : t("tenantLabel")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Penalties */}
               {value.penalties && value.penalties.length > 0 && (
                 <div className="space-y-2">

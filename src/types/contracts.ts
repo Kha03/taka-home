@@ -213,6 +213,10 @@ export interface BlockchainContractValue {
   penalties: ContractPenalty[];
   currentExtensionNumber: number;
   extensions: BlockchainExtension[];
+  terminationReason?: string;
+  terminatedAt?: string;
+  terminatedBy?: string;
+  terminatedByRole?: "landlord" | "tenant";
 }
 
 export interface BlockchainContractHistoryItem {
