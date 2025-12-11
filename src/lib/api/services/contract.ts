@@ -71,9 +71,9 @@ export class ContractService {
       responseNote,
       newMonthlyRent,
     }: {
-      status: "LANDLORD_RESPONDED";
+      status: "LANDLORD_RESPONDED" | "REJECTED";
       responseNote: string;
-      newMonthlyRent: number | null;
+      newMonthlyRent?: number | null;
     }
   ): Promise<ApiResponse<void>> {
     return apiClient.patch<void>(

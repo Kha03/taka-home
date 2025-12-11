@@ -33,12 +33,13 @@ export function LandlordResponseDialog({
   onSuccess,
 }: LandlordResponseDialogProps) {
   const [loading, setLoading] = useState(false);
+  const [action, setAction] = useState<"accept" | "reject" | null>(null);
   const [formData, setFormData] = useState({
     newMonthlyRent: "",
     responseNote: "",
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (actionType: "accept" | "reject") => {
     // Validation
     if (!formData.responseNote.trim()) {
       toast.error("Lỗi", "Vui lòng nhập lời nhắn phản hồi");
@@ -46,16 +47,23 @@ export function LandlordResponseDialog({
     }
 
     setLoading(true);
+    setAction(actionType);
     try {
       await contractService.respondToContractExtensionRequest(extension.id, {
-        status: "LANDLORD_RESPONDED",
+        status: actionType === "accept" ? "LANDLORD_RESPONDED" : "REJECTED",
         responseNote: formData.responseNote,
-        newMonthlyRent: formData.newMonthlyRent
-          ? parseFloat(formData.newMonthlyRent)
-          : null,
+        newMonthlyRent:
+          actionType === "accept" && formData.newMonthlyRent
+            ? parseFloat(formData.newMonthlyRent)
+            : null,
       });
 
-      toast.success("Thành công", "Đã gửi phản hồi yêu cầu gia hạn");
+      toast.success(
+        "Thành công",
+        actionType === "accept"
+          ? "Đã chấp nhận yêu cầu gia hạn"
+          : "Đã từ chối yêu cầu gia hạn"
+      );
       onOpenChange(false);
       onSuccess();
     } catch (error) {
@@ -67,6 +75,7 @@ export function LandlordResponseDialog({
       toast.error("Lỗi", errorMessage);
     } finally {
       setLoading(false);
+      setAction(null);
     }
   };
 
@@ -76,7 +85,8 @@ export function LandlordResponseDialog({
         <DialogHeader>
           <DialogTitle>Phản hồi yêu cầu gia hạn</DialogTitle>
           <DialogDescription>
-            Nhập điều kiện gia hạn hợp đồng. Nếu không thay đổi giá, để trống.
+            Chấp nhận hoặc từ chối yêu cầu gia hạn từ người thuê. Vui lòng nhập
+            lời nhắn phản hồi.
           </DialogDescription>
         </DialogHeader>
 
@@ -130,18 +140,29 @@ export function LandlordResponseDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
-            className="text-red-500 border-red-500"
           >
             Hủy
           </Button>
-          <Button onClick={handleSubmit} disabled={loading}>
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Gửi phản hồi
+          <Button
+            variant="destructive"
+            onClick={() => handleSubmit("reject")}
+            disabled={loading}
+          >
+            {loading && action === "reject" && (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            )}
+            Từ chối
+          </Button>
+          <Button onClick={() => handleSubmit("accept")} disabled={loading}>
+            {loading && action === "accept" && (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            )}
+            Chấp nhận
           </Button>
         </DialogFooter>
       </DialogContent>
