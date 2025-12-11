@@ -89,18 +89,17 @@ export default function VerifySignaturePage() {
         parseInt(signatureIndex)
       );
 
-      console.log("=== VERIFY RESPONSE ===");
-      console.log("Full response:", response);
-      console.log("Response.data:", response.data);
-
-      // ApiResponse structure: { code, message, data: VerifySignatureResult }
+      // Backend response structure: { success, message, data: { isValid, signerInfo, signatureInfo } }
+      // After apiClient wrap: { code, message, data: { success, message, data: {...} } }
       if (response && response.data) {
-        const verificationData = response.data;
+        // Check if response.data has nested data (wrapped by apiClient)
+        const responseData = response.data as VerifySignatureResult & { data?: VerifySignatureResult };
+        const verificationData = responseData.data || responseData;
+        
         setVerificationResult(verificationData);
 
-        // Check isValid from response.data
+        // Check isValid
         const isValid = verificationData.isValid;
-        console.log("Final isValid value:", isValid);
 
         if (isValid === true) {
           toast.success("Xác thực thành công", "Chữ ký số hợp lệ");
@@ -114,7 +113,6 @@ export default function VerifySignaturePage() {
         toast.error("Không thể xác thực chữ ký. Vui lòng thử lại.");
       }
     } catch (error: unknown) {
-      console.error("Verification error:", error);
       const err = error as {
         response?: { data?: { message?: string } };
         message?: string;
