@@ -76,7 +76,7 @@ export function TenantDecisionDialog({
   const handleReject = async () => {
     setLoading(true);
     try {
-      await contractService.tenantRejectionOnExtension(extension.id);
+      await contractService.tenantDecisionOnExtension(extension.id, "REJECTED");
 
       toast.success("Đã từ chối", "Bạn đã từ chối điều kiện gia hạn");
       setRejectDialogOpen(false);

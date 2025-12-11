@@ -88,7 +88,7 @@ export class ContractService {
   // người thuê đồng ý điều kiện gia hạn hợp đồng
   async tenantDecisionOnExtension(
     extensionId: string,
-    status: "AWAITING_SIGNATURES"
+    status: "AWAITING_SIGNATURES" | "REJECTED"
   ): Promise<ApiResponse<void>> {
     return apiClient.patch<void>(
       `${this.basePath}/extensions/${extensionId}/tenant-respond`,
