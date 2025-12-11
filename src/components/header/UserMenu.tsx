@@ -115,12 +115,6 @@ export function UserMenu() {
                   <span>{t("rentalRequests")}</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/verify-signature" className="cursor-pointer">
-                  <FileCheck className="mr-2 h-4 w-4" />
-                  <span>{t("verifySignature")}</span>
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>
           )}
@@ -143,6 +137,12 @@ export function UserMenu() {
             <Link href="/profile" className="cursor-pointer">
               <User className="mr-2 h-4 w-4" />
               <span>{t("profile")}</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/verify-signature" className="cursor-pointer">
+              <FileCheck className="mr-2 h-4 w-4" />
+              <span>{t("verifySignature")}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
