@@ -395,7 +395,9 @@ export function BlockchainHistoryTimeline({
                         <span className="text-xs font-medium text-muted-foreground">
                           {t("terminationReason")}:
                         </span>
-                        <p className="text-sm mt-1">{value.terminationReason}</p>
+                        <p className="text-sm mt-1">
+                          {value.terminationReason}
+                        </p>
                       </div>
                       {value.terminatedAt && (
                         <div>
