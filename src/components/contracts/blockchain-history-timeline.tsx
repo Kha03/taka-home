@@ -424,7 +424,7 @@ export function BlockchainHistoryTimeline({
                               : value.terminatedByRole === "tenant"
                               ? t("tenantLabel")
                               : value.terminatedByRole === "admin"
-                              ? t("admin")
+                              ? t("adminLabel")
                               : value.terminatedByRole}
                           </p>
                         </div>
