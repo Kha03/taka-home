@@ -294,6 +294,7 @@
     "electronicSignature": "Electronic Signature",
     "landlordLabel": "Landlord",
     "tenantLabel": "Tenant",
+    "adminLabel": "Admin",
     "signed": "Signed",
     "notSigned": "Not signed",
     "hash": "Hash",

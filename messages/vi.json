@@ -294,6 +294,7 @@
     "electronicSignature": "Chữ ký điện tử",
     "landlordLabel": "Chủ nhà",
     "tenantLabel": "Người thuê",
+    "adminLabel": "Quản trị hệ thống",
     "signed": "Đã ký",
     "notSigned": "Chưa ký",
     "hash": "Hash",
