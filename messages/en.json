@@ -503,6 +503,7 @@
     "bathrooms": "Bathrooms",
     "furniture": "Furniture",
     "contractInfoTitle": "Contract Information",
+    "amount": "Amount",
     "contractExtension": "Contract Extension",
     "liquidationReminder": "Reminder: Contract Expiring Soon",
     "contractEndsIn": "The contract will end in <strong>{days} days</strong> ({date}). If there are damages or incurred fees, please create a liquidation invoice before the contract ends.",

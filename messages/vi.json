@@ -498,6 +498,7 @@
     "bathrooms": "Phòng tắm",
     "furniture": "Nội thất",
     "contractInfoTitle": "Thông tin hợp đồng",
+    "amount": "Số tiền",
     "contractExtension": "Gia hạn hợp đồng",
     "liquidationReminder": "Nhắc nhở: Hợp đồng sắp hết hạn",
     "contractEndsIn": "Hợp đồng sẽ kết thúc trong <strong>{days} ngày</strong> ({date}). Nếu có thiệt hại hoặc phí phát sinh, vui lòng tạo hóa đơn thanh lý để xử lý trước khi kết thúc hợp đồng.",
