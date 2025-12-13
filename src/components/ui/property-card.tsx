@@ -17,6 +17,7 @@ interface PropertyCardProps {
   isFeatured?: boolean;
   roomType?: string; // Tên loại phòng cho BOARDING
   type?: "apartment" | "boarding"; // Type để xác định API call
+  isRented?: boolean; // Trạng thái đang cho thuê
 }
 
 export function PropertyCard({
@@ -30,6 +31,7 @@ export function PropertyCard({
   imageUrl,
   roomType,
   type = "apartment",
+  isRented = false,
 }: PropertyCardProps) {
   return (
     <Link
@@ -45,6 +47,11 @@ export function PropertyCard({
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width:768px) 100vw, 325px"
           />
+          {isRented && (
+            <div className="absolute top-2 right-2 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+              Đang cho thuê
+            </div>
+          )}
         </div>
         <CardContent className="p-0 flex-1 flex flex-col">
           <PropertyDetails

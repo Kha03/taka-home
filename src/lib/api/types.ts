@@ -185,7 +185,7 @@ export interface Property {
   roomTypes?: PropertyRoomType[];
 
   // Metadata
-  isVisible?: boolean;
+  isVisible?: boolean; // false = đang cho thuê, true = còn trống
   isApproved?: boolean;
   status?: "draft" | "pending" | "approved" | "rejected";
   ownerId?: string;

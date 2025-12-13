@@ -16,6 +16,7 @@ interface Property {
   imageUrl: string;
   isFeatured?: boolean;
   isNew?: boolean;
+  isRented?: boolean;
 }
 
 interface PropertySectionProps {
@@ -56,6 +57,7 @@ export function PropertySection({
               imageUrl={property.imageUrl}
               isFeatured={property.isFeatured}
               isNew={property.isNew}
+              isRented={property.isRented}
             />
           ))}
         </div>

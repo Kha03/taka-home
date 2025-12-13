@@ -35,6 +35,7 @@ import {
   getPropertyDetails,
   getRoomTypeName,
   getUpdatedDate,
+  getIsRented,
 } from "@/lib/utils/property-helpers";
 
 // Response data interface from API
@@ -266,6 +267,7 @@ export function SearchResults() {
                   area={details.area}
                   imageUrl={getPropertyImage(item)}
                   type={isRoomType(item) ? "boarding" : "apartment"}
+                  isRented={getIsRented(item)}
                 />
               );
             })}
@@ -289,6 +291,7 @@ export function SearchResults() {
                   imageUrl={getPropertyImage(item)}
                   timePosted={getUpdatedDate(item)}
                   type={isRoomType(item) ? "boarding" : "apartment"}
+                  isRented={getIsRented(item)}
                 />
               );
             })}

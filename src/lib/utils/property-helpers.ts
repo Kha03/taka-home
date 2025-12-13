@@ -211,3 +211,15 @@ export function getUpdatedDate(item: PropertyOrRoomType): string {
   }
   return item.updatedAt || "";
 }
+
+/**
+ * Get rental status - isVisible=false nghĩa là đang được thuê
+ */
+export function getIsRented(item: PropertyOrRoomType): boolean {
+  if (isRoomType(item)) {
+    // For RoomType, không có isVisible nên return false
+    return false;
+  }
+  // isVisible = false nghĩa là đang cho thuê
+  return item.isVisible === false;
+}
