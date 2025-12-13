@@ -176,6 +176,7 @@ export default function ContractDetailPage() {
                   ? parseFloat(booking.room.roomType.deposit)
                   : parseFloat(booking.property.deposit || "0")
               }
+              bookingStatus={booking.status}
             />
           )}
 

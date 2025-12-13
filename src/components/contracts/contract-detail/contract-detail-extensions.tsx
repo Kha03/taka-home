@@ -12,6 +12,7 @@ interface ContractDetailExtensionsProps {
   userRole: string;
   endDate: string;
   requiredDeposit: number;
+  bookingStatus?: string; // Thêm bookingStatus để kiểm tra trạng thái hợp đồng
 }
 
 export function ContractDetailExtensions({
@@ -19,6 +20,7 @@ export function ContractDetailExtensions({
   userRole,
   endDate,
   requiredDeposit,
+  bookingStatus,
 }: ContractDetailExtensionsProps) {
   const t = useTranslations("contract");
   const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
@@ -44,15 +46,26 @@ export function ContractDetailExtensions({
     }
   }, [endDate]);
 
-  // Show extension alert if contract expires within 60 days
+  // Show extension alert if contract expires within 60 days AND contract is still active
+  // Không cho phép gia hạn khi hợp đồng đã TERMINATED, SETTLED, hoặc CANCELLED
   const shouldShowExtensionAlert = useMemo(() => {
+    const inactiveStatuses = [
+      "TERMINATED",
+      "SETTLED",
+      "CANCELLED",
+      "SETTLEMENT_PENDING",
+    ];
+    const isContractInactive =
+      bookingStatus && inactiveStatuses.includes(bookingStatus);
+
     return (
       userRole === "TENANT" &&
+      !isContractInactive && // Hợp đồng không ở trạng thái đã kết thúc
       daysUntilEnd !== null &&
-      daysUntilEnd > 0 &&
+      daysUntilEnd > 0 && // Hợp đồng còn hiệu lực
       daysUntilEnd <= 60
     );
-  }, [userRole, daysUntilEnd]);
+  }, [userRole, daysUntilEnd, bookingStatus]);
 
   return (
     <>
