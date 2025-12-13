@@ -297,6 +297,23 @@ export function ContractDetailInvoices({
                       <span>{t("pendingPayment")}</span>
                     </div>
                   )
+                ) : mostRecentInvoice.status === "OVERDUE" ? (
+                  userRole === "TENANT" && isActionsAllowed ? (
+                    <Button
+                      size="sm"
+                      className="rounded-full bg-red-500 text-white hover:bg-red-600"
+                      onClick={() => handlePayInvoice(mostRecentInvoice)}
+                    >
+                      {t("payButton")}
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-foreground">
+                      <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
+                        <AlertCircle className="h-3 w-3 text-white" />
+                      </div>
+                      <span>{t("overdueStatus")}</span>
+                    </div>
+                  )
                 ) : (
                   <div className="flex items-center gap-2 text-xs text-foreground">
                     <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
@@ -383,6 +400,23 @@ export function ContractDetailInvoices({
                                 <AlertCircle className="h-3 w-3 text-white" />
                               </div>
                               <span>{t("pendingPayment")}</span>
+                            </div>
+                          )
+                        ) : invoice.status === "OVERDUE" ? (
+                          userRole === "TENANT" && isActionsAllowed ? (
+                            <Button
+                              size="sm"
+                              className="rounded-full bg-red-500 text-white hover:bg-red-600"
+                              onClick={() => handlePayInvoice(invoice)}
+                            >
+                              {t("payButton")}
+                            </Button>
+                          ) : (
+                            <div className="flex items-center gap-2 text-xs text-foreground">
+                              <div className="h-4 w-4 rounded-full bg-red-500 flex items-center justify-center">
+                                <AlertCircle className="h-3 w-3 text-white" />
+                              </div>
+                              <span>{t("overdueStatus")}</span>
                             </div>
                           )
                         ) : (
