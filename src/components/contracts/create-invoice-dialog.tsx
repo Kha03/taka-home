@@ -79,6 +79,7 @@ export function CreateInvoiceDialog({
     totalAmount?: number;
     netAmount?: number;
     invoiceType?: string;
+    documentText?: string; // Thêm documentText
   }>({});
   const [invoiceItems, setInvoiceItems] = useState<
     { description: string; amount: number; serviceType: ServiceTypeEnum }[]
@@ -124,6 +125,7 @@ export function CreateInvoiceDialog({
         totalAmount?: number;
         netAmount?: number;
         invoiceType?: string;
+        documentText?: string;
       } = {};
 
       response.data.extractedData.forEach((data) => {
@@ -151,6 +153,11 @@ export function CreateInvoiceDialog({
           processed.invoiceType = data.value;
         }
       });
+
+      // Lưu documentText từ rawData
+      if (response.data.rawData?.documentText) {
+        processed.documentText = response.data.rawData.documentText;
+      }
 
       setProcessedInvoiceData(processed);
 
@@ -572,6 +579,16 @@ export function CreateInvoiceDialog({
                                 0
                             )}
                           </span>
+                        </div>
+                      )}
+                      {processedInvoiceData.documentText && (
+                        <div className="mt-3 pt-3 border-t">
+                          <span className="text-sm font-medium block mb-2">
+                            Nội dung hóa đơn:
+                          </span>
+                          <div className="text-xs bg-gray-50 p-3 rounded-md max-h-32 overflow-y-auto whitespace-pre-wrap font-mono border">
+                            {processedInvoiceData.documentText}
+                          </div>
                         </div>
                       )}
                     </div>
