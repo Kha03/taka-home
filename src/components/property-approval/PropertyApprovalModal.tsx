@@ -105,7 +105,7 @@ export function PropertyApprovalModal({
     : undefined;
 
   const legalDoc = isBoarding
-    ? property.property.legalDoc
+    ? (property.property as any).legalDoc
     : "legalDoc" in property
     ? property.legalDoc
     : undefined;
