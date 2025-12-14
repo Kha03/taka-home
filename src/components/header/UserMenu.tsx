@@ -123,7 +123,10 @@ export function UserMenu() {
           {isAdmin && (
             <>
               <DropdownMenuItem asChild>
-                <Link href="/property-approval" className="cursor-pointer">
+                <Link
+                  href="/admin/property-approval"
+                  className="cursor-pointer"
+                >
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   <span>{t("propertyApproval")}</span>
                 </Link>

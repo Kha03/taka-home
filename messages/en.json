@@ -869,6 +869,7 @@
     "waterPrice": "Water Price",
     "description": "Description",
     "roomTypes": "Room Types",
+    "roomType": "Room Type",
     "price": "Price",
     "roomList": "Room List",
     "moveRoom": "Move",

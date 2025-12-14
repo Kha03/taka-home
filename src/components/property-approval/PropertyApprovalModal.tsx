@@ -104,6 +104,12 @@ export function PropertyApprovalModal({
     ? property.deposit
     : undefined;
 
+  const legalDoc = isBoarding
+    ? property.property.legalDoc
+    : "legalDoc" in property
+    ? property.legalDoc
+    : undefined;
+
   const activeImage = images[activeIndex];
 
   const typeBadge = (
@@ -309,6 +315,22 @@ export function PropertyApprovalModal({
                       <p className="text-base font-medium text-primary">
                         {new Date(updatedAt).toLocaleDateString("vi-VN")}
                       </p>
+                    </div>
+                  )}
+
+                  {legalDoc && (
+                    <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Giấy tờ pháp lý
+                      </p>
+                      <a
+                        href={legalDoc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-base font-medium text-blue-600 hover:text-blue-800 hover:underline break-all"
+                      >
+                        Xem giấy tờ
+                      </a>
                     </div>
                   )}
 

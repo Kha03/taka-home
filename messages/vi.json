@@ -865,6 +865,7 @@
     "waterPrice": "Giá nước",
     "description": "Mô tả",
     "roomTypes": "Các loại phòng",
+    "roomType": "Loại phòng",
     "price": "Giá",
     "roomList": "Danh sách phòng",
     "moveRoom": "Chuyển",
