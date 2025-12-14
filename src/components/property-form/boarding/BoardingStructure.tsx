@@ -70,8 +70,19 @@ function TagEditor({ index }: { index: number }) {
   const roomsPath = `floors.${index}.rooms` as const;
   const rooms = watch(roomsPath) as string[];
 
-  const addRoom = () =>
-    setValue(roomsPath, [...rooms, `A${(rooms.length + 101).toString()}`]);
+  // Generate floor letter based on floor index: A, B, C, D...
+  const getFloorLetter = (floorIndex: number) => {
+    return String.fromCharCode(65 + floorIndex); // A=65, B=66, C=67...
+  };
+
+  const addRoom = () => {
+    const floorLetter = getFloorLetter(index);
+    setValue(roomsPath, [
+      ...rooms,
+      `${floorLetter}${(rooms.length + 101).toString()}`,
+    ]);
+  };
+
   const removeRoom = (i: number) =>
     setValue(
       roomsPath,
