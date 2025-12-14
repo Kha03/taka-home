@@ -110,6 +110,12 @@ export function PropertyApprovalModal({
     ? property.legalDoc
     : undefined;
 
+  const legalUrl = isBoarding
+    ? (property.property as any).legalUrl
+    : "legalUrl" in property
+    ? (property as any).legalUrl
+    : undefined;
+
   const activeImage = images[activeIndex];
 
   const typeBadge = (
@@ -318,19 +324,29 @@ export function PropertyApprovalModal({
                     </div>
                   )}
 
-                  {legalDoc && (
+                  {(legalDoc || legalUrl) && (
                     <div className="bg-white rounded-xl p-4 border border-[#DCBB87]/30">
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="text-sm text-muted-foreground mb-2">
                         Giấy tờ pháp lý
                       </p>
-                      <a
-                        href={legalDoc}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-base font-medium text-blue-600 hover:text-blue-800 hover:underline break-all"
-                      >
-                        Xem giấy tờ
-                      </a>
+                      <div className="space-y-2">
+                        {legalDoc && (
+                          <p className="text-base font-medium text-primary">
+                            {legalDoc}
+                          </p>
+                        )}
+                        {legalUrl && (
+                          <a
+                            href={legalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            <Images className="w-4 h-4" />
+                            Xem ảnh giấy tờ
+                          </a>
+                        )}
+                      </div>
                     </div>
                   )}
 
