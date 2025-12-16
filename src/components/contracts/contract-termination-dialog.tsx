@@ -144,6 +144,16 @@ export function ContractTerminationDialog({
           <AlertDescription>{t("terminationNote")}</AlertDescription>
         </Alert>
 
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <div className="space-y-2">
+              <p className="font-semibold">{t("terminationPenaltyWarning")}</p>
+              <p className="text-sm">{t("terminationPenaltyNote")}</p>
+            </div>
+          </AlertDescription>
+        </Alert>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Date Picker */}
           <div className="flex flex-col space-y-2">

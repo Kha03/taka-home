@@ -37,7 +37,8 @@ const USER_ERRORS_VI = {
   NO_IMAGE_UPLOADED: "Chưa tải lên hình ảnh",
   INVALID_IMAGE_TYPE: "Loại hình ảnh không hợp lệ",
   INVALID_IMAGE_BUFFER: "Dữ liệu hình ảnh không hợp lệ",
-  USER_NOT_VERIFIED_FOR_ACTION: "Người dùng chưa được xác minh để thực hiện hành động này",
+  USER_NOT_VERIFIED_FOR_ACTION:
+    "Người dùng chưa được xác minh để thực hiện hành động này",
 } as const;
 
 // ============= WALLET ERRORS =============
@@ -326,6 +327,11 @@ const CONTRACT_ERRORS_VI = {
   TERMINATION_CANCEL_FORBIDDEN_NOT_CREATOR:
     "Không thể hủy - bạn không phải người tạo yêu cầu",
   TERMINATION_CANCEL_ONLY_PENDING: "Chỉ có thể hủy yêu cầu đang chờ xử lý",
+  TERMINATION_ESCROW_NOT_FOUND: "Không tìm thấy escrow",
+  TERMINATION_DEPOSIT_BALANCE_ZERO: "Số dư tiền cọc bằng 0",
+  TERMINATION_DEPOSIT_INSUFFICIENT: "Số dư tiền cọc nạp không đủ",
+  TERMINATION_ESCROW_ACCOUNT_NOT_FOUND: "Không tìm thấy tài khoản escrow",
+  TERMINATION_PENALTY_APPLICATION_FAILED: "Áp dụng phí phạt thất bại",
 } as const;
 
 // ============= ESCROW ERRORS =============

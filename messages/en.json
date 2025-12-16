@@ -421,6 +421,8 @@
     "landlordParty": "Landlord",
     "cannotCreateTermination": "Cannot create termination request. Contract must be active.",
     "terminationList": "Termination request list",
+    "terminationPenaltyWarning": "Early termination penalty: The party requesting cancellation will lose 30% of the initial deposit as an early termination penalty fee.",
+    "terminationPenaltyNote": "Note: This penalty will be automatically deducted from the deposit balance.",
     "contractExpiring": "Contract expiring soon!",
     "extensionReminder": "Contract extension reminder",
     "extensionInfo": "Extension information",
@@ -511,7 +513,9 @@
     "contractManagement": "Contract Management",
     "contractManagementDescription": "View and manage rental contracts in the system",
     "featureInDevelopment": "Feature in Development",
-    "contractManagementComingSoon": "Contract management feature will be updated soon"
+    "contractManagementComingSoon": "Contract management feature will be updated soon",
+    "approved": "Approved",
+    "success": "Success"
   },
   "payment": {
     "title": "Payment",
@@ -1242,7 +1246,12 @@
       "TERMINATION_FORBIDDEN_NOT_OTHER_PARTY": "You are not the other party",
       "TERMINATION_FORBIDDEN_CANNOT_RESPOND_OWN": "Cannot respond to your own request",
       "TERMINATION_CANCEL_FORBIDDEN_NOT_CREATOR": "Only creator can cancel",
-      "TERMINATION_CANCEL_ONLY_PENDING": "Can only cancel pending requests"
+      "TERMINATION_CANCEL_ONLY_PENDING": "Can only cancel pending requests",
+      "TERMINATION_ESCROW_NOT_FOUND": "Escrow not found",
+      "TERMINATION_DEPOSIT_BALANCE_ZERO": "Deposit balance is zero",
+      "TERMINATION_DEPOSIT_INSUFFICIENT": "Insufficient deposit balance",
+      "TERMINATION_ESCROW_ACCOUNT_NOT_FOUND": "Escrow account not found",
+      "TERMINATION_PENALTY_APPLICATION_FAILED": "Failed to apply penalty"
     },
     "booking": {
       "BOOKING_ALREADY_HAS_CONTRACT": "Booking already has a contract",

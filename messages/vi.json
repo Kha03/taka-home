@@ -416,6 +416,8 @@
     "landlordParty": "Chủ nhà",
     "cannotCreateTermination": "Không thể tạo yêu cầu hủy hợp đồng. Hợp đồng phải ở trạng thái hoạt động.",
     "terminationList": "Danh sách yêu cầu hủy hợp đồng",
+    "terminationPenaltyWarning": "Phạt hủy trước hạn: Bên yêu cầu hủy sẽ mất 30% số tiền đặt cọc ban đầu làm phí phạt hủy trước hạn.",
+    "terminationPenaltyNote": "Lưu ý: Khoản phạt này sẽ tự động được trừ vào số dư tiền cọc.",
     "contractExpiring": "Hợp đồng sắp hết hạn!",
     "extensionReminder": "Nhắc nhở gia hạn hợp đồng",
     "extensionInfo": "Thông tin gia hạn",
@@ -506,7 +508,9 @@
     "contractManagement": "Quản lý hợp đồng",
     "contractManagementDescription": "Xem và quản lý các hợp đồng thuê trong hệ thống",
     "featureInDevelopment": "Tính năng đang phát triển",
-    "contractManagementComingSoon": "Chức năng quản lý hợp đồng sẽ sớm được cập nhật"
+    "contractManagementComingSoon": "Chức năng quản lý hợp đồng sẽ sớm được cập nhật",
+    "approved": "Đã duyệt",
+    "success": "Thành công"
   },
   "payment": {
     "title": "Thanh toán",
@@ -1246,7 +1250,12 @@
       "TERMINATION_FORBIDDEN_NOT_OTHER_PARTY": "Bạn không phải bên còn lại",
       "TERMINATION_FORBIDDEN_CANNOT_RESPOND_OWN": "Không thể phản hồi yêu cầu của chính mình",
       "TERMINATION_CANCEL_FORBIDDEN_NOT_CREATOR": "Chỉ người tạo mới có thể hủy",
-      "TERMINATION_CANCEL_ONLY_PENDING": "Chỉ có thể hủy yêu cầu đang chờ"
+      "TERMINATION_CANCEL_ONLY_PENDING": "Chỉ có thể hủy yêu cầu đang chờ",
+      "TERMINATION_ESCROW_NOT_FOUND": "Không tìm thấy escrow",
+      "TERMINATION_DEPOSIT_BALANCE_ZERO": "Số dư tiền cọc bằng 0",
+      "TERMINATION_DEPOSIT_INSUFFICIENT": "Số dư tiền cọc không đủ",
+      "TERMINATION_ESCROW_ACCOUNT_NOT_FOUND": "Không tìm thấy tài khoản escrow",
+      "TERMINATION_PENALTY_APPLICATION_FAILED": "Áp dụng phí phạt thất bại"
     },
     "booking": {
       "BOOKING_ALREADY_HAS_CONTRACT": "Đặt phòng đã có hợp đồng",
