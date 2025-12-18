@@ -301,7 +301,7 @@ export default function BlockchainHistoryPage() {
             )}
 
             {paymentHistory?.data && paymentHistory.data.length === 0 && (
-              <Card>
+              <Card className="bg-primary-foreground">
                 <CardContent className="py-8 text-center text-muted-foreground">
                   {t("noPaymentHistory")}
                 </CardContent>
