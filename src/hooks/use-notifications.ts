@@ -52,7 +52,13 @@ export function useNotifications(
     try {
       const response = await notificationService.findAllByUserId(userId);
       if (response.code === 200 && response.data) {
-        setNotifications(response.data);
+        // Sắp xếp thông báo theo thời gian tạo (mới nhất trước)
+        const sortedNotifications = response.data.sort((a, b) => {
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+        setNotifications(sortedNotifications);
       } else {
         throw new Error(response.message || "Không thể tải thông báo");
       }
