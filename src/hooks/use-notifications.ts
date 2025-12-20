@@ -39,7 +39,7 @@ export function useNotifications(
 
   // Tính toán pendingCount từ danh sách notifications
   const pendingCount = notifications.filter(
-    (n) => n.status === "PENDING"
+    (n) => n.status === "PENDING" 
   ).length;
 
   // Fetch notifications
