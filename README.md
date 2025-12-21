@@ -1,5 +1,6 @@
 <a href="https://github.com/PhamVanThanh2111/TaKaHome_BE" target="_blank">Link BE</a>
-
+</br>
+<a href="https://github.com/Kha03/taka-home-mobile" target="_blank">Link Mobile FE</a>
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
